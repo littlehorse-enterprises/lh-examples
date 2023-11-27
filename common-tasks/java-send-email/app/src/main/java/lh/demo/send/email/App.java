@@ -38,9 +38,9 @@ public class App {
         switch (args[0]) {
             case COMMAND_REGISTER -> {
                 if (worker.doesTaskDefExist()) {
-                    log.debug("Task {} already exists, skipping creation", worker.getTaskDefName());
+                    log.info("Task {} already exists, skipping creation", worker.getTaskDefName());
                 } else {
-                    log.debug("Task {} does not exist, registering it", worker.getTaskDefName());
+                    log.info("Task {} does not exist, registering it", worker.getTaskDefName());
                     worker.registerTaskDef();
                 }
             }
