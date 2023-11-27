@@ -30,7 +30,7 @@ public class ITRequestWorkflow {
         this.client = config.getBlockingStub();
     }
 
-    public void registerWorkflowSpec() throws IOException {
+    public void registerWorkflowSpec() {
         UserTaskSchema approvalForm = new UserTaskSchema(new ApprovalForm(), APPROVAL_FORM);
 
         log.info("Deploying User Task Schemas");
