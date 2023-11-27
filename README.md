@@ -6,11 +6,24 @@ This repository will grow into a collection of reference applications that show 
 
 ## Prerequisites
 
-TODO: Put generic instructions to install:
-* `lhctl`
-* `lh-standalone` docker image
+As a prerequisite to all of these examples, you should have access to a LH Server and `lhctl`. To install the proper version of `lhctl`, you can run:
 
-TODO: Add instructions to add the Go, Python, and Java client libraries as dependencies.
+```
+go install github.com/littlehorse-enterprises/littlehorse/lhctl@0.7.0-alpha.1
+```
+
+To run a LittleHorse Cluster (Kafka, LH Server, and soon to be LH Dashboard) in a single container on your laptop, you can run:
+
+```
+docker run --name littlehorse -d -p 2023:2023 public.ecr.aws/littlehorse/lh-standalone:latest
+```
+
+The `lh-standalone` image takes about 30 seconds to start up because we first need to start a Kafka cluster. Once LH is up and running, you should get a `[]` response from:
+```
+lhctl search wfSpec
+```
+
+_NOTE: if your computer falls asleep for a while, you might benefit from stopping, removing, and re-starting the lh-standalone container._
 
 ## Application and Repo Structure
 
@@ -41,3 +54,5 @@ The [`applications`](./applications) folder contains a set of various demo appli
 * A program that registers a `WfSpec` (every application has this)
 * A backend-for-frontend or REST API
 * A frontend which drives the workflow
+
+Please consult the README of each individual application for instructions about how to run that app.
