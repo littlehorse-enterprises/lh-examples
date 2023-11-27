@@ -28,7 +28,7 @@ public class App {
         }
 
         LHConfig config = new LHConfig();
-        SendGrid client = Optional.of(System.getenv("SENDGRID_API_KEY"))
+        SendGrid client = Optional.ofNullable(System.getenv("SENDGRID_API_KEY"))
                 .map(SendGrid::new)
                 .orElse(null);
         String fromEmail = System.getenv("FROM_EMAIL");
