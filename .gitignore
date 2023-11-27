@@ -1,0 +1,41 @@
+# Ignore binary and build stuff
+.gradle
+examples/*/build/
+examples/*/bin/
+*/build/
+*/bin/
+
+# Emacs-related stuff
+*\#
+*~
+
+# node
+node_modules/
+package-lock.json
+
+# go
+lhctl/lhctl
+
+# Intellij
+*/.idea
+.idea/
+
+# vscode
+.vscode/launch.json
+*.code-workspace
+
+#Visual Studio
+**/bin/
+**/obj/
+**/.vs/
+**/out/
+
+# Others
+local-dev/certs/
+build/
+
+# Python
+__pycache__
+.ruff_cache
+.mypy_cache
+dist/
