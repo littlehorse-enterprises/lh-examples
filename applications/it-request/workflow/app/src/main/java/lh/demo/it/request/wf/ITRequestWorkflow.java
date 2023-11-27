@@ -54,10 +54,6 @@ public class ITRequestWorkflow {
         WfRunVariable item =
                 wf.addVariable("item-description", VariableType.STR).required();
 
-        @SuppressWarnings("unused")
-        WfRunVariable justification =
-                wf.addVariable("justification", VariableType.STR).required();
-
         // The status is an enum of 'PENDING', 'APPROVED', and 'REJECTED', and it is not an
         // input variable, so it's not `.required()`. However, it is `.searchable()` because we want to
         // be able to search for it-requests by status.

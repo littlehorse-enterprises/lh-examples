@@ -39,3 +39,9 @@ spotless {
         palantirJavaFormat()
     }
 }
+
+// This is helpful so that we can use the Reflection API to determine the names
+// of parameters for Task Functions and match them to the TaskDef param names.
+compileJava {
+    options.compilerArgs << '-parameters'
+}

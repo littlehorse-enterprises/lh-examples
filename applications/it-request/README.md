@@ -6,7 +6,17 @@
     - [Relevant Features](#relevant-features)
   - [For Developers](#for-developers)
     - [Required Systems](#required-systems)
-    - [Running the Application](#running-the-application)
+    - [Set Up the App](#set-up-the-app)
+      - [Register TaskDef](#register-taskdef)
+      - [Register the Workflow Spec](#register-the-workflow-spec)
+  - [Run the Workflow with `lhctl`](#run-the-workflow-with-lhctl)
+    - [Run the `WfRun`](#run-the-wfrun)
+    - [Test Search Capabilities](#test-search-capabilities)
+    - [Assign the User Task Run](#assign-the-user-task-run)
+    - [Check Search Again](#check-search-again)
+    - [Execute the User Task](#execute-the-user-task)
+    - [Search One Last Time](#search-one-last-time)
+  - [Run the Workflow With REST API](#run-the-workflow-with-rest-api)
   - [Future Work and Extensions](#future-work-and-extensions)
 
 ## Overview
@@ -52,11 +62,137 @@ As such, to run the app, you need:
 * The `workflow` program to register the `WfSpec`
 * The `rest-api` to serve requests
 
-### Running the Application
+### Set Up the App
+
+First, as described in the [Root README](../../README.md), please set up the prerequisites.
+
+#### Register TaskDef
+
+Register the `send-email` `TaskDef`. From the root of the repo, please run:
+
+```
+./common-tasks/java-send-email/register.sh
+```
+
+You can confirm that the `TaskDef` exists via:
+```
+lhctl get taskDef send-email
+```
+
+Next, in a terminal please run the Task Worker:
+
+```
+./common-tasks/java-send-email/run-worker.sh
+```
+
+#### Register the Workflow Spec
+
+From this directory, run:
+```
+./register.sh
+```
+
+You can confirm that the `WfSpec` was created by:
+
+```
+lhctl get wfSpec it-request
+```
+
+## Run the Workflow with `lhctl`
+
+If you want to really know what's going on under the hood, you can run the application using `lhctl`.
+
+### Run the `WfRun`
+
+First, run the workflow. We will pass in a few input variables:
+
+```
+lhctl run it-request requester-email colt@littlehorse.io item-description "a nice laptop"
+```
+
+### Test Search Capabilities
+
+We can search for IT Requests that were sent by `colt@littlehorse.io`. The following command should show a composite ID containing the `WfRun`'s id from before:
+
+```
+lhctl search variable --wfSpecName it-request --varType STR --name requester-email --value 'colt@littlehorse.io'
+```
+
+We can also search for `PENDING`, `APPROVED` or `REJECTED` IT Requests:
+
+```
+# Should be empty
+-> lhctl search variable --wfSpecName it-request --varType STR --name status --value APPROVED
+
+# Should contain the ID
+-> lhctl search variable --wfSpecName it-request --varType STR --name status --value PENDING
+```
 
 
+### Assign the User Task Run
 
-TODO: Instructions on how to run the application.
+Next, search for a `UserTaskRun` in the `UNASSIGNED` state, which belongs to the `finance` department:
+
+```
+-> lhctl search userTaskRun --userTaskStatus UNASSIGNED --userGroup finance
+{
+  "results": [
+    {
+      "wfRunId": {
+        "id": "f76af884642347d0b1af2600ee9fb06b"
+      },
+      "userTaskGuid": "f0ccec0e43d84cf9947af2c25cdc226e"
+    }
+  ]
+}
+```
+
+Let's inspect that `UserTaskRun`. We can see that it is not assigned to anyone:
+```
+-> lhctl get userTaskRun f76af884642347d0b1af2600ee9fb06b f0ccec0e43d84cf9947af2c25cdc226e
+```
+
+Let's assign the `UserTaskRun` to a specific user (in this case, `yoda`).
+
+```
+lhctl assign userTaskRun f76af884642347d0b1af2600ee9fb06b f0ccec0e43d84cf9947af2c25cdc226e --userId yoda
+```
+
+### Check Search Again
+
+Let's see if we can't find any `UserTaskRun`s assigned to `yoda`, can we?
+
+```
+-> lhctl search userTaskRun --status ASSIGNED --userId yoda
+```
+
+That command should show the composite `UserTaskRun` id from above.
+
+### Execute the User Task
+
+Now, to complete the workflow, we need to execute the User Task:
+
+```
+lhctl execute userTaskRun f76af884642347d0b1af2600ee9fb06b f0ccec0e43d84cf9947af2c25cdc226e
+```
+
+That command should walk you through executing the user task run. When asked for `user-id`, provide `yoda`. To approve the request, pass `true`; to reject it, pass `false`.
+
+### Search One Last Time
+
+You can search for Task Run's of the `send-email` task as follows:
+
+```
+lhctl search taskRun --status COMPLETED --taskDefName send-email
+```
+
+Then get the TaskRun as follows, and see the output:
+
+```
+lhctl get taskRun <wfRunId> <taskGuid>
+```
+
+## Run the Workflow With REST API
 
 ## Future Work and Extensions
 
