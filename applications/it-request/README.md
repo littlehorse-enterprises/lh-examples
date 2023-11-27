@@ -5,6 +5,8 @@
     - [Business Process](#business-process)
     - [Relevant Features](#relevant-features)
   - [For Developers](#for-developers)
+    - [Required Systems](#required-systems)
+    - [Running the Application](#running-the-application)
   - [Future Work and Extensions](#future-work-and-extensions)
 
 ## Overview
@@ -40,9 +42,25 @@ There are two sub-directories in this application:
 
 Note that in this application, all data is stored as LittleHorse `WfRun`s, `Variable`s, and `UserTaskRun`s: there is no external database beyond LittleHorse. **It is OK to use LittleHorse as a Data Store**. In fact, sometimes your job as an application developer becomes far easier when you do this.
 
+### Required Systems
+
+This application requires only one `TaskDef`: `send-email`, which is defined in the [`java-send-email`](../../common-tasks/java-send-email/) directory.
+
+As such, to run the app, you need:
+* LH Cluster (see the root readme for instructions)
+* The `java-send-email` Task Worker
+* The `workflow` program to register the `WfSpec`
+* The `rest-api` to serve requests
+
+### Running the Application
+
+
+
 TODO: Instructions on how to run the application.
 
 ## Future Work and Extensions
+
+We will add a primitive ReactJS frontend on top of the Spring Boot API in order to make the demo easier to run through.
 
 There are many other ways to implement or extend this system. I have put some ideas below.
 

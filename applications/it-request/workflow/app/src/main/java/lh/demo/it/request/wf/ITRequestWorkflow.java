@@ -13,11 +13,8 @@ import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.littlehorse.sdk.wfsdk.internal.WorkflowImpl;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 public class ITRequestWorkflow {
-
-    Logger log = Logger.getLogger(ITRequestWorkflow.class.getName());
 
     private LHPublicApiBlockingStub client;
 
@@ -32,10 +29,10 @@ public class ITRequestWorkflow {
     public void registerWorkflowSpec() throws IOException {
         UserTaskSchema approvalForm = new UserTaskSchema(new ApprovalForm(), APPROVAL_FORM);
 
-        log.info("Deploying User Task Schemas");
+        System.out.println("Deploying User Task Schemas"); // TODO: Use a logger
         client.putUserTaskDef(approvalForm.compile());
 
-        log.info("Deploying workflow!");
+        System.out.println("Deploying workflow!");
         Workflow wf = new WorkflowImpl(WF_NAME, this::wfFunc);
         wf.registerWfSpec(client);
     }

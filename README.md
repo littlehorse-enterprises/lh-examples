@@ -15,7 +15,7 @@ go install github.com/littlehorse-enterprises/littlehorse/lhctl@0.7.0-alpha.1
 To run a LittleHorse Cluster (Kafka, LH Server, and soon to be LH Dashboard) in a single container on your laptop, you can run:
 
 ```
-docker run --name littlehorse -d -p 2023:2023 public.ecr.aws/littlehorse/lh-standalone:latest
+docker run --name littlehorse -d -p 2023:2023 public.ecr.aws/littlehorse/lh-standalone:0.7.0-alpha.1
 ```
 
 The `lh-standalone` image takes about 30 seconds to start up because we first need to start a Kafka cluster. Once LH is up and running, you should get a `[]` response from:
