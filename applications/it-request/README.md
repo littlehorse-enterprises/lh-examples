@@ -194,6 +194,24 @@ lhctl get taskRun <wfRunId> <taskGuid>
 
 ## Run the Workflow With REST API
 
+### Run the ReST API
+
+In order to run the SpringBoot API on port 8080 run the following command in this directory:
+```shell
+./run-api.sh
+```
+
+### Create an IT Request
+
+```shell
+curl --location 'localhost:8080/it-requests' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "requesterEmail": "some@email.io",
+    "itemDescription": "Some item with a description"
+}'
+```
+
 ## Future Work and Extensions
 
 We will add a primitive ReactJS frontend on top of the Spring Boot API in order to make the demo easier to run through.
