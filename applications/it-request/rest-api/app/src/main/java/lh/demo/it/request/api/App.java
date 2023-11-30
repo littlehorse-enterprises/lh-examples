@@ -18,6 +18,7 @@ public class App {
     @Bean
     public LHPublicApiGrpc.LHPublicApiBlockingStub client() throws IOException {
         final LHConfig config = new LHConfig();
+        // TODO: Confirm that a single Stub can handle concurrent requests?
         return config.getBlockingStub();
     }
 

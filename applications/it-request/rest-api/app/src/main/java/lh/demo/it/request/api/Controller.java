@@ -11,12 +11,15 @@ import java.util.UUID;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,6 +72,15 @@ public class Controller {
                 .toList()
                 .get(0);
 
-        return new ITRequest(id, status, requesterEmail, itemDescription);
+        return new ITRequest(id, Status.valueOf(status), requesterEmail, itemDescription);
+    }
+
+    @GetMapping
+    public Paginated<ITRequest> getITRequests(
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) String requesterEmail,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) Integer pageSize,
+            @RequestParam(defaultValue = "1") @Min(1) Integer page) {
+        return null;
     }
 }
