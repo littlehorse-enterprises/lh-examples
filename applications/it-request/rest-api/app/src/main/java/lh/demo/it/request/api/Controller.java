@@ -7,16 +7,14 @@ import io.littlehorse.sdk.common.proto.LHPublicApiGrpc;
 import io.littlehorse.sdk.common.proto.ListUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
-
-import java.util.List;
-import java.util.UUID;
-
 import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,22 +54,28 @@ public class Controller {
     @GetMapping(path = "/{it-request-id}")
     public ITRequest getITRequest(@PathVariable("it-request-id") String id) {
 
-        List<Variable> variables = client.listVariables(ListVariablesRequest.newBuilder().setWfRunId(WfRunId.newBuilder().setId(id)).build()).getResultsList();
+        List<Variable> variables = client.listVariables(ListVariablesRequest.newBuilder()
+                        .setWfRunId(WfRunId.newBuilder().setId(id))
+                        .build())
+                .getResultsList();
 
         String status = variables.stream()
-                .filter(variable -> variable.getId().getName().equals("status") && variable.getId().getThreadRunNumber() == 0)
+                .filter(variable -> variable.getId().getName().equals("status")
+                        && variable.getId().getThreadRunNumber() == 0)
                 .map(variable -> variable.getValue().getStr())
                 .toList()
                 .get(0);
 
         String requesterEmail = variables.stream()
-                .filter(variable -> variable.getId().getName().equals("requester-email") && variable.getId().getThreadRunNumber() == 0)
+                .filter(variable -> variable.getId().getName().equals("requester-email")
+                        && variable.getId().getThreadRunNumber() == 0)
                 .map(variable -> variable.getValue().getStr())
                 .toList()
                 .get(0);
 
         String itemDescription = variables.stream()
-                .filter(variable -> variable.getId().getName().equals("item-description") && variable.getId().getThreadRunNumber() == 0)
+                .filter(variable -> variable.getId().getName().equals("item-description")
+                        && variable.getId().getThreadRunNumber() == 0)
                 .map(variable -> variable.getValue().getStr())
                 .toList()
                 .get(0);
@@ -90,12 +94,15 @@ public class Controller {
 
     @PostMapping(path = "/{it-request-id}/complete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void completeITRequest(
-            @PathVariable("it-request-id") String id,
-            @RequestBody CompleteRequest request)
+    public void completeITRequest(@PathVariable("it-request-id") String id, @RequestBody CompleteRequest request)
             throws LHSerdeError {
 
-        UserTaskRunId userTaskRunId = client.listUserTaskRuns(ListUserTaskRunRequest.newBuilder().setWfRunId(WfRunId.newBuilder().setId(id)).build()).getResultsList().get(0).getId();
+        UserTaskRunId userTaskRunId = client.listUserTaskRuns(ListUserTaskRunRequest.newBuilder()
+                        .setWfRunId(WfRunId.newBuilder().setId(id))
+                        .build())
+                .getResultsList()
+                .get(0)
+                .getId();
 
         CompleteUserTaskRunRequest result = CompleteUserTaskRunRequest.newBuilder()
                 .setUserId(request.userId())
