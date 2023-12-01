@@ -1,13 +1,17 @@
 package lh.demo.it.request.api;
 
 import io.littlehorse.sdk.common.LHLibUtil;
+import io.littlehorse.sdk.common.exception.LHSerdeError;
+import io.littlehorse.sdk.common.proto.CompleteUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.LHPublicApiGrpc;
+import io.littlehorse.sdk.common.proto.ListUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 
 import java.util.List;
 import java.util.UUID;
 
+import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import jakarta.validation.Valid;
@@ -82,5 +86,23 @@ public class Controller {
             @RequestParam(defaultValue = "10") @Min(1) @Max(50) Integer pageSize,
             @RequestParam(defaultValue = "1") @Min(1) Integer page) {
         return null;
+    }
+
+    @PostMapping(path = "/{it-request-id}/complete")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void completeITRequest(
+            @PathVariable("it-request-id") String id,
+            @RequestBody CompleteRequest request)
+            throws LHSerdeError {
+
+        UserTaskRunId userTaskRunId = client.listUserTaskRuns(ListUserTaskRunRequest.newBuilder().setWfRunId(WfRunId.newBuilder().setId(id)).build()).getResultsList().get(0).getId();
+
+        CompleteUserTaskRunRequest result = CompleteUserTaskRunRequest.newBuilder()
+                .setUserId(request.userId())
+                .putResults("isApproved", LHLibUtil.objToVarVal(request.isApproved()))
+                .setUserTaskRunId(userTaskRunId)
+                .build();
+
+        client.completeUserTaskRun(result);
     }
 }
