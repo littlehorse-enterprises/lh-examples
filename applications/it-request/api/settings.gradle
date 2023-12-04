@@ -1,2 +1,2 @@
-rootProject.name = 'rest-api'
+rootProject.name = 'api'
 include('app')
