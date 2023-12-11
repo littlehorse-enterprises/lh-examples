@@ -21,7 +21,7 @@ export default function ButtonUsage() {
         method: 'POST',
         body: JSON.stringify({
           "requesterEmail": requesterEmail,
-          "itemDescription": description
+          "description": description
         }),
       })
 
