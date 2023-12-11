@@ -43,7 +43,7 @@ public class Controller {
                 .setId(wfRunId)
                 .setWfSpecName("it-request")
                 .putVariables("requester-email", LHLibUtil.objToVarVal(request.requesterEmail()))
-                .putVariables("item-description", LHLibUtil.objToVarVal(request.itemDescription()))
+                .putVariables("item-description", LHLibUtil.objToVarVal(request.description()))
                 .build();
 
         client.runWf(runWf);
