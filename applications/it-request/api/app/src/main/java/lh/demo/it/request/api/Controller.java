@@ -9,11 +9,13 @@ import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.Variable;
+import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,14 +75,25 @@ public class Controller {
                 .toList()
                 .get(0);
 
-        String itemDescription = variables.stream()
+        String description = variables.stream()
                 .filter(variable -> variable.getId().getName().equals("item-description")
                         && variable.getId().getThreadRunNumber() == 0)
                 .map(variable -> variable.getValue().getStr())
                 .toList()
                 .get(0);
 
-        return new ITRequest(id, Status.valueOf(status), requesterEmail, itemDescription);
+        String comments = client
+                .listUserTaskRuns(ListUserTaskRunRequest.newBuilder()
+                        .setWfRunId(WfRunId.newBuilder().setId(id))
+                        .build())
+                .getResultsList()
+                .stream()
+                .findFirst()
+                .flatMap(it -> Optional.ofNullable(it.getResultsOrDefault("comments", null)))
+                .map(VariableValue::getStr)
+                .orElse(null);
+
+        return new ITRequest(id, Status.valueOf(status), requesterEmail, description, comments);
     }
 
     @GetMapping
@@ -104,12 +117,15 @@ public class Controller {
                 .get(0)
                 .getId();
 
-        CompleteUserTaskRunRequest result = CompleteUserTaskRunRequest.newBuilder()
+        CompleteUserTaskRunRequest.Builder result = CompleteUserTaskRunRequest.newBuilder()
                 .setUserId(request.userId())
                 .putResults("isApproved", LHLibUtil.objToVarVal(request.isApproved()))
-                .setUserTaskRunId(userTaskRunId)
-                .build();
+                .setUserTaskRunId(userTaskRunId);
 
-        client.completeUserTaskRun(result);
+        if (request.comments() != null) {
+            result.putResults("comments", LHLibUtil.objToVarVal(request.comments()));
+        }
+
+        client.completeUserTaskRun(result.build());
     }
 }
