@@ -11,12 +11,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import IconButton from '@mui/material/IconButton';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import { MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material';
+import { MenuItem, Select, SelectChangeEvent, Stack, TextField } from '@mui/material';
 
 export default function BasicTable() {
 
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [status, setStatus] = useState("ALL");
+    const [requester, setRequester] = useState("");
     const router = useRouter();
 
     const getKey = (pageIndex: number, previousPageData: any) => {
@@ -24,10 +25,10 @@ export default function BasicTable() {
         if (previousPageData && !previousPageData.data) return null
         
         // first page, we don't have `previousPageData`
-        if (pageIndex === 0) return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&status=${status === "ALL" ? '' : status}`
+        if (pageIndex === 0) return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&status=${status === "ALL" ? '' : status}${requester !== '' ? '&requesterEmail=' + requester : ''}`
         
         // add the cursor to the API endpoint
-        return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&bookmark=${previousPageData.bookmark}&status=${status === "ALL" ? '' : status}`
+        return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&bookmark=${previousPageData.bookmark}&status=${status === "ALL" ? '' : status}${requester !== '' ? '&requesterEmail=' + requester : ''}`
     }
 
     const { data, size: page, setSize: setPage } = useSWRInfinite(getKey, (url) => fetch(url).then(r => r.json()))
@@ -35,6 +36,14 @@ export default function BasicTable() {
   return  (
     <Paper>
       <Stack direction="row">
+      <div>Requester:</div>
+      <TextField
+        required
+        value={requester}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          setRequester(event.target.value);
+        }}
+      />
       <div>Status:</div>
       <Select
         value={status}
