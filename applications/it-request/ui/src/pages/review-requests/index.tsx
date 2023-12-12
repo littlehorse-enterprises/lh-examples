@@ -6,16 +6,16 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import TablePagination from '@mui/material/TablePagination';
-import TableFooter from '@mui/material/TableFooter';
 import useSWRInfinite from 'swr/infinite';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import IconButton from '@mui/material/IconButton';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Stack } from '@mui/material';
 
 export default function BasicTable() {
 
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
     const router = useRouter();
 
     const getKey = (pageIndex: number, previousPageData: any) => {
@@ -29,12 +29,12 @@ export default function BasicTable() {
         return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&bookmark=${previousPageData.bookmark}`
     }
 
-    const { data, size, setSize } = useSWRInfinite(getKey, (url) => fetch(url).then(r => r.json()))
+    const { data, size: page, setSize: setPage } = useSWRInfinite(getKey, (url) => fetch(url).then(r => r.json()))
 
   return  (
-    <>
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <Paper>
+    <TableContainer>
+      <Table>
         <TableHead>
           <TableRow>
             <TableCell>Requester</TableCell>
@@ -42,36 +42,34 @@ export default function BasicTable() {
             <TableCell align="right">Status</TableCell>
           </TableRow>
         </TableHead>
-        {data && data[page] &&
+        {data && data[page - 1] &&
         <TableBody>
-          {data[page].data.map((row: any) => (
+          {data[page - 1].data.map((row: any) => (
             <TableRow
               hover
               onClick={() => {router.push(`/review-requests/${row.id}`)}}
               key={row.id}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              <TableCell component="th" scope="row">
-                {row.requesterEmail}
-              </TableCell>
+              <TableCell>{row.requesterEmail}</TableCell>
               <TableCell align="right">{row.description}</TableCell>
               <TableCell align="right">{row.status}</TableCell>
             </TableRow>
           ))}
         </TableBody>}
-        <TableFooter>
-          <TableRow>
-          <TablePagination rowsPerPageOptions={[1, 2, 3]} onRowsPerPageChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  }} component="div" count={-1} onPageChange={(event, newPageNumber) => {
-            setPage(newPageNumber)
-            setSize(newPageNumber + 1)
-            }} page={page} rowsPerPage={rowsPerPage}/>
-          </TableRow>
-        </TableFooter>
       </Table>
     </TableContainer>
-    </>
+    <Stack direction="row">
+    <IconButton disabled={page <= 1} onClick={() => {
+      setPage(page - 1)
+    }}>
+            <ChevronLeft />
+          </IconButton>
+    <IconButton disabled={data && data[page - 1] && data[page - 1].bookmark === null}   onClick={() => {
+      setPage(page + 1)
+    }}>
+            <ChevronRight />
+          </IconButton>
+    </Stack>
+    </Paper>
     );
 }
