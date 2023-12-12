@@ -19,7 +19,7 @@ import {
   TextField,
 } from "@mui/material";
 
-export default function BasicTable() {
+export default function ReviewRequests() {
   const [rowsPerPage, setRowsPerPage] = useState(1);
   const [status, setStatus] = useState("ALL");
   const [statusInput, setStatusInput] = useState("ALL");

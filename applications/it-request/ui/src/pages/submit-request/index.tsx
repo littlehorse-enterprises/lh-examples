@@ -1,8 +1,8 @@
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Alert, AlertTitle, Box, Stack, TextField } from "@mui/material";
+import { Alert, AlertTitle, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 
-export default function ButtonUsage() {
+export default function SubmitRequest() {
   const [requesterEmail, setRequesterEmail] = useState<string>();
   const [description, setDescription] = useState<string>();
   const [error, setError] = useState<string | undefined>();

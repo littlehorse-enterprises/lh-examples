@@ -11,7 +11,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
-export default function ButtonUsage() {
+export default function ReviewRequestById() {
   const [comments, setComments] = useState<string | null>(null);
 
   const router = useRouter();
