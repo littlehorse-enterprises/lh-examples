@@ -1,4 +1,4 @@
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Card, CardActions, CardContent, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import useSWR from "swr";
@@ -10,12 +10,12 @@ export default function ButtonUsage() {
 
   const router = useRouter()
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading } = useSWR(
     `http://localhost:8080/it-requests/${router.query['it-request-id']}`,
     (url) => fetch(url).then(r => r.json()).then(json => {setComments(json.comments); return json}),
   )
 
-  const { trigger, isMutating, error: errorPepe } = useSWRMutation(
+  const { trigger, isMutating, error: errorMutation } = useSWRMutation(
     `http://localhost:8080/it-requests/${router.query['it-request-id']}`,
     (url, { arg }: { arg: any }) => fetch(url + '/complete', {
       headers: {
@@ -30,48 +30,53 @@ export default function ButtonUsage() {
     })
   )
 
-  return <Stack height={"100vh"} spacing={2}>
-    {isLoading || isMutating ? <h1>Loading</h1> : <>
-  <TextField
-    id="outlined-required"
-    label="Request Status"
-    value={data.status}
-    disabled
-  />
-  <TextField
-    id="outlined-required"
-    label="Requester Email"
-    value={data.requesterEmail}
-    disabled
-  />
-  <TextField
-    id="outlined-required"
-    label="Description"
-    value={data.description}
-    disabled
-    multiline
-  />
-  <TextField
-    required
-    id="outlined-required"
-    label="Comments"
-    value={comments}
-    multiline
-    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(`value: ${event.target.value}`);
-      setComments(event.target.value);
-    }}
-    disabled={data.status !== 'PENDING'}
-  />
-  <Stack direction="row" spacing={2}>
-  <Button onClick={() => trigger({userId: 'someone', isApproved: false})} variant="contained">
-Reject
-</Button>
-  <Button onClick={() => trigger({userId: 'someone', isApproved: true})} variant="contained">
-Accept
-</Button>
-</Stack>
-  </>
+  if (isLoading || isMutating) {
+    return <h1>Loading</h1>
   }
-</Stack>
+
+  return <Card sx={{ minWidth: 275 }}>
+      <CardContent>
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Request Status
+        </Typography>
+        <Typography variant="body1" color="text.secondary" gutterBottom>
+          {data.status}
+        </Typography>
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Requester Email
+        </Typography>
+        <Typography variant="body1" color="text.secondary" gutterBottom>
+          {data.requesterEmail}
+        </Typography>
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Description
+        </Typography>
+        <Typography variant="body1" color="text.secondary" gutterBottom>
+          {data.description}
+        </Typography>
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Comments
+        </Typography>
+        {data.status === 'PENDING' ? <TextField
+          required
+          value={comments}
+          multiline
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            console.log(`value: ${event.target.value}`);
+            setComments(event.target.value);
+          }}
+          disabled={data.status !== 'PENDING'}
+        /> :         <Typography variant="body1" color="text.secondary" gutterBottom>
+        {data.comments}
+      </Typography>}
+      </CardContent>
+      {data.status === 'PENDING' && <CardActions>
+      <Button onClick={() => trigger({userId: 'someone', isApproved: false})}>
+      Reject
+      </Button>
+      <Button onClick={() => trigger({userId: 'someone', isApproved: true})}>
+      Accept
+      </Button>
+      </CardActions>}
+    </Card>;
 }
