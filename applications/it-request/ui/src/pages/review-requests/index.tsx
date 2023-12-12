@@ -17,10 +17,11 @@ import {
   SelectChangeEvent,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 
 export default function ReviewRequests() {
-  const [rowsPerPage, setRowsPerPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [status, setStatus] = useState("ALL");
   const [statusInput, setStatusInput] = useState("ALL");
   const [requester, setRequester] = useState("");
@@ -48,16 +49,15 @@ export default function ReviewRequests() {
   return (
     <Paper>
       <Stack direction="row">
-        <div>Requester:</div>
         <TextField
-          required
+          label="Requester Email"
           value={requesterInput}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
             setRequesterInput(event.target.value);
           }}
         />
-        <div>Status:</div>
         <Select
+          label="Status"
           value={statusInput}
           onChange={(event: SelectChangeEvent) => {
             setStatusInput(event.target.value);
