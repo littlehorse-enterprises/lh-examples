@@ -12,10 +12,9 @@ import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.littlehorse.sdk.wfsdk.internal.WorkflowImpl;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class ITRequestWorkflow {
 
@@ -43,33 +42,40 @@ public class ITRequestWorkflow {
 
     /*
      * This function defines the logic of our WfSpec.
+     *
+     * First: We define the variables used by this WfSpec.
+     *  - .required() makes a variable required as input.
+     *  - .searchable() allows us to search that variable by its value.
+     *
+     *  The status is an enum of 'PENDING', 'APPROVED', and 'REJECTED', and it is not an
+     *  input variable, so it's not `.required()`. However, it is `.searchable()` because we want to
+     *  be able to search for it-requests by status.
+     *
+     * After defining our variables, the first action we take in the workflow is assigning a
+     * User Task. In this case, we do not assign it to a specific userId; rather, we assign it to
+     * the 'finance' userGroup.
+     *
+     * We save the `UserTaskOutput.jsonPath("$.isApproved") into an internal variable.
+     *
+     * Depending on whether the request was approved, we either:
+     * - schedule the `send-email` task to notify the requester that the request was accepted, OR
+     * - schedule the `send-email` task to notify the requester that the request was rejected.
+     *
+     * In both cases, the input parameters to the `.execute()` method determine the content
+     * of the email. See `common-tasks/java-send-email/` for info on how the Task Worker works.
      */
     public void wfFunc(WorkflowThread wf) {
-        // First: We define the variables used by this WfSpec.
-        // .required() makes a variable required as input.
-        // .searchable() allows us to search that variable by its value.
 
-        // We want to be able to search it-requests by the email of the person who requests it.
-        // Also, we require that the email is provided as an input variable.
         WfRunVariable requesterEmail =
                 wf.addVariable("requester-email", VariableType.STR).searchable().required();
-
-        // The item is required as an input variable. However, we don't search by the item yet.
         WfRunVariable item =
                 wf.addVariable("item-description", VariableType.STR).required();
 
-        // The status is an enum of 'PENDING', 'APPROVED', and 'REJECTED', and it is not an
-        // input variable, so it's not `.required()`. However, it is `.searchable()` because we want to
-        // be able to search for it-requests by status.
-        //
-        // We set the default value to 'PENDING' when we start the workflow.
+        // Set status as PENDING when we start workflow.
         WfRunVariable status = wf.addVariable("status", "PENDING").searchable();
-
-        // Internal variable
         WfRunVariable isApproved = wf.addVariable("is-approved", VariableType.BOOL);
 
-        // Send a User Task to the finance department and have them approve the request.
-        // We assign it to the finance group, not to an individual user.
+        // Send a User Task to the finance userGroup and have them approve the request.
         String assignedUserId = null;
         String userGroup = "finance";
         UserTaskOutput financeUserTaskOutput = wf.assignUserTask(APPROVAL_FORM, assignedUserId, userGroup);
@@ -80,31 +86,20 @@ public class ITRequestWorkflow {
 
         wf.doIfElse(
                 wf.condition(isApproved, Comparator.EQUALS, true),
-                // If the request is approved, then this lambda is executed
                 ifBody -> {
-                    // Create the email body using a LittleHorse Format String
                     LHFormatString emailContent =
                             ifBody.format("Dear {0}, your request for {1} has been approved!", requesterEmail, item);
-                    // You can also pass in hard-coded
                     String emailSubject = "Your IT Request";
 
-                    // Send the email!
                     ifBody.execute(ITRequestWorkflow.EMAIL_TASK_NAME, requesterEmail, emailSubject, emailContent);
-
-                    // Save the status as approved
                     ifBody.mutate(status, VariableMutationType.ASSIGN, "APPROVED");
                 },
                 // If the request is denied, then this lambda is executed.
                 elseBody -> {
-                    // Create the email body
                     LHFormatString emailContent =
                             elseBody.format("Dear {0}, your request for {1} has been approved!", requesterEmail, item);
-
-                    // Send the email!
                     elseBody.execute(
                             ITRequestWorkflow.EMAIL_TASK_NAME, requesterEmail, "Your IT Request", emailContent);
-
-                    // Save the status as rejected
                     elseBody.mutate(status, VariableMutationType.ASSIGN, "REJECTED");
                 });
     }
