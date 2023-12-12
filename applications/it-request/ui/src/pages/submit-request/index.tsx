@@ -1,5 +1,5 @@
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Alert, AlertTitle, Stack, TextField } from "@mui/material";
+import { Alert, AlertTitle, Card, CardActions, CardContent, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
 export default function SubmitRequest() {
@@ -29,7 +29,6 @@ export default function SubmitRequest() {
 
       if (!response.ok) {
         setError((await response.json()).message);
-      } else {
       }
     } catch (exception: any) {
       setError("Unexpected error happened");
@@ -38,39 +37,46 @@ export default function SubmitRequest() {
     setLoading(false);
   }
 
-  return (
-    <Stack height={"100vh"} spacing={2}>
-      <TextField
-        required
-        id="outlined-required"
-        label="Requester Email"
-        value={requesterEmail}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          setRequesterEmail(event.target.value);
-        }}
-      />
-      <TextField
-        required
-        id="outlined-required"
-        label="Request Description"
-        value={description}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          setDescription(event.target.value);
-        }}
-      />
-      <LoadingButton
-        loading={loading}
-        onClick={() => submitRequest(description, requesterEmail)}
-        variant="contained"
-      >
-        Submit
-      </LoadingButton>
-      {error && (
+  return ( <Card sx={{ minWidth: 275 }}>
+      <CardContent>
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Requester Email
+        </Typography>
+        <TextField
+          required
+          placeholder="someone@email.com"
+          value={requesterEmail}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setRequesterEmail(event.target.value);
+          }}
+        />
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Request Description
+        </Typography>
+        <TextField
+          required
+          id="outlined-required"
+          placeholder="e.g. access to jira"
+          value={description}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setDescription(event.target.value);
+          }}
+        />
+        {error && (
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
           {error}
         </Alert>
       )}
-    </Stack>
+      </CardContent>
+      <CardActions>
+        <LoadingButton
+          loading={loading}
+          onClick={() => submitRequest(description, requesterEmail)}
+        >
+          Submit
+        </LoadingButton>
+      </CardActions>
+    </Card>
   );
 }

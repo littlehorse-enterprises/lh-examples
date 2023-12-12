@@ -76,6 +76,7 @@ public class ITRequestWorkflow {
 
         // Save the value of the output into our variable.
         wf.mutate(isApproved, VariableMutationType.ASSIGN, financeUserTaskOutput.jsonPath("$.isApproved"));
+        wf.mutate(status, VariableMutationType.ASSIGN, "PROCESSING");
 
         wf.doIfElse(
                 wf.condition(isApproved, Comparator.EQUALS, true),
