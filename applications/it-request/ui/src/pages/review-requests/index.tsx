@@ -11,11 +11,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import IconButton from '@mui/material/IconButton';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import { Stack } from '@mui/material';
+import { MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material';
 
 export default function BasicTable() {
 
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [status, setStatus] = useState("ALL");
     const router = useRouter();
 
     const getKey = (pageIndex: number, previousPageData: any) => {
@@ -23,16 +24,30 @@ export default function BasicTable() {
         if (previousPageData && !previousPageData.data) return null
         
         // first page, we don't have `previousPageData`
-        if (pageIndex === 0) return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}`
+        if (pageIndex === 0) return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&status=${status === "ALL" ? '' : status}`
         
         // add the cursor to the API endpoint
-        return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&bookmark=${previousPageData.bookmark}`
+        return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&bookmark=${previousPageData.bookmark}&status=${status === "ALL" ? '' : status}`
     }
 
     const { data, size: page, setSize: setPage } = useSWRInfinite(getKey, (url) => fetch(url).then(r => r.json()))
 
   return  (
     <Paper>
+      <Stack direction="row">
+      <div>Status:</div>
+      <Select
+        value={status}
+        onChange={(event: SelectChangeEvent) => {
+          setStatus(event.target.value);
+        }}
+      >
+        <MenuItem value="ALL">ALL</MenuItem>
+        <MenuItem value="PENDING">PENDING</MenuItem>
+        <MenuItem value="APPROVED">APPPROVED</MenuItem>
+        <MenuItem value="REJECTED">REJECTED</MenuItem>
+      </Select>
+    </Stack>
     <TableContainer>
       <Table>
         <TableHead>
