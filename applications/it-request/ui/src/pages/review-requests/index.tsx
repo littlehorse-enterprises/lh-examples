@@ -10,25 +10,24 @@ import useSWRInfinite from 'swr/infinite';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import IconButton from '@mui/material/IconButton';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, Search } from '@mui/icons-material';
 import { MenuItem, Select, SelectChangeEvent, Stack, TextField } from '@mui/material';
 
 export default function BasicTable() {
 
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(1);
     const [status, setStatus] = useState("ALL");
+    const [statusInput, setStatusInput] = useState("ALL");
     const [requester, setRequester] = useState("");
+    const [requesterInput, setRequesterInput] = useState("");
     const router = useRouter();
 
-    const getKey = (pageIndex: number, previousPageData: any) => {
+    const getKey = (_pageIndex: number, previousPageData: any) => {
         // reached the end
         if (previousPageData && !previousPageData.data) return null
         
-        // first page, we don't have `previousPageData`
-        if (pageIndex === 0) return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&status=${status === "ALL" ? '' : status}${requester !== '' ? '&requesterEmail=' + requester : ''}`
-        
         // add the cursor to the API endpoint
-        return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}&bookmark=${previousPageData.bookmark}&status=${status === "ALL" ? '' : status}${requester !== '' ? '&requesterEmail=' + requester : ''}`
+        return `http://localhost:8080/it-requests?pageSize=${rowsPerPage}${previousPageData ? '&bookmark=' + previousPageData.bookmark : ''}&status=${status === "ALL" ? '' : status}${requester !== '' ? '&requesterEmail=' + requester : ''}`
     }
 
     const { data, size: page, setSize: setPage } = useSWRInfinite(getKey, (url) => fetch(url).then(r => r.json()))
@@ -39,23 +38,29 @@ export default function BasicTable() {
       <div>Requester:</div>
       <TextField
         required
-        value={requester}
+        value={requesterInput}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          setRequester(event.target.value);
+          setRequesterInput(event.target.value);
         }}
       />
       <div>Status:</div>
       <Select
-        value={status}
+        value={statusInput}
         onChange={(event: SelectChangeEvent) => {
-          setStatus(event.target.value);
+          setStatusInput(event.target.value);
         }}
       >
         <MenuItem value="ALL">ALL</MenuItem>
         <MenuItem value="PENDING">PENDING</MenuItem>
-        <MenuItem value="APPROVED">APPPROVED</MenuItem>
+        <MenuItem value="APPROVED">APPROVED</MenuItem>
         <MenuItem value="REJECTED">REJECTED</MenuItem>
       </Select>
+      <IconButton onClick={() => {
+        setStatus(statusInput)
+        setRequester(requesterInput)
+      }}>
+          <Search/>
+      </IconButton>
     </Stack>
     <TableContainer>
       <Table>
