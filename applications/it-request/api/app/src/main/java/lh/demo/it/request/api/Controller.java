@@ -191,10 +191,7 @@ public class Controller {
             search.setBookmark(decode(bookmark));
         }
 
-        WfRunIdList wfRunIds = client.searchWfRun(SearchWfRunRequest.newBuilder()
-                .setWfSpecName("it-request")
-                .setLimit(pageSize)
-                .build());
+        WfRunIdList wfRunIds = client.searchWfRun(search.build());
         List<ITRequest> out = wfRunIds.getResultsList().stream()
                 .map(wfRunId -> getITRequest(wfRunId.getId()))
                 .toList();
