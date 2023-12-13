@@ -69,7 +69,7 @@ public class IncidentWorker {
                 } else {
                     sendNotCriticalAlert(incidentJson.getString("incidentId"));
                 }
-                Thread.sleep(30000); // Sleep for 30 seconds between notifications
+                //Thread.sleep(30000); // Sleep for 30 seconds between notifications
             }
         }
 

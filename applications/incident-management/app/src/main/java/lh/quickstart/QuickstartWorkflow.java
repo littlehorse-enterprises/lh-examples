@@ -38,6 +38,7 @@ public class QuickstartWorkflow {
                 wf.condition(incidentResolved, Comparator.EQUALS, false),
                 loopBody -> {
                     loopBody.execute(PERIODIC_CHECK_TASK, incidentDetails);
+                    loopBody.sleepSeconds(30);
                 }
         );
 
