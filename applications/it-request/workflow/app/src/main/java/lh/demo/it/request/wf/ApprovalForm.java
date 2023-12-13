@@ -11,4 +11,10 @@ public class ApprovalForm {
 
     @UserTaskField(displayName = "Approved?", description = "Check the box if this is an acceptable purchase.")
     public boolean isApproved;
+
+    @UserTaskField(
+            displayName = "Comments",
+            description = "Additional information that explains the approval or rejections",
+            required = false)
+    public String comments;
 }

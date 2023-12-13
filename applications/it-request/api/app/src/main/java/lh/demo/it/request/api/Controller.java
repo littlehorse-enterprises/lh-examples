@@ -14,6 +14,7 @@ import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.VariableId;
 import io.littlehorse.sdk.common.proto.VariableIdList;
+import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import io.littlehorse.sdk.common.proto.WfRunIdList;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("it-requests")
+@CrossOrigin("http://localhost:3000")
 public class Controller {
     private final LHPublicApiGrpc.LHPublicApiBlockingStub client;
 
@@ -50,7 +53,7 @@ public class Controller {
                 .setId(wfRunId)
                 .setWfSpecName("it-request")
                 .putVariables("requester-email", LHLibUtil.objToVarVal(request.requesterEmail()))
-                .putVariables("item-description", LHLibUtil.objToVarVal(request.itemDescription()))
+                .putVariables("item-description", LHLibUtil.objToVarVal(request.description()))
                 .build();
 
         client.runWf(runWf);
@@ -80,14 +83,30 @@ public class Controller {
                 .toList()
                 .get(0);
 
-        String itemDescription = variables.stream()
+        String description = variables.stream()
                 .filter(variable -> variable.getId().getName().equals("item-description")
                         && variable.getId().getThreadRunNumber() == 0)
                 .map(variable -> variable.getValue().getStr())
                 .toList()
                 .get(0);
 
-        return new ITRequest(id, Status.valueOf(status), requesterEmail, itemDescription);
+        String comments = client
+                .listUserTaskRuns(ListUserTaskRunRequest.newBuilder()
+                        .setWfRunId(WfRunId.newBuilder().setId(id))
+                        .build())
+                .getResultsList()
+                .stream()
+                .findFirst()
+                .map(userTaskRun -> {
+                    VariableValue variable = userTaskRun.getResultsOrDefault("comments", null);
+                    if (variable == null) {
+                        return null;
+                    }
+                    return variable.getStr();
+                })
+                .orElse(null);
+
+        return new ITRequest(id, Status.valueOf(status), requesterEmail, description, comments);
     }
 
     @GetMapping
@@ -174,10 +193,7 @@ public class Controller {
             search.setBookmark(decode(bookmark));
         }
 
-        WfRunIdList wfRunIds = client.searchWfRun(SearchWfRunRequest.newBuilder()
-                .setWfSpecName("it-request")
-                .setLimit(pageSize)
-                .build());
+        WfRunIdList wfRunIds = client.searchWfRun(search.build());
         List<ITRequest> out = wfRunIds.getResultsList().stream()
                 .map(wfRunId -> getITRequest(wfRunId.getId()))
                 .toList();
@@ -208,12 +224,15 @@ public class Controller {
                 .get(0)
                 .getId();
 
-        CompleteUserTaskRunRequest result = CompleteUserTaskRunRequest.newBuilder()
+        CompleteUserTaskRunRequest.Builder result = CompleteUserTaskRunRequest.newBuilder()
                 .setUserId(request.userId())
                 .putResults("isApproved", LHLibUtil.objToVarVal(request.isApproved()))
-                .setUserTaskRunId(userTaskRunId)
-                .build();
+                .setUserTaskRunId(userTaskRunId);
 
-        client.completeUserTaskRun(result);
+        if (request.comments() != null) {
+            result.putResults("comments", LHLibUtil.objToVarVal(request.comments()));
+        }
+
+        client.completeUserTaskRun(result.build());
     }
 }
