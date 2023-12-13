@@ -55,26 +55,21 @@ public class IncidentWorker {
     public String periodicCheckTask(String incidentDetails) throws InterruptedException {
         JSONObject incidentJson = new JSONObject(incidentDetails);
         boolean isCritical = incidentJson.optInt("severity", 0) >= 5;
-        boolean resolved = false;
 
-        // Loop to perform actions until the incident is resolved
-        while (!resolved) {
-            String currentStatus = checkIncidentStatus(incidentJson.getString("incidentId"));
-            resolved = "Resolved".equals(currentStatus);
+        String currentStatus = checkIncidentStatus(incidentJson.getString("incidentId"));
+        boolean resolved = "Resolved".equals(currentStatus);
 
-            if (!resolved) {
-                // Send notifications based on severity
-                if (isCritical) {
-                    sendCriticalAlert(incidentJson.getString("incidentId"));
-                } else {
-                    sendNotCriticalAlert(incidentJson.getString("incidentId"));
-                }
-                //Thread.sleep(30000); // Sleep for 30 seconds between notifications
+        if (!resolved) {
+            if (isCritical) {
+                sendCriticalAlert(incidentJson.getString("incidentId"));
+            } else {
+                sendNotCriticalAlert(incidentJson.getString("incidentId"));
             }
         }
 
-        return "Incident Resolved";
+        return resolved ? "Incident Resolved" : "Incident In Progress";
     }
+
 
     // Method to send critical alerts (dummy implementation)
     private void sendCriticalAlert(String incidentId) {
