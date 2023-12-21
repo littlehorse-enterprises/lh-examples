@@ -1,93 +1,82 @@
 package lh.quickstart;
 
 import io.littlehorse.sdk.worker.LHTaskMethod;
-import org.json.JSONObject; // Utilize the JSON library for parsing JSON strings
+import org.json.JSONObject;
 
 public class IncidentWorker {
 
-    // Task method to verify an incident
+    /**
+     * Task method to verify an incident based on its details.
+     *
+     * @param incidentDetails JSON string containing incident data.
+     * @return A verification result as a String.
+     */
     @LHTaskMethod("verify-incident")
     public String verifyIncident(String incidentDetails) {
-        // Extract incident type and severity from incidentDetails
+        // Extract incident type and severity level from the JSON details
         String incidentType = extractIncidentType(incidentDetails);
         int severityLevel = extractSeverityLevel(incidentDetails);
 
-        // Validate the incident and check if it's a known issue
-        boolean isValid = validateIncident(incidentType);
-        boolean isKnownIssue = checkKnownIssues(incidentType);
-
-        // Determine verification result based on the checks above
-        if (!isValid) {
-            return "Invalid Incident Report";
-        } else if (isKnownIssue) {
-            return "Incident is a Known Issue";
-        } else if (severityLevel >= 5) {
-            return "Critical Incident Verified: Severity Level " + severityLevel;
-        } else {
-            return "Non-Critical Incident: Severity Level " + severityLevel;
-        }
+        // Return a string combining the incident type and severity level
+        return "Incident Verified: Type - " + incidentType + ", Severity Level - " + severityLevel;
     }
 
-    // Method to extract the incident type from the JSON details
+    /**
+     * Extracts the incident type from JSON details.
+     *
+     * @param details JSON string containing incident data.
+     * @return The type of the incident.
+     */
     private String extractIncidentType(String details) {
         JSONObject incidentJson = new JSONObject(details);
         return incidentJson.optString("type", "Unknown"); // Default to "Unknown" if not found
     }
 
-    // Method to extract the severity level from the JSON details
+    /**
+     * Extracts the severity level from JSON details.
+     *
+     * @param details JSON string containing incident data.
+     * @return The severity level of the incident.
+     */
     private int extractSeverityLevel(String details) {
         JSONObject incidentJson = new JSONObject(details);
         return incidentJson.optInt("severity", 0); // Default to 0 if not found
     }
 
-    // Dummy method to validate the incident type
-    private boolean validateIncident(String type) {
-        return true; // Assuming the incident type is valid
-    }
-
-    // Dummy method to check if the incident type is a known issue
-    private boolean checkKnownIssues(String type) {
-        return false; // Assuming this is not a known issue
-    }
-
-    // Task method for periodic checks on an incident
+    /**
+     * Task method for performing periodic checks on an incident.
+     *
+     * @param incidentId ID of the incident to check.
+     * @return A string indicating completion of the periodic check.
+     */
     @LHTaskMethod("periodic-check-task")
-    public String periodicCheckTask(String incidentDetails) throws InterruptedException {
-        JSONObject incidentJson = new JSONObject(incidentDetails);
-        boolean isCritical = incidentJson.optInt("severity", 0) >= 5;
-
-        String currentStatus = checkIncidentStatus(incidentJson.getString("incidentId"));
-        boolean resolved = "Resolved".equals(currentStatus);
-
-        if (!resolved) {
-            if (isCritical) {
-                sendCriticalAlert(incidentJson.getString("incidentId"));
-            } else {
-                sendNotCriticalAlert(incidentJson.getString("incidentId"));
-            }
-        }
-
-        return resolved ? "Incident Resolved" : "Incident In Progress";
+    public String periodicCheckTask(String incidentId) {
+        // Simulate the process of a periodic check
+        System.out.println("Performing periodic check for Incident ID: " + incidentId);
+        return "Periodic Check Completed";
     }
 
-
-    // Method to send critical alerts (dummy implementation)
-    private void sendCriticalAlert(String incidentId) {
-        System.out.println("CRITICAL ALERT: Incident " + incidentId + " requires immediate attention!");
+    /**
+     * Task method to send critical alerts for incidents.
+     *
+     * @param incidentDetails JSON string containing incident data.
+     * @return A string indicating that the alert was sent.
+     */
+    @LHTaskMethod("send-critical-alert")
+    public String sendCriticalAlert(String incidentDetails) {
+        // Simulate sending a critical alert
+        System.out.println("CRITICAL INCIDENT ALERT: " + incidentDetails);
+        return "Alert sent";
     }
 
-    // Method to send non-critical alerts (dummy implementation)
-    private void sendNotCriticalAlert(String incidentId) {
-        System.out.println("Alert: Incident " + incidentId + " is not critical but needs to be monitored.");
-    }
-
-    // Dummy method to simulate checking the incident status
+    /**
+     * Simulates checking the current status of an incident.
+     *
+     * @param incidentId ID of the incident to check.
+     * @return The current status of the incident.
+     */
     private String checkIncidentStatus(String incidentId) {
-        return "In Progress"; // Example status
-    }
-
-    // Method placeholder for performing actions based on the incident's status
-    private void performStatusBasedActions(String status) {
-        // Here, we would implement actions based on the incident's status
+        // Dummy implementation for checking incident status
+        return "In Progress";
     }
 }

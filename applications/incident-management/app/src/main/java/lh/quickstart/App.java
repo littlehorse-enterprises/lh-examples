@@ -13,56 +13,58 @@ import io.littlehorse.sdk.common.proto.PutExternalEventDefRequest;
 
 public class App {
 
-    // Task identifiers
+    // Define constants for task and event names
     private static final String VERIFY_TASK = "verify-incident";
     private static final String PERIODIC_CHECK_TASK = "periodic-check-task";
+    private static final String SEND_CRITICAL_ALERT_TASK = "send-critical-alert";
     private static final String EXTERNAL_EVENT_NAME = "incident-resolved";
 
-    // Method to register the external event with LittleHorse
+    // Method to register an external event in the LittleHorse workflow system
     private static void registerExternalEventDef(LHPublicApiBlockingStub client) {
         System.out.println("Registering external event " + EXTERNAL_EVENT_NAME);
         try {
-            // Attempt to create a new external event definition
+            // Create a new external event definition
             client.putExternalEventDef(
                     PutExternalEventDefRequest.newBuilder().setName(EXTERNAL_EVENT_NAME).build()
             );
             System.out.println("External event registered successfully.");
         } catch (StatusRuntimeException exn) {
-            // Handle the case where the external event already exists
+            // Check if the event already exists and handle accordingly
             if (exn.getStatus().getCode() == Code.ALREADY_EXISTS) {
                 System.out.println("External event already exists!");
             } else {
-                // Re-throw other exceptions to be handled externally
                 throw exn;
             }
         }
     }
 
-    // Method to register the workflow and task definitions
+    // Method to register workflow and task definitions
     private static void registerWorkflow() throws IOException {
         LHConfig config = new LHConfig();
 
-        // Create instances of the task worker for each task
+        // Create task worker instances for each task
         IncidentWorker workerInstance = new IncidentWorker();
         LHTaskWorker verifyTaskWorker = new LHTaskWorker(workerInstance, VERIFY_TASK, config);
         LHTaskWorker periodicCheckTaskWorker = new LHTaskWorker(workerInstance, PERIODIC_CHECK_TASK, config);
+        LHTaskWorker sendCriticalAlertTaskWorker = new LHTaskWorker(workerInstance, SEND_CRITICAL_ALERT_TASK, config);
 
-        // Register task definitions
+        // Register each task definition
         verifyTaskWorker.registerTaskDef(true);
         periodicCheckTaskWorker.registerTaskDef(true);
+        sendCriticalAlertTaskWorker.registerTaskDef(true);
 
         // Register the workflow specification
-        QuickstartWorkflow quickstartWorkflow = new QuickstartWorkflow();
-        quickstartWorkflow.getWorkflow().registerWfSpec(config.getBlockingStub());
+        ConditionalsExample conditionalsExample = new ConditionalsExample();
+        conditionalsExample.getWorkflow().registerWfSpec(config.getBlockingStub());
 
         System.out.println("Workflow registered successfully.");
     }
 
-    // Method to start a given task worker
+    // Method to start an individual task worker
     private static void startTaskWorker(LHTaskWorker worker) throws IOException {
-        // Add a shutdown hook to close the worker gracefully
+        // Add a shutdown hook to ensure the worker is closed properly
         Runtime.getRuntime().addShutdownHook(new Thread(worker::close));
-        // Start the worker to listen for tasks
+        // Start the worker to begin listening for tasks
         worker.start();
         System.out.println("Started worker for task: " + worker.getTaskDefName());
     }
@@ -70,36 +72,37 @@ public class App {
     // Method to start all necessary task workers
     private static void startTaskWorkers() throws IOException {
         LHConfig config = new LHConfig();
+        // Start each task worker
         startTaskWorker(new LHTaskWorker(new IncidentWorker(), VERIFY_TASK, config));
         startTaskWorker(new LHTaskWorker(new IncidentWorker(), PERIODIC_CHECK_TASK, config));
+        startTaskWorker(new LHTaskWorker(new IncidentWorker(), SEND_CRITICAL_ALERT_TASK, config));
     }
 
     // Main method to execute the application
     public static void main(String[] args) throws IOException {
-        // Ensure the correct arguments are provided
+        // Validate command line arguments
         if (args.length != 1 || (!args[0].equals("register") && !args[0].equals("start"))) {
             System.err.println("Argument required: 'register' or 'start'");
             System.exit(1);
         }
 
-        // Establish a connection to the LittleHorse server
+        // Establish a gRPC channel to communicate with the LittleHorse server
         String host = "localhost";
         int port = 2023;
         ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         LHPublicApiBlockingStub client = LHPublicApiGrpc.newBlockingStub(channel);
 
         try {
-            // Execute the specified command
+            // Execute registration or start tasks based on the command line argument
             if (args[0].equals("register")) {
-                registerExternalEventDef(client); // Register the external event
-                registerWorkflow(); // Then register the workflow
+                registerExternalEventDef(client); // Register external event
+                registerWorkflow(); // Register workflow and task definitions
             } else {
-                startTaskWorkers(); // Start task workers
+                startTaskWorkers(); // Start task workers to handle tasks
             }
         } finally {
-            // Ensure the gRPC channel is shutdown properly
+            // Ensure proper shutdown of the gRPC channel
             channel.shutdown();
         }
     }
-
 }
