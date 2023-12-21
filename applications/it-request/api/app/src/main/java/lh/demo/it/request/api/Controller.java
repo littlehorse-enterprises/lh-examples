@@ -8,12 +8,10 @@ import io.littlehorse.sdk.common.proto.LHPublicApiGrpc;
 import io.littlehorse.sdk.common.proto.ListUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
-import io.littlehorse.sdk.common.proto.SearchVariableRequest;
 import io.littlehorse.sdk.common.proto.SearchWfRunRequest;
 import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.Variable;
-import io.littlehorse.sdk.common.proto.VariableId;
-import io.littlehorse.sdk.common.proto.VariableIdList;
+import io.littlehorse.sdk.common.proto.VariableMatch;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import io.littlehorse.sdk.common.proto.WfRunIdList;
@@ -116,92 +114,32 @@ public class Controller {
             @RequestParam(defaultValue = "10") @Min(1) @Max(50) Integer pageSize,
             @RequestParam(required = false) String bookmark) {
 
-        if (pageSize == null) pageSize = 20;
-
-        // With no filters, we just search wfRun's
-        if (status == null && requesterEmail == null) return listITRequests(pageSize, bookmark);
-
-        // With two filters, it's a bit tricky.
-        if (requesterEmail != null && status != null) {
-            // then search first by email, then iterate and filter by status
-            return searchByEmailAndStatus(status, requesterEmail, (int) pageSize, bookmark);
-        }
-
-        // In this case, we only have one filter.
-        SearchVariableRequest.Builder search =
-                SearchVariableRequest.newBuilder().setWfSpecName("it-request").setLimit(pageSize);
-        if (bookmark != null) search.setBookmark(decode(bookmark));
-
-        if (requesterEmail != null) {
-            search.setVarName("requester-email").setValue(LHLibUtil.objToVarVal(requesterEmail));
-        } else {
-            // then status
-            search.setVarName("status").setValue(LHLibUtil.objToVarVal(status.toString()));
-        }
-
-        VariableIdList matching = client.searchVariable(search.build());
-        List<ITRequest> results = matching.getResultsList().stream()
-                .map(varId -> getITRequest(varId.getWfRunId().getId()))
-                .toList();
-
-        if (matching.hasBookmark()) {
-            return new Paginated<>(results, encode(matching.getBookmark().toByteArray()));
-        }
-        return new Paginated<>(results, null);
-    }
-
-    private Paginated<ITRequest> searchByEmailAndStatus(
-            Status status, String requesterEmail, int pageSize, String bookmark) {
-        // first search by email
-        SearchVariableRequest.Builder search = SearchVariableRequest.newBuilder()
-                .setWfSpecName("it-request")
-                .setVarName("requester-email")
-                .setValue(LHLibUtil.objToVarVal(requesterEmail))
-                .setLimit(pageSize);
-        if (bookmark != null) {
-            search.setBookmark(decode(bookmark));
-        }
-
-        VariableIdList matchingTheEmail = client.searchVariable(search.build());
-
-        // Next, filter it by the status.
-        List<ITRequest> matching = matchingTheEmail.getResultsList().stream()
-                .filter(variableId -> {
-                    Variable statusVar = client.getVariable(VariableId.newBuilder()
-                            .setWfRunId(variableId.getWfRunId())
-                            .setThreadRunNumber(0)
-                            .setName("status")
-                            .build());
-                    return statusVar.getValue().getStr().equals(status.toString());
-                })
-                .map(variableId -> getITRequest(variableId.getWfRunId().getId()))
-                .toList();
-
-        // TODO: the bookmark and pagination works, but we will sometimes return less than pageSize, but still have a
-        // bookmark.
-        if (matchingTheEmail.hasBookmark()) {
-            return new Paginated<>(
-                    matching, encode(matchingTheEmail.getBookmark().toByteArray()));
-        }
-        return new Paginated<>(matching, null);
-    }
-
-    private Paginated<ITRequest> listITRequests(int pageSize, String bookmark) {
         SearchWfRunRequest.Builder search =
-                SearchWfRunRequest.newBuilder().setWfSpecName("it-request").setLimit(pageSize);
+                SearchWfRunRequest.newBuilder().setWfSpecName("it-request").setLimit(pageSize == null ? 20 : pageSize);
+
+        // Handle request pagination
         if (bookmark != null) {
             search.setBookmark(decode(bookmark));
         }
 
-        WfRunIdList wfRunIds = client.searchWfRun(search.build());
-        List<ITRequest> out = wfRunIds.getResultsList().stream()
+        // Configure search
+        if (status != null) {
+            search.addVariableFilters(
+                    VariableMatch.newBuilder().setVarName("status").setValue(LHLibUtil.objToVarVal(status.toString())));
+        }
+        if (requesterEmail != null) {
+            search.addVariableFilters(VariableMatch.newBuilder()
+                    .setVarName("requester-email")
+                    .setValue(LHLibUtil.objToVarVal(requesterEmail)));
+        }
+
+        WfRunIdList searchResult = client.searchWfRun(search.build());
+        List<ITRequest> matchingRequests = searchResult.getResultsList().stream()
                 .map(wfRunId -> getITRequest(wfRunId.getId()))
                 .toList();
-
-        if (wfRunIds.hasBookmark()) {
-            return new Paginated<>(out, encode(wfRunIds.getBookmark().toByteArray()));
-        }
-        return new Paginated<>(out, null);
+        String nextBookmark =
+                searchResult.hasBookmark() ? encode(searchResult.getBookmark().toByteArray()) : null;
+        return new Paginated<>(matchingRequests, nextBookmark);
     }
 
     private String encode(byte[] bookmark) {
