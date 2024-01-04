@@ -24,14 +24,14 @@ dependencies {
     implementation 'com.google.guava:guava:31.1-jre'
 
     // Add LittleHorse Client
-    implementation 'io.littlehorse:littlehorse-client:0.7.0-alpha.3'
+    implementation 'io.littlehorse:littlehorse-client:0.7.0'
 
     implementation 'org.json:json:20210307'
 }
 
 application {
     // Define the main class for the application.
-    mainClass = 'lh.quickstart.App'
+    mainClass = 'lh.it.demo.App'
 }
 
 // This is a nice-to-have which lets us use the Reflection API to determine the names
