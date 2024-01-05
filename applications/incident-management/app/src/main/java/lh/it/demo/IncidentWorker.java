@@ -1,4 +1,4 @@
-package lh.quickstart;
+package lh.it.demo;
 
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import org.json.JSONObject;

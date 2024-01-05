@@ -1,4 +1,4 @@
-package lh.quickstart;
+package lh.it.demo;
 
 import io.littlehorse.sdk.common.proto.Comparator;
 import io.littlehorse.sdk.common.proto.VariableType;
@@ -11,7 +11,7 @@ import io.littlehorse.sdk.common.proto.VariableMutationType;
 public class ConditionalsExample {
 
     // Define constants for workflow and task names
-    public static final String WF_NAME = "quickstart";
+    public static final String WF_NAME = "it-incident";
     public static final String VERIFY_TASK = "verify-incident";
     public static final String SEND_CRITICAL_ALERT_TASK = "send-critical-alert";
     public static final String PERIODIC_CHECK_TASK = "periodic-check-task";

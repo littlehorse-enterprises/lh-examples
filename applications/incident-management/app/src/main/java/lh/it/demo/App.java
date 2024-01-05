@@ -1,4 +1,4 @@
-package lh.quickstart;
+package lh.it.demo;
 
 import java.io.IOException;
 import io.grpc.ManagedChannel;
@@ -7,8 +7,8 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.Status.Code;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.worker.LHTaskWorker;
-import io.littlehorse.sdk.common.proto.LHPublicApiGrpc;
-import io.littlehorse.sdk.common.proto.LHPublicApiGrpc.LHPublicApiBlockingStub;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.PutExternalEventDefRequest;
 
 public class App {
@@ -20,22 +20,14 @@ public class App {
     private static final String EXTERNAL_EVENT_NAME = "incident-resolved";
 
     // Method to register an external event in the LittleHorse workflow system
-    private static void registerExternalEventDef(LHPublicApiBlockingStub client) {
+    private static void registerExternalEventDef(LittleHorseBlockingStub client) {
         System.out.println("Registering external event " + EXTERNAL_EVENT_NAME);
-        try {
+
             // Create a new external event definition
             client.putExternalEventDef(
                     PutExternalEventDefRequest.newBuilder().setName(EXTERNAL_EVENT_NAME).build()
             );
             System.out.println("External event registered successfully.");
-        } catch (StatusRuntimeException exn) {
-            // Check if the event already exists and handle accordingly
-            if (exn.getStatus().getCode() == Code.ALREADY_EXISTS) {
-                System.out.println("External event already exists!");
-            } else {
-                throw exn;
-            }
-        }
     }
 
     // Method to register workflow and task definitions
@@ -49,9 +41,9 @@ public class App {
         LHTaskWorker sendCriticalAlertTaskWorker = new LHTaskWorker(workerInstance, SEND_CRITICAL_ALERT_TASK, config);
 
         // Register each task definition
-        verifyTaskWorker.registerTaskDef(true);
-        periodicCheckTaskWorker.registerTaskDef(true);
-        sendCriticalAlertTaskWorker.registerTaskDef(true);
+        verifyTaskWorker.registerTaskDef();
+        periodicCheckTaskWorker.registerTaskDef();
+        sendCriticalAlertTaskWorker.registerTaskDef();
 
         // Register the workflow specification
         ConditionalsExample conditionalsExample = new ConditionalsExample();
@@ -90,7 +82,7 @@ public class App {
         String host = "localhost";
         int port = 2023;
         ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
-        LHPublicApiBlockingStub client = LHPublicApiGrpc.newBlockingStub(channel);
+        LittleHorseBlockingStub client = LittleHorseGrpc.newBlockingStub(channel);
 
         try {
             // Execute registration or start tasks based on the command line argument

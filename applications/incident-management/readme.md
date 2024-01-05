@@ -37,7 +37,7 @@ Part of the `lh.quickstart` package, this project automates handling and resolvi
 - **Start Workflow**: `./gradlew run --args start`
 
 ## API Usage
-- **Start Workflow Run**: `lhctl run quickstart severity [level] incidentDetails '[json]' resolved [true/false]`
+- **Start Workflow Run**: `lhctl run it-incident severity [level] incidentDetails '[json]' resolved [true/false]`
 - **Check Task Run**: `lhctl get taskRun [wfRunId] [taskGuid]`
 
 ## Future Enhancements
