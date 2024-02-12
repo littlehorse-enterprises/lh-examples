@@ -2,9 +2,9 @@ package lh.demo.it.request.wf;
 
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.Comparator;
-import io.littlehorse.sdk.common.proto.LHPublicApiGrpc.LHPublicApiBlockingStub;
 import io.littlehorse.sdk.common.proto.VariableMutationType;
 import io.littlehorse.sdk.common.proto.VariableType;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.usertask.UserTaskSchema;
 import io.littlehorse.sdk.wfsdk.LHFormatString;
 import io.littlehorse.sdk.wfsdk.UserTaskOutput;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class ITRequestWorkflow {
 
-    private LHPublicApiBlockingStub client;
+    private LittleHorseBlockingStub client;
 
     private static final Logger log = LoggerFactory.getLogger(App.class);
     private static final String WF_NAME = "it-request";

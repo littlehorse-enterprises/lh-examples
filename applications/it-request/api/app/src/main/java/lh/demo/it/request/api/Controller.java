@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.exception.LHSerdeError;
 import io.littlehorse.sdk.common.proto.CompleteUserTaskRunRequest;
-import io.littlehorse.sdk.common.proto.LHPublicApiGrpc;
 import io.littlehorse.sdk.common.proto.ListUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
@@ -15,6 +14,7 @@ import io.littlehorse.sdk.common.proto.VariableMatch;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import io.littlehorse.sdk.common.proto.WfRunIdList;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -36,9 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("it-requests")
 @CrossOrigin("http://localhost:3000")
 public class Controller {
-    private final LHPublicApiGrpc.LHPublicApiBlockingStub client;
+    private final LittleHorseBlockingStub client;
 
-    public Controller(LHPublicApiGrpc.LHPublicApiBlockingStub client) {
+    public Controller(LittleHorseBlockingStub client) {
         this.client = client;
     }
 

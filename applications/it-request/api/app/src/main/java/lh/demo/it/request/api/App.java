@@ -1,7 +1,8 @@
 package lh.demo.it.request.api;
 
 import io.littlehorse.sdk.common.config.LHConfig;
-import io.littlehorse.sdk.common.proto.LHPublicApiGrpc;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+
 import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,9 +16,8 @@ public class App {
     }
 
     @Bean
-    public LHPublicApiGrpc.LHPublicApiBlockingStub client() throws IOException {
+    public LittleHorseBlockingStub client() throws IOException {
         final LHConfig config = new LHConfig();
-        // TODO: Confirm that a single Stub can handle concurrent requests?
         return config.getBlockingStub();
     }
 }

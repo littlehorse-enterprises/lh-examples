@@ -19,9 +19,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-
     // LittleHorse Client
-    implementation 'io.littlehorse:littlehorse-client:0.7.0-alpha.4'
+    implementation 'io.littlehorse:littlehorse-client:0.7.2'
 
     // Logging
     runtimeOnly 'ch.qos.logback:logback-classic:1.3.5'
