@@ -1,4 +1,4 @@
-# Transactional Openbox
+# Transactional Outbox
 
 
 ## How to use
