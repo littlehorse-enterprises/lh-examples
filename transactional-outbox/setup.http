@@ -1,0 +1,35 @@
+
+### Create account with initial balance
+POST http://localhost:8081/transaction/credit
+Content-Type: application/json
+Accept: application/json
+
+{
+  "account": "GIFT130",
+  "amount": 130.00,
+  "idempotencyKey": "{{$guid}}"
+}
+
+### Get account balance
+GET http://localhost:8081/balance/GIFT130
+Accept: application/json
+
+### Create item with quantity
+POST http://localhost:8082/transaction/credit
+Content-Type: application/json
+Accept: application/json
+
+{
+  "account": "cookies",
+  "amount": 20,
+  "idempotencyKey": "{{$guid}}"
+}
+
+### Get cookies balance
+GET http://localhost:8082/balance/cookies
+Accept: application/json
+
+
+### Get all
+GET http://localhost:8082/balance
+Accept: application/json

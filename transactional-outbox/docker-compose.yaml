@@ -1,0 +1,103 @@
+version: "3.8"
+services:
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:master
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://littlehorse:1822/liveness"]
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - 2023:2023
+      - 8080:8080
+    environment:
+      - LHS_ADVERTISED_LISTENERS=external://littlehorse:2023
+  
+  warehouse-db:
+    image: postgres:16
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=ledger
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notifications:
+    image: littlehorse/notifications
+    build: ./notifications
+    environment:
+      - PORT=3001
+    ports:
+      - 3001:3001
+
+  warehouse:
+    image: littlehorse/ledger
+    build: ./ledger
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+      warehouse-db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOSTNAME=warehouse-db
+      - WORKER=warehouse
+      - NOTIFICATIONS_SERVICE=http://notifications:3001
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+    ports:
+      - 8082:8081
+  
+  payments-db:
+    image: postgres:16
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=ledger
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  payments:
+    image: littlehorse/ledger
+    build: ./ledger
+    depends_on:
+      littlehorse:
+          condition: service_healthy
+      payments-db:
+        condition: service_healthy
+      warehouse:
+        condition: service_started
+    environment:
+      - POSTGRES_HOSTNAME=payments-db
+      - REGISTER_WORKFLOW=true
+      - WORKER=payments
+      - NOTIFICATIONS_SERVICE=http://notifications:3001
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+    ports:
+      - 8081:8081
+  
+  commerce:
+    image: littlehorse/commerce
+    build: ./commerce
+    environment:
+      - PORT=3000
+      - PAYMENTS_API=http://payments:8081
+      - WAREHOUSE_API=http://warehouse:8081
+    ports:
+      - 3000:3000
+
+
