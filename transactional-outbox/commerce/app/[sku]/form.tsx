@@ -6,16 +6,13 @@ import submit from "./submit";
 
 type FormProps = {
   stock: number;
+  price: number;
 };
-export const Form: FC<FormProps> = ({ stock }) => {
+export const Form: FC<FormProps> = ({ stock, price }) => {
   const { sku } = useParams<{ sku: string }>();
   const { account, setAccount } = useAccountContext();
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const price = useMemo(
-    () => parseFloat((Math.random() * (8 - 1) + 1).toFixed(2)),
-    [],
-  );
 
   const onSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {

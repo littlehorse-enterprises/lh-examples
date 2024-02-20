@@ -1,11 +1,11 @@
 "use server";
 export type Account = {
-  account: String;
+  account: string;
   balance: number;
 };
 
 
-export async function getSkus(): Promise<String[]> {
+export async function getSkus(): Promise<string[]> {
   const warehouseApi = process.env.WAREHOUSE_API || "http://localhost:8082";
   const res = await fetch(`${warehouseApi}/balance`);
 

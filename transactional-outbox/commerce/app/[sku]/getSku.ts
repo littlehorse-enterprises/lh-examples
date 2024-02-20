@@ -1,11 +1,13 @@
 import { Account } from "../getSkus";
+import seedrandom from 'seedrandom'
 
 type Product = {
-  sku: String;
+  sku: string;
   stock: number;
+  price: number
 };
 
-export async function getSku(sku: String): Promise<Product> {
+export async function getSku(sku: string): Promise<Product> {
   const warehouseApi = process.env.WAREHOUSE_API || "http://localhost:8082";
   const res = await fetch(`${warehouseApi}/balance/${sku}`);
 
@@ -17,6 +19,15 @@ export async function getSku(sku: String): Promise<Product> {
 
   return {
     sku: account,
-    stock: balance
+    stock: balance,
+    price: getRandomPrice(account)
   };
+}
+
+const getRandomPrice = (seed: string): number => {
+  const random = seedrandom(seed).double()
+  const min = 1;
+  const max = 10;
+  const diff = max - min;
+  return parseFloat(((random * diff) + min).toFixed(2));
 }

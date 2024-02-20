@@ -18,11 +18,11 @@ export const generateMetadata = ({ params }: {params: {sku: string}}): Metadata 
 };
 
 export default async function Item({ params: { sku } }: ItemParams) {
-  const { stock } = await getSku(sku);
+  const { stock, price } = await getSku(sku);
 
   return (
     <Container>
-      <Form stock={stock} />
+      <Form stock={stock} price={price}/>
       <Notifications/>
     </Container>
   );
