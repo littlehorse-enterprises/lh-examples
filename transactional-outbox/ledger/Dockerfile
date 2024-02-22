@@ -1,8 +1,8 @@
-FROM gradle:jdk17-alpine as builder
+FROM amazoncorretto:17 as builder
 
 COPY ./ /app
 WORKDIR /app
-RUN gradle build
+RUN ./gradlew build
 
 
 FROM amazoncorretto:17
