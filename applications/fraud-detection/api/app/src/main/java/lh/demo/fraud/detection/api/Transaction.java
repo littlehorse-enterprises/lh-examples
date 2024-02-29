@@ -2,11 +2,8 @@ package lh.demo.fraud.detection.api;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
@@ -14,8 +11,7 @@ public class Transaction {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     @Column(name = "source_account")
     private String sourceAccount;
@@ -31,18 +27,19 @@ public class Transaction {
 
     public Transaction() {}
 
-    public Transaction(String sourceAccount, String destinationAccount, Integer amount, String status) {
+    public Transaction(String id, String sourceAccount, String destinationAccount, Integer amount, String status) {
+        this.id = id;
         this.sourceAccount = sourceAccount;
         this.destinationAccount = destinationAccount;
         this.amount = amount;
         this.status = status;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

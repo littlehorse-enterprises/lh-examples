@@ -26,11 +26,12 @@ public class TransactionController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     public void createTransaction(@RequestBody @Valid CreateTransactionRequest transaction) {
-        String wfRunId = UUID.randomUUID().toString().replace("-", "");
+        String transactionId = UUID.randomUUID().toString().replace("-", "");
 
         RunWfRequest runWf = RunWfRequest.newBuilder()
-                .setId(wfRunId)
+                .setId(transactionId)
                 .setWfSpecName(FraudDetectionWorkflow.WORKFLOW_NAME)
+                .putVariables("transaction-id", LHLibUtil.objToVarVal(transactionId))
                 .putVariables("source-account", LHLibUtil.objToVarVal(transaction.sourceAccount()))
                 .putVariables("destination-account", LHLibUtil.objToVarVal(transaction.destinationAccount()))
                 .putVariables("amount", LHLibUtil.objToVarVal(transaction.amount()))

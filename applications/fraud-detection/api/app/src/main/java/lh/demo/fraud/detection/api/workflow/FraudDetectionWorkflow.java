@@ -38,20 +38,22 @@ public class FraudDetectionWorkflow {
 
     private WfRunVariable transactionId;
     private WfRunVariable fraudTicketApproved;
+    private WfRunVariable sourceAccount;
+    private WfRunVariable destinationAccount;
+    private WfRunVariable amount;
+    private WfRunVariable possibleFraudDetected;
 
     public void wfFunc(WorkflowThread wf) {
-        WfRunVariable sourceAccount =
-                wf.addVariable("source-account", VariableType.STR).required();
-        WfRunVariable destinationAccount =
+        sourceAccount = wf.addVariable("source-account", VariableType.STR).required();
+        destinationAccount =
                 wf.addVariable("destination-account", VariableType.STR).required();
-        WfRunVariable amount = wf.addVariable("amount", VariableType.INT).required();
-        transactionId = wf.addVariable("transaction-id", VariableType.STR);
-        WfRunVariable possibleFraudDetected =
+        amount = wf.addVariable("amount", VariableType.INT).required();
+        transactionId = wf.addVariable("transaction-id", VariableType.STR).required();
+        possibleFraudDetected =
                 wf.addVariable("possible-fraud-detected", VariableType.BOOL).searchable();
         fraudTicketApproved = wf.addVariable("fraud-ticket-approved", VariableType.BOOL);
 
-        NodeOutput saveTransactionOutput = wf.execute(SAVE_TRANSACTION, sourceAccount, destinationAccount, amount);
-        wf.mutate(transactionId, VariableMutationType.ASSIGN, saveTransactionOutput);
+        wf.execute(SAVE_TRANSACTION, transactionId, sourceAccount, destinationAccount, amount);
 
         NodeOutput detectFraudOutput = wf.execute(DETECT_FRAUD, transactionId);
         wf.mutate(possibleFraudDetected, VariableMutationType.ASSIGN, detectFraudOutput);

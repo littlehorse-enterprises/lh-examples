@@ -1,7 +1,6 @@
 package lh.demo.fraud.detection.api.task;
 
 import io.littlehorse.sdk.worker.LHTaskMethod;
-import java.util.UUID;
 import lh.demo.fraud.detection.api.Transaction;
 import lh.demo.fraud.detection.api.TransactionRepository;
 
@@ -19,30 +18,27 @@ public class TransactionTasks {
     }
 
     @LHTaskMethod(SAVE_TRANSACTION)
-    public String saveTransaction(String sourceAccount, String destinationAccount, Integer amount) {
-        Transaction transaction = new Transaction(sourceAccount, destinationAccount, amount, "PENDING");
-        return repository.save(transaction).getId().toString();
+    public void saveTransaction(String transactionId, String sourceAccount, String destinationAccount, Integer amount) {
+        Transaction transaction = new Transaction(transactionId, sourceAccount, destinationAccount, amount, "PENDING");
+        repository.save(transaction);
     }
 
     @LHTaskMethod(APPROVE_TRANSACTION)
     public void approveTransaction(String transactionId) {
-        Transaction transaction =
-                repository.findById(UUID.fromString(transactionId)).get();
+        Transaction transaction = repository.findById(transactionId).get();
         transaction.setStatus("APPROVED");
         repository.save(transaction);
     }
 
     @LHTaskMethod(DETECT_FRAUD)
     public boolean detectFraud(String transactionId) {
-        Transaction transaction =
-                repository.findById(UUID.fromString(transactionId)).get();
+        Transaction transaction = repository.findById(transactionId).get();
         return transaction.getAmount().equals(1000);
     }
 
     @LHTaskMethod(REJECT_TRANSACTION)
     public void rejectTransaction(String transactionId) {
-        Transaction transaction =
-                repository.findById(UUID.fromString(transactionId)).get();
+        Transaction transaction = repository.findById(transactionId).get();
         transaction.setStatus("REJECTED");
         repository.save(transaction);
     }
