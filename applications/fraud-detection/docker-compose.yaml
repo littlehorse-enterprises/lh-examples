@@ -11,7 +11,7 @@ services:
       - 2023:2023
       - 8080:8080
     environment:
-      - LHS_ADVERTISED_LISTENERS=external://localhost:2023
+      - LHS_ADVERTISED_LISTENERS=external://littlehorse:2023
   
   database:
     image: postgres:16
@@ -27,3 +27,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  api:
+    image: littlehorse/api
+    build: ./api
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOSTNAME=database
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+    ports:
+      - 8081:8081
