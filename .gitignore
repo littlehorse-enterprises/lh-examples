@@ -4,6 +4,7 @@ examples/*/build/
 examples/*/bin/
 */build/
 */bin/
+.DS_Store
 
 # Emacs-related stuff
 *\#
