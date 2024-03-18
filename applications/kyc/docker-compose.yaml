@@ -1,0 +1,109 @@
+version: "3.8"
+services:
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:0.7.2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://littlehorse:1822/liveness"]
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - 2023:2023
+      - 8080:8080
+    environment:
+      - LHS_ADVERTISED_LISTENERS=external://littlehorse:2023,internal://localhost:2023
+
+  notifications:
+    image: littlehorse/kyc-notifications
+    build: ./notifications
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://notifications:8080/actuator/health"]
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    environment:
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+      - FRONTEND_URL=http://localhost:3000
+      - SENDGRID_ENABLED=false
+      - SENDGRID_API_KEY=
+      - SENDGRID_SENDER=notifications@localhost
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+
+  customer-db:
+    image: postgres:16
+    volumes:
+      - ./customer/sql:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=customer
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  customer:
+    image: littlehorse/kyc-customer
+    build: ./customer
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://customer:8080/actuator/health"]
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    environment:
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+      - POSTGRES_HOSTNAME=customer-db
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+      customer-db:
+        condition: service_healthy
+
+  verifications:
+    image: littlehorse/kyc-verifications
+    build: ./verifications
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://verifications:8080/actuator/health"]
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    environment:
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+
+  frontend:
+    image: littlehorse/kyc-frontend
+    build: ./frontend
+    environment:
+      - PORT=3000
+      - LHC_API_HOST=littlehorse
+    ports:
+      - 3000:3000
+    depends_on:
+      verifications:
+        condition: service_healthy
+
+  workflow:
+    image: littlehorse/kyc-workflow
+    build: ./workflow
+    environment:
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+    depends_on:
+      notifications:
+        condition: service_healthy
+      customer:
+        condition: service_healthy
+      verifications:
+        condition: service_healthy

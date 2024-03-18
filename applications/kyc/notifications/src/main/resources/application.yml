@@ -1,0 +1,10 @@
+frontend-url: ${FRONTEND_URL:http://localhost:3000}
+manager: ${MANAGER_EMAIL:manager@localhost}
+
+sendgrid:
+  enabled: ${SENDGRID_ENABLED:false}
+  api-key: ${SENDGRID_API_KEY}
+  sender: ${SENDGRID_SENDER:notifications@localhost}
+
+server:
+  port: ${PORT:8080}
