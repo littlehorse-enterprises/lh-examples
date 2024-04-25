@@ -11,14 +11,11 @@ public class CartMonitorWorkflow {
     public static final String NOTIFY_CART_TASK = "notify-cart";
 
     public void defineWorkflow(WorkflowThread wf) {
-        // Variable to track the number of items in the cart
-        var cartItemsCount = wf.addVariable("cartItemsCount", 0);
-
         // Variable to track if the cart has been checked out
         var isCheckedOut = wf.addVariable("isCheckedOut", false);
 
         // Input variable to represent product being added to cart
-        var productId = wf.addVariable("product-id", VariableType.STR).searchable();
+        var products = wf.addVariable("products", VariableType.JSON_ARR).searchable();
 
         wf.doWhile(
                 wf.condition(isCheckedOut, Comparator.EQUALS, false),
@@ -32,6 +29,13 @@ public class CartMonitorWorkflow {
                     );
                 }
         );
+
+        // Register an interrupt handler to modify the cart items
+        wf.registerInterruptHandler("add-to-cart", handler -> {
+             WfRunVariable product = handler.addVariable(WorkflowThread.HANDLER_INPUT_VAR, VariableType.JSON_OBJ);
+            // Add the product to the cart
+            handler.mutate(products, VariableMutationType.EXTEND, product);
+        });
 
         // Register an interrupt handler for when the checkout is completed
         wf.registerInterruptHandler("checkout-completed", handler -> {

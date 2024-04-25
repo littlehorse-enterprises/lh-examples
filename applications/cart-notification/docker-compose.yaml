@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+  
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:0.8.1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://littlehorse:1822/liveness"]
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - 2023:2023
+      - 8080:8080
+    environment:
+      - LHS_ADVERTISED_LISTENERS=external://littlehorse:2023,internal://localhost:2023
+
+  notifications:
+    image: littlehorse/notifications
+    build: ./notifications
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+    environment:
+      - PORT=3001
+    ports:
+      - 3001:3001
+
+  workflow:
+    image: cart-notification
+    build: ./workflow
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+      notifications:
+        condition: service_started
+    environment:
+      - NOTIFICATIONS_SERVICE=http://notifications:3001
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHW_SERVER_CONNECT_LISTENER=external
+    ports:
+      - 8082:8082
+
+  frontend:
+    image: littlehorse/cart-frontend
+    build: ./frontend
+    environment:
+      - PORT=3000
+      - LHC_API_HOST=littlehorse
+      - CART_DB=postgres://postgres:123456@cart-db:5432/cart
+    ports:
+      - 3000:3000
+    depends_on:
+      littlehorse:
+        condition: service_healthy
+      notifications:
+        condition: service_started
