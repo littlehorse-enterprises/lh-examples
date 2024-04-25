@@ -40,7 +40,7 @@ public class CartWorkflow {
       wf.doWhile(
           wf.condition(isCheckedOut, Comparator.EQUALS, false),
           loopBody -> {
-            loopBody.sleepSeconds(60); // Wait for 1 minute
+            loopBody.sleepSeconds(10); // Wait for 10 seconds
             loopBody.execute(NOTIFY_CART_TASK, account);
           });
 

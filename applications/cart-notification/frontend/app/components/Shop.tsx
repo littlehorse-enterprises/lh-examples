@@ -7,6 +7,7 @@ import Tshirt from "../../public/T-shirt.jpeg";
 import { logout } from "../actions/logout";
 import { updateProducts } from "../actions/updateProducts";
 import { useCart } from "../hooks/useCart";
+import { checkout } from "../actions/checkout";
 const products = [
   { name: "T-shirt", price: 20, image: Tshirt },
   { name: "Mug", price: 5, image: Mug },
@@ -22,6 +23,8 @@ export type Product = {
 export const Shop: FC<{}> = () => {
   const { email, cartId } = useCart();
   const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [showBill, setShowBill] = useState(false);
+  
 
   const addToCart = useCallback(
     (product: Omit<Product, "quantity">) => {
@@ -43,7 +46,17 @@ export const Shop: FC<{}> = () => {
     if (cartId && cartItems.length > 0) {
       updateProducts(cartId, cartItems);
     }
-  });
+  }, [cartItems, cartId]);
+
+  if (!cartId) {
+    logout()
+    return <></>
+  };
+
+  const goToCheckout = () => {
+    setShowBill(true);
+    checkout(cartId);
+  }
 
   return (
     <div className="mt-8">
@@ -59,6 +72,7 @@ export const Shop: FC<{}> = () => {
           (logout)
         </a>
       </p>
+      {!showBill && (
       <div className="flow-root mt-4 bg-white rounded p-4">
         <ul role="list" className="-my-6 divide-y divide-gray-200">
           {products.map(({ name, price, image }) => (
@@ -96,6 +110,7 @@ export const Shop: FC<{}> = () => {
           ))}
         </ul>
       </div>
+      )}
 
       {cartItems.length > 0 && (
         <div className="mt-4">
@@ -114,12 +129,25 @@ export const Shop: FC<{}> = () => {
               </ul>
             </div>
           </div>
-          <button
-            onClick={() => {}}
+          {!showBill && <button
+            onClick={() => {goToCheckout()}}
             className="text-white bg-green-500 w-full hover:bg-blue-600 px-4 py-2 rounded-md"
           >
             Checkout
-          </button>
+          </button>}
+          {showBill && (
+            <div className="mt-4">
+              <h2 className="text-center text-xl">Total</h2>
+              <div className="mb-2">
+                <ul>
+                  <li className="flex justify-between">
+                    <div>Total</div>
+                    <div className="">${cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)}</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
