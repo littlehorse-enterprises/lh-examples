@@ -40,7 +40,7 @@ export const Shop: FC<{}> = () => {
   );
 
   useEffect(() => {
-    if (cartId) {
+    if (cartId && cartItems.length > 0) {
       updateProducts(cartId, cartItems);
     }
   });
