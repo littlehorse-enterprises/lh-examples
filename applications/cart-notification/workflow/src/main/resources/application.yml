@@ -1,0 +1,4 @@
+server:
+  port: ${PORT:8081}
+
+notifications-service: ${NOTIFICATIONS_SERVICE:http://localhost:3001}
