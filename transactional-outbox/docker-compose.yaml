@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   littlehorse:
-    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:0.7.2
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:0.10.1
     healthcheck:
       test: ["CMD", "curl", "-f", "http://littlehorse:1822/liveness"]
       timeout: 10s

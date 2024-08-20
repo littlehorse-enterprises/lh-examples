@@ -22,7 +22,7 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'io.littlehorse:littlehorse-client:0.7.2'
+	implementation 'io.littlehorse:littlehorse-client:0.10.+'
 	implementation 'io.socket:socket.io-client:2.1.0'
 }
 
