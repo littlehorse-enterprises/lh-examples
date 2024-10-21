@@ -15,7 +15,7 @@ public class PaymentsTask extends Task {
   }
 
   @LHTaskMethod("process-payment")
-  public String shipItem(String account, Double amount, WorkerContext context) throws Exception {
+  public String processPayment(String account, Double amount, WorkerContext context) throws Exception {
     String idempotencyKey = context.getIdempotencyKey();
     try {
       return this.debit(account, amount, idempotencyKey);
@@ -29,7 +29,7 @@ public class PaymentsTask extends Task {
   }
 
   @LHTaskMethod("issue-refund")
-  public String shipItem(String transactionId) throws Exception {
+  public String issueRefund(String transactionId) throws Exception {
     return this.revert(transactionId);
   }
 }
