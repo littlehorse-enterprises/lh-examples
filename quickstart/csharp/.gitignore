@@ -1,0 +1,18 @@
+### C# / .NET ###
+bin/
+obj/
+*.user
+_ReSharper*/
+*.ReSharper
+*.suo
+*.cache
+*.pdb
+*.dll
+*.exe
+*.log
+*.vs/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.ionide/ 
