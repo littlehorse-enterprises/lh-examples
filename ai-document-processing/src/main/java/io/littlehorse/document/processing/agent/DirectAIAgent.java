@@ -1,10 +1,9 @@
 package io.littlehorse.document.processing.agent;
 
-import java.util.Random;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Random;
 
 /**
  * This class demonstrates an AI agent that directly calls tools and APIs
@@ -61,9 +60,9 @@ public class DirectAIAgent {
     }
 
     private JsonNode extractDocumentInfo(String documentId, String documentType) throws Exception {
-        // Simulate API failure ~33% of the time
-        if (random.nextInt(3) == 0) {
-            throw new Exception("API failure: Document extraction service unavailable");
+        // Simulate API failure 40% of the time
+        if (random.nextInt(4) == 0) {
+            throw new Exception("API failure: LLM service unavailable");
         }
 
         // Simulate successful extraction
@@ -98,8 +97,7 @@ public class DirectAIAgent {
         if (documentType.equals("INVOICE")) {
             isValid = extractedInfo.has("amount") && extractedInfo.has("dueDate");
         } else if (documentType.equals("CONTRACT")) {
-            isValid = extractedInfo.has("partyA") && extractedInfo.has("partyB") &&
-                    extractedInfo.has("effectiveDate");
+            isValid = extractedInfo.has("partyA") && extractedInfo.has("partyB") && extractedInfo.has("effectiveDate");
         }
 
         System.out.println("Document validation result: " + (isValid ? "VALID" : "INVALID"));
@@ -141,7 +139,7 @@ public class DirectAIAgent {
             }
         } else {
             // Default department for unknown document types
-            department = "LEGAL";
+            department = "HR";
         }
 
         // Simulate thinking time of an LLM
@@ -166,8 +164,8 @@ public class DirectAIAgent {
             throw new Exception("API failure: Notification service unavailable");
         }
 
-        System.out.println("Successfully notified submitter " + submitterId + " about document " +
-                documentId + " with status: " + status);
+        System.out.println("Successfully notified submitter " + submitterId + " about document " + documentId
+                + " with status: " + status);
     }
 
     public static void main(String[] args) {

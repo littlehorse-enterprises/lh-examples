@@ -1,10 +1,16 @@
 package io.littlehorse.document.processing;
 
-import java.util.UUID;
+import static io.littlehorse.document.processing.LHConstants.TASK_DETERMINE_APPROVAL_ROUTE;
+import static io.littlehorse.document.processing.LHConstants.TASK_EXTRACT_DOCUMENT_INFO;
+import static io.littlehorse.document.processing.LHConstants.TASK_NOTIFY_SUBMITTER;
+import static io.littlehorse.document.processing.LHConstants.TASK_ROUTE_TO_DEPARTMENT;
+import static io.littlehorse.document.processing.LHConstants.TASK_VALIDATE_DOCUMENT;
 
 import io.littlehorse.document.processing.agent.DirectAIAgent;
+import io.littlehorse.document.processing.tasks.DetermineApprovalRouteTask;
 import io.littlehorse.document.processing.tasks.ExtractDocumentInfoTask;
 import io.littlehorse.document.processing.tasks.NotifySubmitterTask;
+import io.littlehorse.document.processing.tasks.RouteToDeprtmentTask;
 import io.littlehorse.document.processing.tasks.ValidateDocumentTask;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.config.LHConfig;
@@ -15,153 +21,141 @@ import io.littlehorse.sdk.common.proto.WfRun;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 
 public class Main {
+    private static LHConfig config = new LHConfig();
+    private static LittleHorseBlockingStub client = config.getBlockingStub();
+
+    private static LHTaskWorker extractWorker =
+            new LHTaskWorker(new ExtractDocumentInfoTask(), TASK_EXTRACT_DOCUMENT_INFO, config);
+
+    private static LHTaskWorker validateWorker =
+            new LHTaskWorker(new ValidateDocumentTask(), TASK_VALIDATE_DOCUMENT, config);
+
+    private static LHTaskWorker routeWorker =
+            new LHTaskWorker(new DetermineApprovalRouteTask(), TASK_DETERMINE_APPROVAL_ROUTE, config);
+
+    private static LHTaskWorker departmentWorker =
+            new LHTaskWorker(new RouteToDeprtmentTask(), TASK_ROUTE_TO_DEPARTMENT, config);
+
+    private static LHTaskWorker notifyWorker =
+            new LHTaskWorker(new NotifySubmitterTask(), TASK_NOTIFY_SUBMITTER, config);
+
     public static void main(String[] args) throws Exception {
-        registerMetadata();
+        String mode = args.length > 0 ? args[0].toLowerCase() : "all";
 
-        // Demo 1: Direct AI Agent (Without LittleHorse)
-        System.out.println("\n\n=========================================");
-        System.out.println("DEMO 1: DIRECT AI AGENT (WITHOUT LITTLEHORSE)");
-        System.out.println("=========================================");
-        demoDirectAgent();
+        switch (mode) {
+            case "direct":
+                // Demo 1: Direct AI Agent (Without LittleHorse)
+                System.out.println("\n\n=========================================");
+                System.out.println("DEMO 1: DIRECT AI AGENT (WITHOUT LITTLEHORSE)");
+                System.out.println("=========================================");
+                demoAgentWithoutLittleHorse();
+                break;
 
-        // Demo 2: Simulated LittleHorse Orchestrated Workflow
-        System.out.println("\n\n=========================================");
-        System.out.println("DEMO 2: AI AGENT (WITH LITTLEHORSE)");
-        System.out.println("=========================================");
-        demoLittleHorseWorkflow();
+            case "lh":
+                // Demo 2: LittleHorse Orchestrated Workflow
+                System.out.println("\n\n=========================================");
+                System.out.println("DEMO 2: AI AGENT (WITH LITTLEHORSE)");
+                System.out.println("=========================================");
+                registerMetadata();
+                demoAgentWithLittleHorse();
+                startTaskWorkers();
+                break;
 
-        // Start workers to execute tasks
-        startTaskWorkers();
+            default:
+                // Run both demos
+                // Demo 1: Direct AI Agent (Without LittleHorse)
+                System.out.println("\n\n=========================================");
+                System.out.println("DEMO 1: DIRECT AI AGENT (WITHOUT LITTLEHORSE)");
+                System.out.println("=========================================");
+                demoAgentWithoutLittleHorse();
 
+                // Demo 2: LittleHorse Orchestrated Workflow
+                System.out.println("\n\n=========================================");
+                System.out.println("DEMO 2: AI AGENT (WITH LITTLEHORSE)");
+                System.out.println("=========================================");
+                registerMetadata();
+                demoAgentWithLittleHorse();
+                startTaskWorkers();
+                break;
+        }
     }
 
-    private static void registerMetadata() {
-        System.out.println("Registering metadata with LittleHorse...");
-        LHConfig config = new LHConfig();
+    private static void registerMetadata() throws Exception {
+        System.out.println("Registering workflow and task definitions...");
 
-        // First, register the ExternalEventDef
-        System.out.println("Registering External Event Definition...");
-        config.getBlockingStub()
-                .putExternalEventDef(PutExternalEventDefRequest.newBuilder()
-                        .setName("document-processing-result")
-                        .build());
+        // Register TaskDefs
+        extractWorker.registerTaskDef();
+        validateWorker.registerTaskDef();
+        routeWorker.registerTaskDef();
+        departmentWorker.registerTaskDef();
+        notifyWorker.registerTaskDef();
 
-        // Next, register all TaskDefs
-        System.out.println("Registering Task Definitions...");
+        // Register External Event Def for document approval
+        client.putExternalEventDef(PutExternalEventDefRequest.newBuilder()
+                .setName(LHConstants.EVENT_DOCUMENT_APPROVAL)
+                .build());
 
-        // Create individual task implementation instances
-        ExtractDocumentInfoTask extractTask = new ExtractDocumentInfoTask();
-        ValidateDocumentTask validateTask = new ValidateDocumentTask();
-        NotifySubmitterTask notifyTask = new NotifySubmitterTask();
-
-        // Register each task definition with its own worker
-        LHTaskWorker extractDataWorker = new LHTaskWorker(extractTask, "extract-document-data", config);
-        extractDataWorker.registerTaskDef();
-
-        LHTaskWorker validateDataWorker = new LHTaskWorker(validateTask, "validate-document-data", config);
-        validateDataWorker.registerTaskDef();
-
-        // Add the missing task
-        LHTaskWorker validateDocWorker = new LHTaskWorker(validateTask, "validate-document", config);
-        validateDocWorker.registerTaskDef();
-
-        LHTaskWorker notifySuccessWorker = new LHTaskWorker(notifyTask, "notify-processing-success", config);
-        notifySuccessWorker.registerTaskDef();
-
-        LHTaskWorker notifyFailureWorker = new LHTaskWorker(notifyTask, "notify-processing-failure", config);
-        notifyFailureWorker.registerTaskDef();
-
-        // Close workers (since we're just registering definitions)
-        extractDataWorker.close();
-        validateDataWorker.close();
-        validateDocWorker.close();
-        notifySuccessWorker.close();
-        notifyFailureWorker.close();
-
-        // Finally, register the WfSpec
-        System.out.println("Registering Workflow Specification...");
+        // Register workflow
         DocumentProcessingWorkflow workflow = new DocumentProcessingWorkflow();
-        workflow.getWorkflow().registerWfSpec(config.getBlockingStub());
+        workflow.getWorkflow().registerWfSpec(client);
 
-        System.out.println("Successfully registered all metadata!");
+        System.out.println("Metadata registration complete!");
     }
 
-    private static void startTaskWorkers() {
-        System.out.println("Starting document processing task workers...");
-        LHConfig config = new LHConfig();
-
-        // Create individual task implementation instances
-        ExtractDocumentInfoTask extractTask = new ExtractDocumentInfoTask();
-        ValidateDocumentTask validateTask = new ValidateDocumentTask();
-        NotifySubmitterTask notifyTask = new NotifySubmitterTask();
-
-        // Create workers for each task
-        LHTaskWorker extractDataWorker = new LHTaskWorker(extractTask, "extract-document-data", config);
-        LHTaskWorker validateDataWorker = new LHTaskWorker(validateTask, "validate-document-data", config);
-        LHTaskWorker validateDocWorker = new LHTaskWorker(validateTask, "validate-document", config);
-        LHTaskWorker notifySuccessWorker = new LHTaskWorker(notifyTask, "notify-processing-success", config);
-        LHTaskWorker notifyFailureWorker = new LHTaskWorker(notifyTask, "notify-processing-failure", config);
-
-        // Register shutdown hooks
-        Runtime.getRuntime().addShutdownHook(new Thread(extractDataWorker::close));
-        Runtime.getRuntime().addShutdownHook(new Thread(validateDataWorker::close));
-        Runtime.getRuntime().addShutdownHook(new Thread(validateDocWorker::close));
-        Runtime.getRuntime().addShutdownHook(new Thread(notifySuccessWorker::close));
-        Runtime.getRuntime().addShutdownHook(new Thread(notifyFailureWorker::close));
-
-        // Start workers
-        extractDataWorker.start();
-        validateDataWorker.start();
-        validateDocWorker.start();
-        notifySuccessWorker.start();
-        notifyFailureWorker.start();
-
-        System.out.println("Task workers started. Press CTRL+C to stop.");
-    }
-
-    private static void demoDirectAgent() {
+    private static void demoAgentWithoutLittleHorse() {
         DirectAIAgent agent = new DirectAIAgent();
 
-        // Process a few documents to demonstrate failures
-        for (int i = 0; i < 5; i++) {
+        // Process 3 documents to demonstrate failures
+        for (int i = 0; i < 3; i++) {
             String documentId = "DOC-" + (1000 + i);
             String documentType = i % 2 == 0 ? "INVOICE" : "CONTRACT";
             String submitterId = "USER-" + (100 + i);
 
-            System.out.println("\n--- PROCESSING DOCUMENT " + (i + 1) + " ---");
+            System.out.println("\n--- Processing Document " + (i + 1) + " ---");
             try {
                 agent.processDocument(documentId, documentType, submitterId);
             } catch (Exception e) {
-                System.err.println("Document processing pipeline failed completely");
+                System.err.println("Document processing pipeline failed completely: " + e.getMessage());
             }
         }
     }
 
-    private static void demoLittleHorseWorkflow() throws Exception {
-        // Create a LittleHorse client
-        LHConfig config = new LHConfig();
-        LittleHorseBlockingStub client = config.getBlockingStub();
-
-        // Run the workflow a few times to showcase retry and resilience
-        for (int i = 0; i < 5; i++) {
-            String documentId = "LH-DOC-" + (1000 + i);
+    private static void demoAgentWithLittleHorse() throws Exception {
+        // Process 3 documents with LittleHorse workflow
+        for (int i = 0; i < 3; i++) {
+            String documentId = "DOC-LH-" + (1000 + i);
             String documentType = i % 2 == 0 ? "INVOICE" : "CONTRACT";
-            String submitterId = "LH-USER-" + (100 + i);
-            String runId = UUID.randomUUID().toString();
+            String submitterId = "USER-" + (100 + i);
 
-            System.out.println("\n--- STARTING LITTLEHORSE WORKFLOW FOR DOCUMENT " + (i + 1) + " ---");
+            System.out.println("\n--- Processing Document " + (i + 1) + " with LittleHorse");
 
-            // Run the actual workflow using the proper API
-            WfRun result = client.runWf(RunWfRequest.newBuilder()
-                    .setWfSpecName("document-processing")
-                    .setId(runId)
-                    .putVariables("documentId", LHLibUtil.objToVarVal(documentId))
-                    .putVariables("documentType", LHLibUtil.objToVarVal(documentType))
-                    .putVariables("submitterId", LHLibUtil.objToVarVal(submitterId))
-                    .build());
+            RunWfRequest.Builder reqBuilder = RunWfRequest.newBuilder().setWfSpecName(LHConstants.WORKFLOW_NAME);
 
-            System.out.println("Started workflow run: " + result.getId());
-            System.out.println("Check the LittleHorse Dashboard to see the workflow progress and retries");
+            // Add required variables
+            reqBuilder.putVariables("document-id", LHLibUtil.objToVarVal(documentId));
+            reqBuilder.putVariables("document-type", LHLibUtil.objToVarVal(documentType));
+            reqBuilder.putVariables("submitter-id", LHLibUtil.objToVarVal(submitterId));
+
+            // Run the workflow
+            WfRun wfRun = client.runWf(reqBuilder.build());
+            System.out.println("Started workflow with ID: " + wfRun.getId().getId());
         }
+    }
+
+    private static void startTaskWorkers() throws Exception {
+        System.out.println("\n\nStarting task workers...");
+
+        // Close the worker upon shutdown
+        Runtime.getRuntime().addShutdownHook(new Thread(extractWorker::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(validateWorker::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(routeWorker::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(departmentWorker::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(notifyWorker::close));
+
+        extractWorker.start();
+        validateWorker.start();
+        routeWorker.start();
+        departmentWorker.start();
+        notifyWorker.start();
     }
 }

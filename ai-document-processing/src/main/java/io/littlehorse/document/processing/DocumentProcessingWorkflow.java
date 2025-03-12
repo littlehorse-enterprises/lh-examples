@@ -1,5 +1,17 @@
 package io.littlehorse.document.processing;
 
+import static io.littlehorse.document.processing.LHConstants.ERROR_EXTRACTION_FAILED;
+import static io.littlehorse.document.processing.LHConstants.ERROR_VALIDATION_FAILED;
+import static io.littlehorse.document.processing.LHConstants.EVENT_DOCUMENT_APPROVAL;
+import static io.littlehorse.document.processing.LHConstants.STATUS_EXTRACTION_FAILED;
+import static io.littlehorse.document.processing.LHConstants.STATUS_VALIDATION_FAILED;
+import static io.littlehorse.document.processing.LHConstants.TASK_DETERMINE_APPROVAL_ROUTE;
+import static io.littlehorse.document.processing.LHConstants.TASK_EXTRACT_DOCUMENT_INFO;
+import static io.littlehorse.document.processing.LHConstants.TASK_NOTIFY_SUBMITTER;
+import static io.littlehorse.document.processing.LHConstants.TASK_ROUTE_TO_DEPARTMENT;
+import static io.littlehorse.document.processing.LHConstants.TASK_VALIDATE_DOCUMENT;
+import static io.littlehorse.document.processing.LHConstants.WORKFLOW_NAME;
+
 import io.littlehorse.sdk.common.proto.LHErrorType;
 import io.littlehorse.sdk.wfsdk.NodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
@@ -7,9 +19,6 @@ import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
 public class DocumentProcessingWorkflow {
-    static final String WORKFLOW_NAME = "document-processing";
-    static final String DOCUMENT_APPROVED_EVENT = "document-approved";
-
     /**
      * This method defines the document processing workflow logic
      */
@@ -20,74 +29,87 @@ public class DocumentProcessingWorkflow {
         WfRunVariable submitterId = wf.declareStr("submitter-id").searchable().required();
 
         // Declare internal variables
-        WfRunVariable extractedInfo = wf.declareJsonObj("extracted-info");
+        WfRunVariable documentInfo = wf.declareJsonObj("document-info");
         WfRunVariable isValid = wf.declareBool("is-valid");
-        WfRunVariable department = wf.declareStr("department");
-        WfRunVariable routingResult = wf.declareStr("routing-result");
+        WfRunVariable approvalResult = wf.declareBool("approval-result");
+        WfRunVariable approvalRoute = wf.declareStr("approval-route");
+        WfRunVariable processingStatus = wf.declareStr("processing-status");
 
-        // Step 1: Extract document information
-        NodeOutput extractResult = wf.execute("extract-document-info", documentId, documentType)
-                .withRetries(3);
+        // Step 1: Extract document information - with retries
+        NodeOutput extractedInfo = wf.execute(TASK_EXTRACT_DOCUMENT_INFO, documentId, documentType)
+                .withRetries(5); // Retry up to 3 times if the extraction fails
 
-        extractedInfo.assign(extractResult);
+        // Handle extraction failure if it still fails after retries
+        wf.handleError(extractedInfo, LHErrorType.TASK_FAILURE, handler -> {
+            handler.execute(TASK_NOTIFY_SUBMITTER, submitterId, documentId, STATUS_EXTRACTION_FAILED);
+            handler.fail(ERROR_EXTRACTION_FAILED, "Failed to extract document information after retries");
+        });
 
-        // Log the extracted information
-        wf.execute("log-message", "Extracted info: " + extractedInfo);
+        // Store the extracted document info
+        documentInfo.assign(extractedInfo);
 
-        // Step 2: Validate the document
-        NodeOutput validationResult = wf.execute("validate-document", extractedInfo, documentType)
-                .withRetries(3);
+        // Step 2: Validate document
+        NodeOutput validationResult =
+                wf.execute(TASK_VALIDATE_DOCUMENT, documentInfo, documentType).withRetries(5);
 
+        // Handle validation failure
+        wf.handleError(validationResult, LHErrorType.TASK_FAILURE, handler -> {
+            handler.execute(TASK_NOTIFY_SUBMITTER, submitterId, documentId, STATUS_VALIDATION_FAILED);
+            handler.fail(ERROR_VALIDATION_FAILED, "Document validation service failed");
+        });
+
+        // Store validation result
         isValid.assign(validationResult);
 
-        // Step 3: Process based on validation result
+        // Step 3: Route based on validation
         wf.doIfElse(
                 isValid.isEqualTo(true),
-                ifBody -> {
-                    // Step 4: Determine approval route using LLM
-                    NodeOutput approvalRoute = ifBody.execute("determine-approval-route", extractedInfo, documentType)
+                validFlowHandler -> {
+                    // Document is valid - determine approval route using AI
+                    NodeOutput routeResult = validFlowHandler
+                            .execute(TASK_DETERMINE_APPROVAL_ROUTE, documentInfo, documentType)
+                            .withRetries(5); // More retries for LLM service which can be
+                    // less reliable
+
+                    // Store the approval route
+                    approvalRoute.assign(routeResult);
+
+                    // Route document to appropriate department
+                    validFlowHandler
+                            .execute(TASK_ROUTE_TO_DEPARTMENT, approvalRoute, documentId, documentInfo)
                             .withRetries(5);
 
-                    department.assign(approvalRoute);
+                    // Wait for approval event with timeout
+                    NodeOutput approvalResultEvent = validFlowHandler.waitForEvent(EVENT_DOCUMENT_APPROVAL);
 
-                    // Log the determined department
-                    ifBody.execute("log-message", "Document needs approval from: " + department);
+                    approvalResult.assign(approvalResultEvent);
 
-                    // Step 5: Route to appropriate department
-                    ifBody.doIf(department.isEqualTo("FINANCE"), thenBody -> {
-                        NodeOutput routeResult = thenBody.execute("route-to-finance", documentId, extractedInfo)
-                                .withRetries(3);
-                        routingResult.assign(routeResult);
-                    });
+                    validFlowHandler.doIfElse(
+                            approvalResult.isEqualTo(true),
+                            approvedFlowHandler -> {
+                                // Store processing status
+                                // Store processing status
+                                processingStatus.assign(LHConstants.STATUS_APPROVED);
 
-                    ifBody.doIf(department.isEqualTo("LEGAL"), thenBody -> {
-                        NodeOutput routeResult = thenBody.execute("route-to-legal", documentId, extractedInfo)
-                                .withRetries(3);
-                        routingResult.assign(routeResult);
-                    });
-
-                    ifBody.doIf(department.isEqualTo("HR"), thenBody -> {
-                        NodeOutput routeResult = thenBody.execute("route-to-hr", documentId, extractedInfo)
-                                .withRetries(3);
-                        routingResult.assign(routeResult);
-                    });
-
-                    // Step 6: Wait for approval decision
-                    NodeOutput approvalResult = ifBody.waitForEvent(DOCUMENT_APPROVED_EVENT)
-                            .timeout(60 * 60 * 24 * 3); // 3 days timeout
-
-                    // Handle timeout
-                    ifBody.handleError(approvalResult, LHErrorType.TIMEOUT, handler -> {
-                        handler.execute("notify-submitter", submitterId, documentId, "APPROVAL_TIMEOUT");
-                        handler.fail("approval-timeout", "Document approval timed out after 3 days");
-                    });
-
-                    // Step 7: Notify submitter of successful processing
-                    ifBody.execute("notify-submitter", submitterId, documentId, "APPROVED");
+                                // Notify submitter of successful processing
+                                validFlowHandler
+                                        .execute(TASK_NOTIFY_SUBMITTER, submitterId, documentId, processingStatus)
+                                        .withRetries(5);
+                            },
+                            rejectedFlowHandler -> {
+                                // Store processing status
+                                processingStatus.assign(LHConstants.STATUS_REJECTED);
+                                rejectedFlowHandler
+                                        .execute(TASK_NOTIFY_SUBMITTER, submitterId, documentId, processingStatus)
+                                        .withRetries(5);
+                            });
                 },
-                elseBody -> {
-                    // If document is invalid, notify submitter
-                    elseBody.execute("notify-submitter", submitterId, documentId, "INVALID");
+                invalidFlowHandler -> {
+                    // Document is invalid - notify submitter
+                    processingStatus.assign(LHConstants.STATUS_INVALID);
+                    invalidFlowHandler
+                            .execute(TASK_NOTIFY_SUBMITTER, submitterId, documentId, processingStatus)
+                            .withRetries(5);
                 });
     }
 
