@@ -39,4 +39,4 @@ hs_err_pid*
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
+.vscode/ 

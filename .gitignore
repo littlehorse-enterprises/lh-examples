@@ -1,66 +1,10 @@
-# Ignore binary and build stuff
-.gradle
-examples/*/build/
-examples/*/bin/
-*/build/
-*/bin/
+### Global Patterns ###
 .DS_Store
-
-# Emacs-related stuff
-*\#
 *~
-
-# node
-node_modules/
-
-# go
-lhctl/lhctl
-
-# Intellij
-*/.idea
-.idea/
-
-# vscode
-.vscode/launch.json
-*.code-workspace
-
-#Visual Studio
-**/bin/
-**/obj/
-**/.vs/
-**/out/
-
-# Others
-local-dev/certs/
-build/
-
-# Python
-__pycache__
-.ruff_cache
-.mypy_cache
-dist/
-
-.vscode/
-
-# sbt specific
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-project/local-plugins.sbt
-.history
-.ensime
-.ensime_cache/
-.sbt-scripted/
-local.sbt
-.scala-build
-
-# Bloop
-.bsp
-
-# Metals
-.bloop/
-.metals/
-metals.sbt
+*.swp
+*.swo
+tmp/
+.env
+.env.local
+.env*.local
+.directory
