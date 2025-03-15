@@ -1,0 +1,25 @@
+services:
+  kafka:
+    image: apache/kafka-native:latest
+    environment:
+      KAFKA_LISTENERS: CONTROLLER://:9093,INTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: "1"
+    restart: on-failure
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-server:latest
+    environment:
+      LHS_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      LHS_SHOULD_CREATE_TOPICS: "true"
+      LHS_HEALTH_SERVICE_PORT: "1822"
+    restart: on-failure
+    ports:
+      - "2023:2023"
