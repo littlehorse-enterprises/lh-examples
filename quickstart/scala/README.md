@@ -15,10 +15,12 @@ Add your littlehorse configuration ~/.config/littlehorse.config
 LHC_API_PORT=2023
 LHC_API_HOST=localhost
 ```
+
 ## Run
 
 ```sh
-docker run --rm -d -p 2023:2023 -p 8080:8080 ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:0.11.2
+docker run --pull always --name lh-standalone --rm -d -p 2023:2023 -p 8080:8080 \
+  ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 sbt run
 ```
 

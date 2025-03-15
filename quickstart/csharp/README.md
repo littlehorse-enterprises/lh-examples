@@ -58,7 +58,8 @@ If you have obtained a LittleHorse Cloud Sandbox, you can skip this step and jus
 To run a LittleHorse Server locally in one command, you can run:
 
 ```sh
-docker run --pull always --name littlehorse -d -p 2023:2023 -p 8080:8080 ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
+docker run --pull always --name lh-standalone --rm -d -p 2023:2023 -p 8080:8080 \
+  ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 ```
 
 Using the local LittleHorse Server takes about 15-25 seconds to start up, but it does not require any further configuration. Please note that the `lh-standalone` docker image requires at least 1.5GB of memory to function properly. This is because it runs Apache Kafka, the LittleHorse Server, and the LittleHorse Dashboard all in one container.
@@ -73,7 +74,7 @@ At this point, whether you are using a local Docker deployment or a LittleHorse 
   "id":  {
     "id":  "anonymous"
   },
-  "createdAt":  "2024-12-17T00:12:10.693Z",
+  "createdAt":  "2025-03-12T21:24:47.593Z",
   "perTenantAcls":  {},
   "globalAcls":  {
     "acls":  [

@@ -11,7 +11,7 @@ As a prerequisite to all of these examples, you need to have a LittleHorse Serve
 The easiest way to get a LittleHorse Server running on port 2023 is to run the following command:
 
 ```bash
-docker run --pull always --name lh-standalone --rm -d --net=host \
+docker run --pull always --name lh-standalone --rm -d -p 2023:2023 -p 8080:8080 \
   ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 ```
 
