@@ -6,7 +6,7 @@ package io.littlehorse.document.processing;
 public final class LHConstants {
 
     // Workflow constants
-    public static final String WORKFLOW_NAME = "document-processing";
+    public static final String WORKFLOW_NAME = "ai-document-processing";
 
     // Task names
     public static final String TASK_EXTRACT_DOCUMENT_INFO = "extract-document-info";

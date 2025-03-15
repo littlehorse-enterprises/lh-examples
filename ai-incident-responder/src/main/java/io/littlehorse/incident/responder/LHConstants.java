@@ -6,7 +6,7 @@ package io.littlehorse.incident.responder;
 public final class LHConstants {
 
     // Workflow constants
-    public static final String WORKFLOW_NAME = "incident-response";
+    public static final String WORKFLOW_NAME = "ai-incident-response";
 
     // Task names
     public static final String TASK_DIAGNOSE_INCIDENT = "diagnose-incident";
