@@ -1,8 +1,9 @@
-package io.littlehorse.document.processing.tasks;
+package io.littlehorse.document.processor.tasks;
 
-import io.littlehorse.document.processing.LHConstants;
-import io.littlehorse.sdk.worker.LHTaskMethod;
 import java.util.Random;
+
+import io.littlehorse.document.processor.LHConstants;
+import io.littlehorse.sdk.worker.LHTaskMethod;
 
 public class NotifySubmitterTask {
     private final Random random = new Random();

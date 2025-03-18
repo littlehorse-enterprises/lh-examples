@@ -1,9 +1,11 @@
-package io.littlehorse.document.processing.tasks;
+package io.littlehorse.document.processor.tasks;
+
+import java.util.Random;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.littlehorse.document.processing.LHConstants;
+
+import io.littlehorse.document.processor.LHConstants;
 import io.littlehorse.sdk.worker.LHTaskMethod;
-import java.util.Random;
 
 public class DetermineApprovalRouteTask {
     private final Random random = new Random();

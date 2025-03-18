@@ -1,17 +1,17 @@
-package io.littlehorse.document.processing;
+package io.littlehorse.document.processor;
 
-import static io.littlehorse.document.processing.LHConstants.TASK_DETERMINE_APPROVAL_ROUTE;
-import static io.littlehorse.document.processing.LHConstants.TASK_EXTRACT_DOCUMENT_INFO;
-import static io.littlehorse.document.processing.LHConstants.TASK_NOTIFY_SUBMITTER;
-import static io.littlehorse.document.processing.LHConstants.TASK_ROUTE_TO_DEPARTMENT;
-import static io.littlehorse.document.processing.LHConstants.TASK_VALIDATE_DOCUMENT;
+import static io.littlehorse.document.processor.LHConstants.TASK_DETERMINE_APPROVAL_ROUTE;
+import static io.littlehorse.document.processor.LHConstants.TASK_EXTRACT_DOCUMENT_INFO;
+import static io.littlehorse.document.processor.LHConstants.TASK_NOTIFY_SUBMITTER;
+import static io.littlehorse.document.processor.LHConstants.TASK_ROUTE_TO_DEPARTMENT;
+import static io.littlehorse.document.processor.LHConstants.TASK_VALIDATE_DOCUMENT;
 
-import io.littlehorse.document.processing.agent.DirectAIAgent;
-import io.littlehorse.document.processing.tasks.DetermineApprovalRouteTask;
-import io.littlehorse.document.processing.tasks.ExtractDocumentInfoTask;
-import io.littlehorse.document.processing.tasks.NotifySubmitterTask;
-import io.littlehorse.document.processing.tasks.RouteToDeprtmentTask;
-import io.littlehorse.document.processing.tasks.ValidateDocumentTask;
+import io.littlehorse.document.processor.agent.DirectAIAgent;
+import io.littlehorse.document.processor.tasks.DetermineApprovalRouteTask;
+import io.littlehorse.document.processor.tasks.ExtractDocumentInfoTask;
+import io.littlehorse.document.processor.tasks.NotifySubmitterTask;
+import io.littlehorse.document.processor.tasks.RouteToDeprtmentTask;
+import io.littlehorse.document.processor.tasks.ValidateDocumentTask;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
@@ -24,20 +24,20 @@ public class Main {
     private static LHConfig config = new LHConfig();
     private static LittleHorseBlockingStub client = config.getBlockingStub();
 
-    private static LHTaskWorker extractWorker =
-            new LHTaskWorker(new ExtractDocumentInfoTask(), TASK_EXTRACT_DOCUMENT_INFO, config);
+    private static LHTaskWorker extractWorker = new LHTaskWorker(new ExtractDocumentInfoTask(),
+            TASK_EXTRACT_DOCUMENT_INFO, config);
 
-    private static LHTaskWorker validateWorker =
-            new LHTaskWorker(new ValidateDocumentTask(), TASK_VALIDATE_DOCUMENT, config);
+    private static LHTaskWorker validateWorker = new LHTaskWorker(new ValidateDocumentTask(), TASK_VALIDATE_DOCUMENT,
+            config);
 
-    private static LHTaskWorker routeWorker =
-            new LHTaskWorker(new DetermineApprovalRouteTask(), TASK_DETERMINE_APPROVAL_ROUTE, config);
+    private static LHTaskWorker routeWorker = new LHTaskWorker(new DetermineApprovalRouteTask(),
+            TASK_DETERMINE_APPROVAL_ROUTE, config);
 
-    private static LHTaskWorker departmentWorker =
-            new LHTaskWorker(new RouteToDeprtmentTask(), TASK_ROUTE_TO_DEPARTMENT, config);
+    private static LHTaskWorker departmentWorker = new LHTaskWorker(new RouteToDeprtmentTask(),
+            TASK_ROUTE_TO_DEPARTMENT, config);
 
-    private static LHTaskWorker notifyWorker =
-            new LHTaskWorker(new NotifySubmitterTask(), TASK_NOTIFY_SUBMITTER, config);
+    private static LHTaskWorker notifyWorker = new LHTaskWorker(new NotifySubmitterTask(), TASK_NOTIFY_SUBMITTER,
+            config);
 
     public static void main(String[] args) throws Exception {
         String mode = args.length > 0 ? args[0].toLowerCase() : "all";
@@ -96,7 +96,7 @@ public class Main {
                 .build());
 
         // Register workflow
-        DocumentProcessingWorkflow workflow = new DocumentProcessingWorkflow();
+        CustomerSupportCallActionsWorkflow workflow = new CustomerSupportCallActionsWorkflow();
         workflow.getWorkflow().registerWfSpec(client);
 
         System.out.println("Metadata registration complete!");

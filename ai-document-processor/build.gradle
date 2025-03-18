@@ -3,7 +3,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0'
 }
 
-group = 'io.littlehorse.document.processing'
+group = 'io.littlehorse.document.processor'
 version = '1.0-SNAPSHOT'
 
 java {
@@ -29,7 +29,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'io.littlehorse.document.processing.Main'
+    mainClass = 'io.littlehorse.document.processor.Main'
 }
 
 spotless {

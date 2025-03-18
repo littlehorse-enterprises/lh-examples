@@ -1,16 +1,16 @@
-package io.littlehorse.document.processing;
+package io.littlehorse.document.processor;
 
-import static io.littlehorse.document.processing.LHConstants.ERROR_EXTRACTION_FAILED;
-import static io.littlehorse.document.processing.LHConstants.ERROR_VALIDATION_FAILED;
-import static io.littlehorse.document.processing.LHConstants.EVENT_DOCUMENT_APPROVAL;
-import static io.littlehorse.document.processing.LHConstants.STATUS_EXTRACTION_FAILED;
-import static io.littlehorse.document.processing.LHConstants.STATUS_VALIDATION_FAILED;
-import static io.littlehorse.document.processing.LHConstants.TASK_DETERMINE_APPROVAL_ROUTE;
-import static io.littlehorse.document.processing.LHConstants.TASK_EXTRACT_DOCUMENT_INFO;
-import static io.littlehorse.document.processing.LHConstants.TASK_NOTIFY_SUBMITTER;
-import static io.littlehorse.document.processing.LHConstants.TASK_ROUTE_TO_DEPARTMENT;
-import static io.littlehorse.document.processing.LHConstants.TASK_VALIDATE_DOCUMENT;
-import static io.littlehorse.document.processing.LHConstants.WORKFLOW_NAME;
+import static io.littlehorse.document.processor.LHConstants.ERROR_EXTRACTION_FAILED;
+import static io.littlehorse.document.processor.LHConstants.ERROR_VALIDATION_FAILED;
+import static io.littlehorse.document.processor.LHConstants.EVENT_DOCUMENT_APPROVAL;
+import static io.littlehorse.document.processor.LHConstants.STATUS_EXTRACTION_FAILED;
+import static io.littlehorse.document.processor.LHConstants.STATUS_VALIDATION_FAILED;
+import static io.littlehorse.document.processor.LHConstants.TASK_DETERMINE_APPROVAL_ROUTE;
+import static io.littlehorse.document.processor.LHConstants.TASK_EXTRACT_DOCUMENT_INFO;
+import static io.littlehorse.document.processor.LHConstants.TASK_NOTIFY_SUBMITTER;
+import static io.littlehorse.document.processor.LHConstants.TASK_ROUTE_TO_DEPARTMENT;
+import static io.littlehorse.document.processor.LHConstants.TASK_VALIDATE_DOCUMENT;
+import static io.littlehorse.document.processor.LHConstants.WORKFLOW_NAME;
 
 import io.littlehorse.sdk.common.proto.LHErrorType;
 import io.littlehorse.sdk.wfsdk.NodeOutput;
@@ -18,7 +18,7 @@ import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
-public class DocumentProcessingWorkflow {
+public class CustomerSupportCallActionsWorkflow {
     /**
      * This method defines the document processing workflow logic
      */
@@ -49,8 +49,7 @@ public class DocumentProcessingWorkflow {
         documentInfo.assign(extractedInfo);
 
         // Step 2: Validate document
-        NodeOutput validationResult =
-                wf.execute(TASK_VALIDATE_DOCUMENT, documentInfo, documentType).withRetries(5);
+        NodeOutput validationResult = wf.execute(TASK_VALIDATE_DOCUMENT, documentInfo, documentType).withRetries(5);
 
         // Handle validation failure
         wf.handleError(validationResult, LHErrorType.TASK_FAILURE, handler -> {

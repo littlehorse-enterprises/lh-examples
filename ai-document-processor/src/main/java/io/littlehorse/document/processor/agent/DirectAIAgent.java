@@ -1,9 +1,10 @@
-package io.littlehorse.document.processing.agent;
+package io.littlehorse.document.processor.agent;
+
+import java.util.Random;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Random;
 
 /**
  * This class demonstrates an AI agent that directly calls tools and APIs

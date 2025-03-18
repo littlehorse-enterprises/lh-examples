@@ -1,11 +1,13 @@
-package io.littlehorse.document.processing.tasks;
+package io.littlehorse.document.processor.tasks;
+
+import java.util.Random;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.littlehorse.document.processing.LHConstants;
+
+import io.littlehorse.document.processor.LHConstants;
 import io.littlehorse.sdk.worker.LHTaskMethod;
-import java.util.Random;
 
 public class ExtractDocumentInfoTask {
     private final ObjectMapper objectMapper = new ObjectMapper();
