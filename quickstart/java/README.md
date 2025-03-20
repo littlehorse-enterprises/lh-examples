@@ -146,7 +146,7 @@ If you would like to see it on the dashboard, go to the `WfSpec` page and scroll
 Note that the status is `RUNNING`! Why hasn't it completed? That's because we haven't yet started a worker which executes the `verify-identity` and `notify-customer-verified` or `notify-customer-not-verified` tasks. Want to verify that? Let's search for all tasks in the queue which haven't been executed yet. You should see an entry whose `wfRunId` matches the Id from above:
 
 ```sh
-lhctl search taskRun --taskDefName verify-identity --status TASK_SCHEDULED
+lhctl search taskRun verify-identity --taskDefName verify-identity --status TASK_SCHEDULED
 ```
 
 You can also see the `TaskRun` node on the workflow. It's highlighted, meaning that it's already running! If you click on it, you can see that it is in the `TASK_SCHEDULED` status.
@@ -168,7 +168,7 @@ lhctl get wfRun <wf_run_id>
 Voila! It's completed. You can also verify that the Task Queue is empty now that the Task Workers executed all of the tasks:
 
 ```sh
-lhctl search taskRun --taskDefName verify-identity --status TASK_SCHEDULED
+lhctl search taskRun verify-identity --taskDefName verify-identity --status TASK_SCHEDULED
 ```
 
 The example has been configured for this task to fail 25% of the time to demonstrate LittleHorse's ability to handle retries and failures.
