@@ -1,6 +1,14 @@
 package io.littlehorse.customer.support;
 
+import java.util.List;
+
+import io.littlehorse.customer.support.workflows.CustomerSupportCallActionsWorkflow;
+import io.littlehorse.customer.support.workflows.EscalateCaseWorkflow;
+import io.littlehorse.customer.support.workflows.SendEmailWorkflow;
+import io.littlehorse.customer.support.workflows.UpdateCustomerNotesWorkflow;
 import io.littlehorse.sdk.common.config.LHConfig;
+import io.littlehorse.sdk.common.proto.DeleteTaskDefRequest;
+import io.littlehorse.sdk.common.proto.TaskDefId;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 
 public class Main {
@@ -8,39 +16,55 @@ public class Main {
 
     static MyTasks tasks = new MyTasks();
 
-    static LHTaskWorker transcribeCallWorker = new LHTaskWorker(tasks, LHConstants.TRANSCRIBE_CALL_TASK, config);
-    static LHTaskWorker determineActionsWorker = new LHTaskWorker(tasks, LHConstants.DETERMINE_ACTIONS_TASK, config);
-    static LHTaskWorker runWorkflowsWorker = new LHTaskWorker(tasks, LHConstants.RUN_WORKFLOWS_TASK, config);
+    static List<LHTaskWorker> workers = List.of(
+            new LHTaskWorker(tasks, LHConstants.TRANSCRIBE_CALL_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.DETERMINE_ACTIONS_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.RUN_WORKFLOWS_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.ADD_NOTE_TO_CUSTOMER_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.ESCALATE_CASE_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.SEND_EMAIL_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.AUDIT_LOG_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.ANALYZE_CUSTOMER_NOTE_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.REDACT_SENSITIVE_INFO_TASK, config),
+            new LHTaskWorker(tasks, LHConstants.SCHEDULE_FOLLOW_UP_TASK, config));
 
     public static void main(String[] args) {
+        deleteAllTaskDefs();
         registerMetadata();
         startTaskWorkers();
     }
 
-    public static void registerMetadata() {
-        // Because we don't start the worker we can suppress the warning
-        transcribeCallWorker.registerTaskDef();
-        determineActionsWorker.registerTaskDef();
-        runWorkflowsWorker.registerTaskDef();
-        // Since we didn't start the worker, this is a no-op, but it prevents
-        // VSCode from underlining with a squiggly
-        transcribeCallWorker.close();
-        determineActionsWorker.close();
-        runWorkflowsWorker.close();
+    public static void deleteAllTaskDefs() {
+        for (LHTaskWorker worker : workers) {
+            if (worker.doesTaskDefExist())
+                config.getBlockingStub()
+                        .deleteTaskDef(DeleteTaskDefRequest.newBuilder()
+                                .setId(TaskDefId.newBuilder()
+                                        .setName(worker.getTaskDefName())
+                                        .build())
+                                .build());
+        }
+    }
 
-        CustomerSupportCallActionsWorkflow myWorkflow = new CustomerSupportCallActionsWorkflow();
-        myWorkflow.getWorkflow().registerWfSpec(config.getBlockingStub());
+    public static void registerMetadata() {
+        for (LHTaskWorker worker : workers) {
+            worker.registerTaskDef();
+        }
+
+        // Register workflows
+        new CustomerSupportCallActionsWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
+        new UpdateCustomerNotesWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
+        new EscalateCaseWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
+        new SendEmailWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
     }
 
     public static void startTaskWorkers() {
-        // Close the worker upon shutdown
-        Runtime.getRuntime().addShutdownHook(new Thread(transcribeCallWorker::close));
-        Runtime.getRuntime().addShutdownHook(new Thread(determineActionsWorker::close));
-        Runtime.getRuntime().addShutdownHook(new Thread(runWorkflowsWorker::close));
-
         System.out.println("Starting task workers!");
-        transcribeCallWorker.start();
-        determineActionsWorker.start();
-        runWorkflowsWorker.start();
+
+        for (LHTaskWorker worker : workers) {
+            // Add shutdown hooks for all workers
+            Runtime.getRuntime().addShutdownHook(new Thread(worker::close));
+            worker.start();
+        }
     }
 }

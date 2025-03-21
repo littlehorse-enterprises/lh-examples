@@ -1,5 +1,6 @@
-package io.littlehorse.customer.support;
+package io.littlehorse.customer.support.workflows;
 
+import io.littlehorse.customer.support.LHConstants;
 import io.littlehorse.sdk.common.proto.Comparator;
 import io.littlehorse.sdk.wfsdk.NodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
@@ -10,23 +11,25 @@ public class CustomerSupportCallActionsWorkflow {
     /**
      * This method defines the document processing workflow logic
      */
-    public void customerSupportCallActionsWf(WorkflowThread wf) {
+    public void workflowSpec(WorkflowThread wf) {
         // Declare input variables
         WfRunVariable callId = wf.declareStr("call-id").searchable().required();
-        WfRunVariable customerId = wf.declareStr("customer-id").searchable().required();
+        WfRunVariable customerEmail =
+                wf.declareStr("customer-email").searchable().required();
 
         // Step 1: Transcribe the call
-        NodeOutput transcript = wf.execute(LHConstants.TRANSCRIBE_CALL_TASK).timeout(60 * 5);
-        
+        NodeOutput transcript = wf.execute(LHConstants.TRANSCRIBE_CALL_TASK, callId, customerEmail)
+                .timeout(60 * 5);
+
         // Step 2: Determine if there are any actions to take
-        NodeOutput actionsToTake = wf.execute(LHConstants.DETERMINE_ACTIONS_TASK, transcript, customerId, callId).timeout(60 * 5);
+        NodeOutput actionsToTake =
+                wf.execute(LHConstants.DETERMINE_ACTIONS_TASK, transcript).timeout(60 * 5);
 
         // Step 3: Either run workflows or create user task
-        wf.doIf(wf.condition(actionsToTake, Comparator.NOT_EQUALS, null),
-                ifHandler -> {
-                    // Run the identified workflows
-                    ifHandler.execute(LHConstants.RUN_WORKFLOWS_TASK, actionsToTake);
-                });
+        wf.doIf(wf.condition(actionsToTake, Comparator.NOT_EQUALS, null), ifHandler -> {
+            // Run the identified workflows
+            ifHandler.execute(LHConstants.RUN_WORKFLOWS_TASK, actionsToTake);
+        });
 
         // Require a human to verify that no actions are needed to be taken
 
@@ -37,6 +40,6 @@ public class CustomerSupportCallActionsWorkflow {
      * the WfSpec.
      */
     public Workflow getWorkflow() {
-        return Workflow.newWorkflow(LHConstants.WORKFLOW_NAME, this::customerSupportCallActionsWf);
+        return Workflow.newWorkflow(LHConstants.WORKFLOW_NAME, this::workflowSpec);
     }
 }
