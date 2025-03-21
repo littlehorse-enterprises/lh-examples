@@ -5,7 +5,7 @@ import java.util.List;
 import io.littlehorse.customer.support.workflows.CustomerSupportCallActionsWorkflow;
 import io.littlehorse.customer.support.workflows.EscalateCaseWorkflow;
 import io.littlehorse.customer.support.workflows.SendEmailWorkflow;
-import io.littlehorse.customer.support.workflows.UpdateCustomerNotesWorkflow;
+import io.littlehorse.customer.support.workflows.AddNoteToCustomerWorkflow;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.DeleteTaskDefRequest;
 import io.littlehorse.sdk.common.proto.TaskDefId;
@@ -53,7 +53,7 @@ public class Main {
 
         // Register workflows
         new CustomerSupportCallActionsWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
-        new UpdateCustomerNotesWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
+        new AddNoteToCustomerWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
         new EscalateCaseWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
         new SendEmailWorkflow().getWorkflow().registerWfSpec(config.getBlockingStub());
     }

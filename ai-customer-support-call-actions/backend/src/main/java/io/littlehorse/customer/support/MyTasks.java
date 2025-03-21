@@ -1,9 +1,12 @@
 package io.littlehorse.customer.support;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -11,9 +14,14 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
+import dev.langchain4j.model.chat.request.ResponseFormat;
+import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import io.littlehorse.customer.support.pojo.Note;
 import io.littlehorse.customer.support.pojo.WorkflowExecutionRequest;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.config.LHConfig;
@@ -40,7 +48,9 @@ public class MyTasks {
 				.messages(
 						new SystemMessage(
 								"Call ID: " + callId + "\n" + "Customer's Email: " + customerEmail
-										+ "\nMake sure to add that metadata and any other metadata you see fit to the transcript so that AI can use that when analyzing the transcript."),
+										+ "\n" + "Date and Time of the call: " + new Date().toString()
+										+ "\n"
+										+ "Make sure to add that metadata and any other metadata you see fit to the transcript so that AI can use that when analyzing the transcript."),
 						new UserMessage(
 								"Generate a example call transcript for a customer support call, with a customer who is angry and the agent who is trying to help them, make it 5 minutes long. Make sure to include the customer's name and the agent's name."))
 				.build());
@@ -54,8 +64,7 @@ public class MyTasks {
 			.parameters(JsonObjectSchema.builder()
 					.addStringProperty("customer-email", "The email of the customer whose record needs to be updated")
 					.addStringProperty("note", "Notes about the issue, preferences, or follow-up details")
-					.addStringProperty("callId", "ID of the call this note is related to")
-					.addStringProperty("agentId", "ID of the agent who handled the call")
+					.addStringProperty("agent-id", "ID of the agent who handled the call")
 					.required("customer-email", "note")
 					.build())
 			.build();
@@ -88,11 +97,11 @@ public class MyTasks {
 	@LHTaskMethod(LHConstants.DETERMINE_ACTIONS_TASK)
 	public List<WorkflowExecutionRequest> determineActions(String transcript) {
 		ChatRequest request = ChatRequest.builder()
+				.toolSpecifications(updateCustomerRecordsSpec, escalateCaseSpec, sendFollowUpEmailSpec)
 				.messages(
 						new SystemMessage(
 								"Analyze this customer support call transcript and determine what actions should be taken if any. If you decide there 1 or more actions to take, call the appropriate tool to execute the action."),
 						new UserMessage(transcript))
-				.toolSpecifications(updateCustomerRecordsSpec, escalateCaseSpec, sendFollowUpEmailSpec)
 				.build();
 
 		ChatResponse response = model.chat(request);
@@ -107,8 +116,12 @@ public class MyTasks {
 	}
 
 	@LHTaskMethod(LHConstants.RUN_WORKFLOWS_TASK)
-	public void runWorkflows(List<Map<String, Object>> requests, WorkerContext context) {
-		StringBuilder wfRunsResponse = new StringBuilder();
+	public String runWorkflows(List<Map<String, Object>> requests, WorkerContext context) {
+		if (context.getAttemptNumber() == 0) {
+			throw new RuntimeException("Failed to run workflows");
+		}
+
+		StringBuilder sb = new StringBuilder();
 
 		requests.forEach(request -> {
 			Gson gson = new Gson();
@@ -121,29 +134,28 @@ public class MyTasks {
 				runWfRequestBuilder.putVariables(key, LHLibUtil.objToVarVal(value));
 			});
 
-			System.out.println(runWfRequestBuilder.build());
-
 			WfRun response = lhClient.runWf(runWfRequestBuilder.build());
-			wfRunsResponse.append("Started `").append(wfSpecName).append("` ").append(response.getId());
+			// context.log("Started `" + wfSpecName + "` " + response.getId());
+			sb.append("Started `" + wfSpecName + "` " + response.getId() + "\n");
 		});
 
-		context.log(wfRunsResponse.toString());
+		return sb.toString();
 	}
 
 	@LHTaskMethod(LHConstants.ADD_NOTE_TO_CUSTOMER_TASK)
 	public void addNoteToCustomer(
-			String customerEmail, String note, String category, String callId, String agentId, WorkerContext context) {
+			String customerEmail, String note, String agentId, WorkerContext context) {
 		// In a real implementation, you would add the note to the customer's record in
 		// your database
 
 		// Simulate a database connection error
-		if (context.getAttemptNumber() == 1) {
+		if (context.getAttemptNumber() == 0) {
 			String databaseUrl = "jdbc:sqlite:customer_support.db";
 			throw new RuntimeException("Failed to connect to database: " + databaseUrl);
 		}
 
 		// Simulate a customer not found error
-		if (context.getAttemptNumber() == 2) {
+		if (context.getAttemptNumber() == 1) {
 			throw new RuntimeException("Customer not found with ID: " + customerEmail);
 		}
 	}
@@ -163,7 +175,7 @@ public class MyTasks {
 		// 3. Set priority and include all relevant information
 
 		// Simulate potential errors in escalation process
-		if (context.getAttemptNumber() == 1) {
+		if (context.getAttemptNumber() == 0) {
 			throw new RuntimeException("Failed to connect to ticketing system");
 		}
 	}
@@ -172,7 +184,7 @@ public class MyTasks {
 	public void sendEmail(String email, String subject, String content, WorkerContext context) {
 		// In a real implementation, you would connect to your email service here
 
-		if (context.getAttemptNumber() == 1) {
+		if (context.getAttemptNumber() == 0) {
 			// Simulate an error sending the email
 			throw new RuntimeException("Failed to send email");
 		}
@@ -186,59 +198,65 @@ public class MyTasks {
 		// 3. Ensure compliance with any regulatory requirements
 
 		// Simulate occasional logging failures
-		if (context.getAttemptNumber() == 1) {
+		if (context.getAttemptNumber() == 0) {
 			throw new RuntimeException("Failed to write to audit log");
 		}
 	}
 
 	@LHTaskMethod(LHConstants.ANALYZE_CUSTOMER_NOTE_TASK)
-	public String analyzeCustomerNote(String note) {
-		System.out.println("Analyzing customer note: " + note);
+	public Note analyzeCustomerNote(String note) {
+		ResponseFormat responseFormat = ResponseFormat.builder()
+				.type(ResponseFormatType.JSON)
+				.jsonSchema(JsonSchema.builder()
+						.name("Note")
+						.rootElement(JsonObjectSchema.builder()
+								.addBooleanProperty("containsSensitiveInfo")
+								.description("Boolean indicating if the note contains sensitive information")
+								.addNumberProperty("followUpTimestamp")
+								.description(
+										"Suggested follow-up time if applicable (in unix timestamp format). This can be null if there is no follow-up information.")
+								.addStringProperty("text").description("The text of the note")
+								.required("containsSensitiveInfo", "text")
+								.build())
+						.build())
+				.build();
 
-		// Use the LLM to analyze the note
-		String prompt = "Analyze the following customer support note and extract structured information.\n\n" + "Note: "
-				+ note + "\n\n" + "Return a JSON object with the following fields:\n"
-				+ "- category: The category of the note (complaint, inquiry, feedback, request, etc.)\n"
-				+ "- containsSensitiveInfo: Boolean indicating if the note contains sensitive information\n"
-				+ "- requiresFollowUp: Boolean indicating if this note requires a follow-up\n"
-				+ "- followUpDate: Suggested follow-up date if applicable (in YYYY-MM-DD format)\n"
-				+ "- structuredNote: A well-formatted version of the note\n"
-				+ "- shouldTriggerAdditionalWorkflows: Boolean indicating if additional workflows should be triggered\n"
-				+ "- additionalWorkflows: Array of workflow objects if applicable";
+		ChatResponse response = model.chat(ChatRequest.builder()
+				.parameters(ChatRequestParameters.builder().responseFormat(responseFormat).build())
+				.messages(new SystemMessage(
+						"Analyze the following customer support note and extract structured information when and only when applicable. The unix timestamp now is "
+								+ System.currentTimeMillis()
+								+ "\nIf there is no follow-up information, set the followUpTimestamp to 0."),
+						new UserMessage("Note: " + note))
+				.build());
 
-		String analysis = model.chat(prompt);
+		System.out.println(response.aiMessage());
 
-		// In a production environment, you would validate the JSON structure
-		// and handle potential formatting issues
-
-		return analysis;
+		try {
+			return new ObjectMapper().readValue(response.aiMessage().text(), Note.class);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException("Failed to parse note", e);
+		}
 	}
 
 	@LHTaskMethod(LHConstants.REDACT_SENSITIVE_INFO_TASK)
 	public String redactSensitiveInfo(String note) {
-		System.out.println("Redacting sensitive information from note");
-
-		// Use the LLM to redact sensitive information
-		String prompt = "The following customer note may contain sensitive information (like credit card numbers, "
-				+ "SSNs, passwords, etc.). Please redact any sensitive information and return the redacted note:\n\n"
-				+ note;
 
 		ChatResponse redactedNote = model.chat(
-				ChatRequest.builder().messages(new SystemMessage(prompt)).build());
+				ChatRequest.builder().messages(new SystemMessage(
+						"The following customer note may contain sensitive information (like credit card numbers, SSNs, passwords, etc.). Please redact any sensitive information and return the redacted note, If you need to redact data please replace it with [REDACTED]"),
+						new UserMessage("Note: " + note)).build());
 
 		return redactedNote.aiMessage().text();
 	}
 
 	@LHTaskMethod(LHConstants.SCHEDULE_FOLLOW_UP_TASK)
-	public void scheduleFollowUp(String email, String followUpDate, String followUpNote) {
-		System.out.println("Scheduling follow-up for customer " + email + " on " + followUpDate);
-		System.out.println("Follow-up note: " + followUpNote);
-
+	public void scheduleFollowUp(String email, long followUpTimestamp, String followUpNote) {
 		// In a real implementation, this would create a task in your CRM or
 		// task management system for the follow-up
 
 		// Simulate occasional scheduling failures
-		if (random.nextInt(15) == 0) {
+		if (random.nextInt(3) == 0) {
 			throw new RuntimeException("Failed to schedule follow-up in task system");
 		}
 	}

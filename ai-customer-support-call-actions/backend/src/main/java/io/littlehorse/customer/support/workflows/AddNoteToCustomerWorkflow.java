@@ -7,15 +7,14 @@ import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
-public class UpdateCustomerNotesWorkflow {
+public class AddNoteToCustomerWorkflow {
 
     public void workflowSpec(WorkflowThread wf) {
         // Declare input variables
         WfRunVariable customerEmail =
-                wf.declareStr("customerEmail").searchable().required();
+                wf.declareStr("customer-email").searchable().required();
         WfRunVariable note = wf.declareStr("note").required();
-        WfRunVariable callId = wf.declareStr("callId").searchable().withDefault("unknown");
-        WfRunVariable agentId = wf.declareStr("agentId").searchable().withDefault("ai-agent");
+        WfRunVariable agentId = wf.declareStr("agent-id").searchable().withDefault("ai-agent");
 
         // Step 1: Analyze the note content using LLM
         NodeOutput analysis = wf.execute(LHConstants.ANALYZE_CUSTOMER_NOTE_TASK, note)
@@ -28,7 +27,7 @@ public class UpdateCustomerNotesWorkflow {
                 ifHandler -> {
                     // Redact sensitive information
                     NodeOutput redactedNote = ifHandler
-                            .execute(LHConstants.REDACT_SENSITIVE_INFO_TASK, analysis.jsonPath("$.structuredNote"))
+                            .execute(LHConstants.REDACT_SENSITIVE_INFO_TASK, analysis.jsonPath("$.text"))
                             .withRetries(5);
 
                     // Add the redacted note to customer record
@@ -37,8 +36,6 @@ public class UpdateCustomerNotesWorkflow {
                                     LHConstants.ADD_NOTE_TO_CUSTOMER_TASK,
                                     customerEmail,
                                     redactedNote,
-                                    analysis.jsonPath("$.category"),
-                                    callId,
                                     agentId)
                             .withRetries(5);
                 },
@@ -48,28 +45,26 @@ public class UpdateCustomerNotesWorkflow {
                             .execute(
                                     LHConstants.ADD_NOTE_TO_CUSTOMER_TASK,
                                     customerEmail,
-                                    analysis.jsonPath("$.structuredNote"),
-                                    analysis.jsonPath("$.category"),
-                                    callId,
+                                    analysis.jsonPath("$.text"),
                                     agentId)
                             .withRetries(5);
                 });
 
         // Step 3: Schedule follow-up if required
-        wf.doIf(wf.condition(analysis.jsonPath("$.requiresFollowUp"), Comparator.EQUALS, true), ifHandler -> {
+        wf.doIf(wf.condition(analysis.jsonPath("$.followUpTimestamp"), Comparator.NOT_EQUALS, 0), ifHandler -> {
             // Create follow-up task
             ifHandler.execute(
                     LHConstants.SCHEDULE_FOLLOW_UP_TASK,
                     customerEmail,
-                    analysis.jsonPath("$.followUpDate"),
-                    "Follow up regarding: " + analysis.jsonPath("$.category"));
+                    analysis.jsonPath("$.followUpTimestamp"),
+                    "Follow up regarding: " + analysis.jsonPath("$.text")).withRetries(5);
 
             // Send notification email
             ifHandler.execute(
                     LHConstants.SEND_EMAIL_TASK,
                     customerEmail,
                     "Follow-up scheduled",
-                    "We've scheduled a follow-up on " + analysis.jsonPath("$.followUpDate"));
+                    "We've scheduled a follow-up on " + analysis.jsonPath("$.followUpTimestamp")).withRetries(5);
         });
     }
 

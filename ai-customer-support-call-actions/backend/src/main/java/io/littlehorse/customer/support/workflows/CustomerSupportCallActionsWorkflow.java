@@ -14,25 +14,23 @@ public class CustomerSupportCallActionsWorkflow {
     public void workflowSpec(WorkflowThread wf) {
         // Declare input variables
         WfRunVariable callId = wf.declareStr("call-id").searchable().required();
-        WfRunVariable customerEmail =
-                wf.declareStr("customer-email").searchable().required();
+        WfRunVariable customerEmail = wf.declareStr("customer-email").searchable().required();
 
         // Step 1: Transcribe the call
-        NodeOutput transcript = wf.execute(LHConstants.TRANSCRIBE_CALL_TASK, callId, customerEmail)
+        NodeOutput transcript = wf.execute(LHConstants.TRANSCRIBE_CALL_TASK, callId, customerEmail).withRetries(5)
                 .timeout(60 * 5);
 
         // Step 2: Determine if there are any actions to take
-        NodeOutput actionsToTake =
-                wf.execute(LHConstants.DETERMINE_ACTIONS_TASK, transcript).timeout(60 * 5);
+        NodeOutput actionsToTake = wf.execute(LHConstants.DETERMINE_ACTIONS_TASK, transcript).withRetries(5)
+                .timeout(60 * 5);
 
         // Step 3: Either run workflows or create user task
         wf.doIf(wf.condition(actionsToTake, Comparator.NOT_EQUALS, null), ifHandler -> {
             // Run the identified workflows
-            ifHandler.execute(LHConstants.RUN_WORKFLOWS_TASK, actionsToTake);
+            ifHandler.execute(LHConstants.RUN_WORKFLOWS_TASK, actionsToTake).withRetries(5);
         });
 
         // Require a human to verify that no actions are needed to be taken
-
     }
 
     /**
