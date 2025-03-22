@@ -20,3 +20,7 @@ To install `lhctl`, you can run:
 ```bash
 brew install littlehorse-enterprises/lh/lhctl
 ```
+
+## Running the examples
+
+Whenever you run an example, you will be able to view the dashboard at [http://localhost:8080](http://localhost:8080).

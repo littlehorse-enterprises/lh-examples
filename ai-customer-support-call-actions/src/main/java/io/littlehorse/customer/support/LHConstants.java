@@ -28,11 +28,11 @@ public final class LHConstants {
     public static final String SCHEDULE_FOLLOW_UP_TASK = "schedule-follow-up";
 
     // Used in escalate-case workflow
-    public static final String ESCALATE_CASE_TASK = "escalate-case-task";
+    public static final String ESCALATE_CASE_TASK = "escalate-case";
 
     // Used in multiple workflows
     public static final String AUDIT_LOG_TASK = "audit-log";
-    public static final String SEND_EMAIL_TASK = "send-email-task";
+    public static final String SEND_EMAIL_TASK = "send-email";
 
     private LHConstants() {
         // Private constructor to prevent instantiation

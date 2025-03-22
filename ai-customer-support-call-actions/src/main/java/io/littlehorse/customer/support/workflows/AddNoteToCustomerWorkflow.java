@@ -3,6 +3,7 @@ package io.littlehorse.customer.support.workflows;
 import io.littlehorse.customer.support.LHConstants;
 import io.littlehorse.sdk.common.proto.Comparator;
 import io.littlehorse.sdk.wfsdk.NodeOutput;
+import io.littlehorse.sdk.wfsdk.TaskNodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
@@ -26,7 +27,7 @@ public class AddNoteToCustomerWorkflow {
                 wf.condition(analysis.jsonPath("$.containsSensitiveInfo"), Comparator.EQUALS, true),
                 ifHandler -> {
                     // Redact sensitive information
-                    NodeOutput redactedNote = ifHandler
+                    TaskNodeOutput redactedNote = ifHandler
                             .execute(LHConstants.REDACT_SENSITIVE_INFO_TASK, analysis.jsonPath("$.text"))
                             .withRetries(5);
 

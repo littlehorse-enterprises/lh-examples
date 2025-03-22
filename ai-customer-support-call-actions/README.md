@@ -4,18 +4,10 @@ This example demonstrates how LittleHorse can be used with LLMs as an AI Agent t
 
 ## Running the example
 
-Export your OpenAI API key as an environment variable:
-
-```bash
-export OPENAI_API_KEY=sk-proj-XXX
-```
-
 Then run the example:
 
 ```bash
 ./gradlew run
 ```
 
-This will register the metadata needed, start the task workers, and execute a `WfRun` for the `CustomerSupportWorkflow`.
-
-## Understanding the example
+This will register the metadata needed, start the task workers, and execute a `WfRun` for the `ai-customer-support-call-actions`.
