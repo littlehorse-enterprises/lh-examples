@@ -92,7 +92,7 @@ At this point, whether you are using a local Docker deployment or a LittleHorse 
 }
 ```
 
-**You should also be able to see the dashboard** at `https://localhost:8080`. It should be empty, but we will put some data in there soon when we run the workflow!
+**You should also be able to see the dashboard** at `http://localhost:8080`. It should be empty, but we will put some data in there soon when we run the workflow!
 
 If you _can't_ get the above to work, please let us know on our [Community Slack Workspace](https://launchpass.com/littlehorsecommunity). We'll be happy to help.
 
