@@ -1,4 +1,3 @@
-from utils.model import model
 from utils.worker_registry import worker
 from utils.constants import TaskDefNames
 
@@ -6,7 +5,7 @@ from utils.constants import TaskDefNames
 async def orchestrate_topics(prompt: str) -> str:
     return prompt
 
-@worker(TaskDefNames.DELEGATE_WORKERS)
+@worker(TaskDefNames.DELEGATE_WORKER)
 async def delegate_workers(_: str) -> str:
   pass
 
