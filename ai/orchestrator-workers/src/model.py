@@ -9,4 +9,4 @@ load_dotenv()
 if not os.environ.get("OPENAI_API_KEY"):
     os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
 
-model = init_chat_model("gpt-4o-mini", model_provider="openai") 
+llm = init_chat_model("gpt-4o-mini", model_provider="openai") 

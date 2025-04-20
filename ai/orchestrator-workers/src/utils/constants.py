@@ -20,4 +20,5 @@ class ThreadNames(str, Enum):
 class VariableNames(str, Enum):
     """Enumeration of Variable names."""
     
+    INITIAL_PROMPT = "initial-prompt"
     WORKER_PROMPTS = "worker-prompts"
