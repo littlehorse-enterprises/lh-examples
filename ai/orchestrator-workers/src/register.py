@@ -4,7 +4,7 @@ import littlehorse
 from workers import *
 from littlehorse import create_task_def, create_workflow_spec
 from littlehorse.config import LHConfig
-from littlehorse.model import DeleteTaskDefRequest, LHErrorType, TaskDefId
+from littlehorse.model import DeleteTaskDefRequest, LHErrorType, TaskDefId, VariableType
 from littlehorse.worker import LHTaskWorker
 from littlehorse.workflow import Workflow, WorkflowThread
 from utils.constants import TaskDefNames, ThreadNames, VariableNames, WorkflowNames
@@ -19,7 +19,7 @@ def get_workflow() -> Workflow:
     def startup_generator(wf: WorkflowThread) -> None:
         initial_prompt = wf.declare_str(
             VariableNames.INITIAL_PROMPT).required()
-        worker_prompts = wf.declare_json_obj(VariableNames.WORKER_PROMPTS)
+        worker_prompts = wf.declare_json_arr(VariableNames.WORKER_PROMPTS)
 
         orchestrated_worker_prompts = wf.execute(
             TaskDefNames.ORCHESTRATE_TOPICS, initial_prompt)
@@ -29,16 +29,19 @@ def get_workflow() -> Workflow:
         logger.info(
             f"Type of orchestrated worker prompts: {type(orchestrated_worker_prompts)}")
 
-        worker_prompts.assign(orchestrated_worker_prompts)
+        worker_prompts.assign(
+            orchestrated_worker_prompts.with_json_path("$.topics"))
 
         # Create a dictionary from the topics array
 
         def delegate_workers(thread: WorkflowThread) -> None:
-            print(thread)
-            # thread.execute(TaskDefNames.DELEGATE_WORKER, "")
+            prompts = thread.declare_json_arr("prompts")
+            logger.info(f"Prompts: {prompts}")
+            # logger.info(f"Input: {input}")
+            thread.execute(TaskDefNames.DELEGATE_WORKER, "")
 
-        worker_threads = wf.spawn_thread_for_each(worker_prompts.with_json_path(
-            "$.topics"), delegate_workers, ThreadNames.DELEGATE_WORKERS)
+        worker_threads = wf.spawn_thread_for_each(
+            worker_prompts, delegate_workers, ThreadNames.DELEGATE_WORKERS, {"prompts": worker_prompts})
         wf.wait_for_threads(worker_threads)
 
         wf.execute(TaskDefNames.SYNTHESIZE_REPORTS, "")
