@@ -24,3 +24,6 @@ class VariableNames(str, Enum):
 
     CUSTOMER_ID = "customer-id"
     APPROVED_EMAIL = "approved-email"
+    INSTRUCTIONS = "instructions"
+    FEEDBACK = "feedback"
+    PREVIOUS_EMAIL = "previous-email"

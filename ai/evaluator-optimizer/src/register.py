@@ -13,23 +13,26 @@ from utils.logger import logger
 
 # The logic for our WfSpec (workflow) lives in this function!
 
-
 def get_workflow() -> Workflow:
 
     def sales_email_personalization(wf: WorkflowThread) -> None:
+        # Inputs
         customer_id = wf.declare_str(VariableNames.CUSTOMER_ID).required()
-        approved_email = wf.declare_bool(
-            VariableNames.APPROVED_EMAIL, False)
+        instructions = wf.declare_str(VariableNames.INSTRUCTIONS).required()
 
-        crm_data = wf.execute(
-            TaskDefNames.FETCH_CUSTOMER_CRM_DATA, customer_id)
+        # Internal Variables
+        feedback = wf.declare_str(VariableNames.FEEDBACK)
+        customer_data = wf.execute(TaskDefNames.FETCH_CUSTOMER_CRM_DATA, customer_id)
+        previous_email = wf.declare_str(VariableNames.PREVIOUS_EMAIL)
 
         def do_while_body(dwt: WorkflowThread) -> None:
-            email = dwt.execute(TaskDefNames.GENERATE_EMAIL, crm_data)
-            approved = dwt.execute(TaskDefNames.APPROVE_EMAIL, email)
-            approved_email.assign(approved)
+            email = dwt.execute(TaskDefNames.GENERATE_EMAIL, customer_data, instructions, feedback, previous_email)
+            previous_email.assign(email)
+            
+            ai_evaluator_feedback = dwt.execute(TaskDefNames.APPROVE_EMAIL, email)
+            feedback.assign(ai_evaluator_feedback)
 
-        wf.do_while(approved_email.is_equal_to(False), do_while_body)
+        wf.do_while(feedback.is_not_equal_to(""), do_while_body)
 
     return Workflow(WorkflowNames.SALES_EMAIL_PERSONALIZATION, sales_email_personalization)
 
