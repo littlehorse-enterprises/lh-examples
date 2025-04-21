@@ -28,7 +28,7 @@ async def orchestrate_topics(prompt: str) -> str:
 
     response = chat.invoke([
         SystemMessage(
-            content="You are an experienced and helpful AI orchesrator who will create a series of prompts for other AI LLM workers that represent specific topics to research to form a full business plan."),
+            content="You are an expert research coordinator who specializes in breaking down complex business challenges into specific, actionable research topics. Your role is to generate focused prompts that will guide other AI workers in conducting thorough research. Each prompt should be clear, specific, and designed to yield valuable insights that can be synthesized into a comprehensive business plan."),
         HumanMessage(content=prompt)
     ])
 
@@ -36,8 +36,13 @@ async def orchestrate_topics(prompt: str) -> str:
 
 
 @worker(TaskDefNames.DELEGATE_WORKER)
-async def delegate_worker(_: str) -> str:
-    return _
+async def delegate_worker(prompt: str) -> str:
+    response = llm.invoke([
+        SystemMessage(
+            content="You are an expert research analyst who specializes in conducting thorough investigations on specific business topics. Your role is to analyze the given research prompt, gather relevant information, and provide comprehensive insights. Focus on delivering factual, well-structured information that contributes to the overall business plan. Keep your responses clear, concise, and directly address the research topic at hand. Be consice and limit your response to 3 points."),
+        HumanMessage(content=prompt)
+    ])
+    return response.content
 
 
 @worker(TaskDefNames.SYNTHESIZE_REPORTS)
