@@ -16,29 +16,22 @@ from utils.logger import logger
 
 def get_workflow() -> Workflow:
 
-    def startup_generator(wf: WorkflowThread) -> None:
-        initial_prompt = wf.declare_str(
-            VariableNames.INITIAL_PROMPT).required()
-        worker_prompts = wf.declare_json_arr(VariableNames.WORKER_PROMPTS)
+    def sales_email_personalization(wf: WorkflowThread) -> None:
+        customer_id = wf.declare_str(VariableNames.CUSTOMER_ID).required()
+        approved_email = wf.declare_bool(
+            VariableNames.APPROVED_EMAIL, False)
 
-        orchestrated_worker_prompts = wf.execute(
-            TaskDefNames.ORCHESTRATE_TOPICS, initial_prompt)
+        crm_data = wf.execute(
+            TaskDefNames.FETCH_CUSTOMER_CRM_DATA, customer_id)
 
-        worker_prompts.assign(
-            orchestrated_worker_prompts.with_json_path("$.topics"))
+        def do_while_body(dwt: WorkflowThread) -> None:
+            email = dwt.execute(TaskDefNames.GENERATE_EMAIL, crm_data)
+            approved = dwt.execute(TaskDefNames.APPROVE_EMAIL, email)
+            approved_email.assign(approved)
 
-        def delegate_workers(thread: WorkflowThread) -> None:
-            thread.execute(TaskDefNames.DELEGATE_WORKER, "")
+        wf.do_while(approved_email.is_equal_to(False), do_while_body)
 
-        worker_threads = wf.spawn_thread_for_each(
-            worker_prompts, delegate_workers, ThreadNames.DELEGATE_WORKERS)
-
-        wf.wait_for_threads(worker_threads)
-
-        wf.execute(TaskDefNames.SYNTHESIZE_REPORTS, "")
-
-    # Provide the name of the WfSpec and a function which has the logic.
-    return Workflow(WorkflowNames.STARTUP_GENERATOR, startup_generator)
+    return Workflow(WorkflowNames.SALES_EMAIL_PERSONALIZATION, sales_email_personalization)
 
 
 async def main() -> None:
