@@ -1,15 +1,13 @@
 import asyncio
 
-import littlehorse
-from workers import *
-from littlehorse import create_task_def, create_workflow_spec
+from littlehorse import create_workflow_spec
 from littlehorse.config import LHConfig
-from littlehorse.model import DeleteTaskDefRequest, LHErrorType, TaskDefId, VariableType
-from littlehorse.worker import LHTaskWorker
+from littlehorse.model import VariableType
 from littlehorse.workflow import Workflow, WorkflowThread
 from utils.constants import TaskDefNames, ThreadNames, VariableNames, WorkflowNames
-from utils.worker_registry import WorkerRegistry
 from utils.logger import logger
+from utils.worker_registry import WorkerRegistry
+from workers import *
 
 # The logic for our WfSpec (workflow) lives in this function!
 

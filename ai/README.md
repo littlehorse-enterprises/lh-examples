@@ -2,6 +2,12 @@
 
 This directory contains practical examples of how to build AI-powered applications using LittleHorse. LittleHorse is a workflow engine that helps you coordinate different AI tasks, handle errors, and manage complex processes. Think of it like a conductor for your AI orchestra - it helps different AI components work together smoothly.
 
+## Repo Directory
+
+- [Evaluator Optimizer](./evaluator-optimizer/)
+- [Orchestrator Workers](./orchestrator-workers/)
+- [Routing](./routing/)
+
 ## Building Blocks: The Augmented LLM
 
 ![Augmented LLM](./augmented-llm.png)
