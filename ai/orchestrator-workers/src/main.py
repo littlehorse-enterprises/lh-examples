@@ -2,16 +2,16 @@ import asyncio
 
 from littlehorse import create_workflow_spec
 from littlehorse.config import LHConfig
-from littlehorse.model import VariableType
+from littlehorse.model import RunWfRequest, VariableType, VariableValue
 from littlehorse.workflow import Workflow, WorkflowThread
-from utils.constants import TaskDefNames, ThreadNames, VariableNames, WorkflowNames
+from utils.constants import (TaskDefNames, ThreadNames, VariableNames,
+                             WorkflowNames)
 from utils.logger import logger
 from utils.worker_registry import WorkerRegistry
 from workers import *
 
+
 # The logic for our WfSpec (workflow) lives in this function!
-
-
 def get_workflow() -> Workflow:
 
     def startup_generator(wf: WorkflowThread) -> None:
@@ -51,17 +51,23 @@ def get_workflow() -> Workflow:
 async def main() -> None:
     # Config
     config = LHConfig()
+    client = config.stub()
 
-    # stub = config.stub()
-    # WorkerRegistry.delete_all(stub)
+    # WorkerRegistry.delete_all(client) 
 
     # Register
-    logger.info("Registering TaskDefs and a WfSpec")
+    logger.info("Registering LittleHorse metadata.")
     WorkerRegistry.register_all(config)
     create_workflow_spec(get_workflow(), config)
 
+    client.RunWf(RunWfRequest(
+        wf_spec_name=WorkflowNames.STARTUP_GENERATOR,
+        variables={
+            VariableNames.INITIAL_PROMPT: VariableValue(str="I want to start a boba matcha business in Las Vegas."),
+        }
+    ))
+
     # Start Task Workers
-    logger.info("Starting Task Worker")
     await WorkerRegistry.start_all(config)
 
 

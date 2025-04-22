@@ -41,7 +41,7 @@ def get_workflow() -> Workflow:
         wf.do_if(route.is_equal_to(TaskDefNames.TECHNICAL_SUPPORT), handle_technical_support)
         wf.do_if(route.is_equal_to(UserTaskDefNames.OTHER), handle_other)
 
-        wf.mutate(email_request.with_json_path("$.to"), VariableMutationType.ASSIGN, customer_data.with_json_path("$.email"))
+        email_request.with_json_path("$.to").assign(customer_data.with_json_path("$.email"))
 
         wf.execute(TaskDefNames.SEND_EMAIL, email_request, retries=3)
 
@@ -73,6 +73,8 @@ async def main() -> None:
     # Config
     config = LHConfig()
     client = config.stub()
+
+    # WorkerRegistry.delete_all(client)
 
     # Register Metadata
     WorkerRegistry.register_all(config)

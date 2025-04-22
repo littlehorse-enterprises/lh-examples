@@ -2,7 +2,6 @@
 from enum import Enum
 
 
-
 class UserTaskDefNames(str, Enum):
     """Constants for UserTaskDefs names."""
 
