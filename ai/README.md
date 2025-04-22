@@ -10,7 +10,7 @@ This directory contains practical examples of how to build AI-powered applicatio
 
 ## Building Blocks: The Augmented LLM
 
-![Augmented LLM](./augmented-llm.png)
+![Augmented LLM](./images/augmented-llm.png)
 
 When we talk about an "augmented LLM" (Large Language Model), we mean an AI system that can do more than just chat. It's like giving your AI assistant superpowers:
 
@@ -26,7 +26,7 @@ When we talk about an "augmented LLM" (Large Language Model), we mean an AI syst
 
 Prompt chaining decomposes a task into a sequence of steps, where each LLM call processes the output of the previous one. You can add programmatic checks (see "gate” in the diagram below) on any intermediate steps to ensure that the process is still on track.
 
-![The prompt chaining workflow](./prompt-chaining.png)
+![The prompt chaining workflow](./images/prompt-chaining.png)
 
 **When to use this workflow:** This workflow is ideal for situations where the task can be easily and cleanly decomposed into fixed subtasks. The main goal is to trade off latency for higher accuracy, by making each LLM call an easier task.
 
@@ -39,7 +39,7 @@ Prompt chaining decomposes a task into a sequence of steps, where each LLM call 
 
 Routing classifies an input and directs it to a specialized followup task. This workflow allows for separation of concerns, and building more specialized prompts. Without this workflow, optimizing for one kind of input can hurt performance on other inputs.
 
-![The routing workflow](./routing.png)
+![The routing workflow](./images/routing.png)
 
 **When to use this workflow:** Routing works well for complex tasks where there are distinct categories that are better handled separately, and where classification can be handled accurately, either by an LLM or a more traditional classification model/algorithm.
 
@@ -55,7 +55,7 @@ LLMs can sometimes work simultaneously on a task and have their outputs aggregat
 - **Sectioning:** Breaking a task into independent subtasks run in parallel.
 - **Voting:** Running the same task multiple times to get diverse outputs.
 
-![The parallelization workflow](./parallelization.png)
+![The parallelization workflow](./images/parallelization.png)
 
 **When to use this workflow:** Parallelization is effective when the divided subtasks can be parallelized for speed, or when multiple perspectives or attempts are needed for higher confidence results. For complex tasks with multiple considerations, LLMs generally perform better when each consideration is handled by a separate LLM call, allowing focused attention on each specific aspect.
 
@@ -72,7 +72,7 @@ LLMs can sometimes work simultaneously on a task and have their outputs aggregat
 
 In the orchestrator-workers workflow, a central LLM dynamically breaks down tasks, delegates them to worker LLMs, and synthesizes their results.
 
-![The orchestrator-workers workflow](./orchestrator-workers.png)
+![The orchestrator-workers workflow](./images/orchestrator-workers.png)
 
 **When to use this workflow:** This workflow is well-suited for complex tasks where you can’t predict the subtasks needed (in coding, for example, the number of files that need to be changed and the nature of the change in each file likely depend on the task). Whereas it’s topographically similar, the key difference from parallelization is its flexibility—subtasks aren't pre-defined, but determined by the orchestrator based on the specific input.
 
@@ -86,7 +86,7 @@ In the orchestrator-workers workflow, a central LLM dynamically breaks down task
 
 In the evaluator-optimizer workflow, one LLM call generates a response while another provides evaluation and feedback in a loop.
 
-![The evaluator-optimizer workflow](./evaluator-optimizer.png)
+![The evaluator-optimizer workflow](./images/evaluator-optimizer.png)
 
 **When to use this workflow:** This workflow is particularly effective when we have clear evaluation criteria, and when iterative refinement provides measurable value. The two signs of good fit are, first, that LLM responses can be demonstrably improved when a human articulates their feedback; and second, that the LLM can provide such feedback.
 
