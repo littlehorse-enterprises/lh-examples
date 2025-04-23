@@ -3,21 +3,14 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 from langchain_postgres import PGVector
-import hashlib
-import psycopg2
-from typing import Any, List
-
-import littlehorse
-from littlehorse.worker import LHTaskWorker, WorkerContext
-from littlehorse.config import LHConfig
-from littlehorse import create_task_def
+from typing import Any
 
 from littlehorse.workflow import Workflow, WorkflowThread
 
 from langchain_core.documents import Document
 from database import CONNECT
 
-load_dotenv() #Loads openai api key
+load_dotenv() 
 
 async def load_pdf(s3_key: str) -> list[Any]:
 
@@ -25,6 +18,7 @@ async def load_pdf(s3_key: str) -> list[Any]:
     pages = []
     for page in loader.lazy_load():
         pages.append(page.page_content)
+
     return pages #list of str
 
 

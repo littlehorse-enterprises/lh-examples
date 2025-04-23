@@ -1,80 +1,61 @@
-from RAG import RAG_Agent
-import os
-import time
-import random
+from process_data import load_pdf, chunk_text, embed_and_store, get_workflow
+import sys
+import hashlib
 
-from langchain.chat_models import init_chat_model
-from process_data import process, load_pdf, chunk_text, embed_and_store
+from littlehorse.config import LHConfig
+from littlehorse.worker import LHTaskWorker
+from littlehorse import create_task_def, create_workflow_spec
+import littlehorse
+import asyncio
+from littlehorse.workflow import Workflow
+from littlehorse.model import RunWfRequest, VariableValue
 
-ASTRONOMY = "./data/Astronomy"
-OCEANOGRAPHY = "./data/Oceanography"
-EVOLUTION = "./data/Evolution"
+config = LHConfig()
+client = config.stub()
+
+workers = [
+    LHTaskWorker(load_pdf, "load-pdf", config),
+    LHTaskWorker(chunk_text, "chunk-text", config),
+    LHTaskWorker(embed_and_store, "embed-and-store", config)
+]
+
+async def get_pdf_hash(pdf_path):
+
+    with open(pdf_path, "rb") as f:
+        pdf_bytes = f.read()
+    return hashlib.sha256(pdf_bytes).hexdigest()
+
+def get_object_size(obj) -> str:
+    """Returns the size of an object in a human-readable format."""
+    size_bytes = sys.getsizeof(obj)
+    if size_bytes < 1024:
+        return f"{size_bytes} bytes"
+    elif size_bytes < 1024 ** 2:
+        return f"{size_bytes / 1024:.2f} KB"
+    else:
+        return f"{size_bytes / (1024 ** 2):.2f} MB"
+
+
+async def main():
+    file_path = "Astronomy/s41550-025-02480-3.pdf"
+
+    pdf_hash = await get_pdf_hash("./data/" + file_path)
+
+    create_task_def(load_pdf, "load-pdf", config, timeout=100),
+    create_task_def(chunk_text, "chunk-text", config),
+    create_task_def(embed_and_store, "embed-and-store", config)
+
+    create_workflow_spec(get_workflow(), config)
+
+    request = RunWfRequest(
+                wf_spec_name="load-chunk-embed-pdf",
+                variables={"s3-id": VariableValue(str=file_path)},
+                id=pdf_hash
+        )
+    print(request)
+    client.RunWf(request)
+
+    await littlehorse.start(workers[0], workers[1], workers[2])
 
 if __name__ == "__main__":
-
-    Astronomy_agent = RAG_Agent(
-        file_path=ASTRONOMY,
-        collection_name="Astronomy"
-    )
-
-    Oceanography_agent = RAG_Agent(
-        file_path=OCEANOGRAPHY,
-        collection_name="Oceanography"
-    )
-
-    Evolution_agent = RAG_Agent(
-        file_path=EVOLUTION,
-        collection_name="Evolution"
-    )
-
-
-
-    agents = [
-        ("Astronomy", ASTRONOMY, Astronomy_agent),
-        ("Oceanography", OCEANOGRAPHY, Oceanography_agent),
-        ("Evolution", EVOLUTION, Evolution_agent),
-    ]
-
-
-    progress_trackers = {
-        "Astronomy": 0,
-        "Oceanography": 0,
-        "Evolution": 0,
-    }
-
-    summaries = []
-
-    text_to_summarize = ""
-
-    while True:  
-        topic, path, agent = random.choice(agents)
-        print(f"Selected topic: {topic}")
-
-        pdfs = sorted(os.listdir(path))
-        tracker = progress_trackers[topic]
-
-        if tracker >= len(pdfs):
-            print(f"All files in {topic} have been processed.")
-            continue
-
-        pdf = pdfs[tracker]
-        file_path = os.path.join(path, pdf)
-        print(f"Processing {file_path}")
-        process(file_path, topic) #--> yuga
-
-        text_to_summarize = text_to_summarize + agent.generate() + "\n\n" #auto called 
-
-
-        llm = init_chat_model("openai:gpt-4.1")
-        
-        promtpt = f""" Give me a detailed summary of the provided text: 
-        
-                        {text_to_summarize}""" 
-
-        answer = llm.invoke(promtpt)
-        print(answer.content)
-
-
-        progress_trackers[topic] += 1
-
-        time.sleep(random.randint(5, 20))
+    asyncio.run(main())
