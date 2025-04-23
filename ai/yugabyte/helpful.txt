@@ -1,0 +1,28 @@
+Some helpful suggestions along the way:
+
+1. You must explicitly state parameter types AND return type in the function definition.
+    This is because LittleHorse does a lot of type checking when a Task is registered to the LittleHorse Server.
+    Otherwise, LittleHorse will raise errors when trying to run create_task_def()
+
+    1a. Also, all LH Task Definitions must have the 'async' keyword
+
+    For example, this IS a VALID LH Task Definition: 
+
+        async def function(a: int, b: int) -> int:   
+    
+    However, these are NOT:
+
+        def function(a, b):
+        def function(a: int, b: int):
+        def function(a, b) -> int:
+
+2. When registering a TaskDef with the LittleHorse Server, the task name must be lowercase and not contain spaces
+
+    Allowed: 
+        "this-is-a-valid-task-name"
+        "validtaskname"
+        
+    Not Allowed:
+        "This is Not Valid"
+        "NotValid"
+
