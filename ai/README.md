@@ -2,6 +2,8 @@
 
 This directory contains practical examples of how to build AI-powered applications using LittleHorse. LittleHorse is a workflow engine that helps you coordinate different AI tasks, handle errors, and manage complex processes. Think of it like a conductor for your AI orchestra - it helps different AI components work together smoothly.
 
+We highly recommend reading this entire README before diving into the examples to get a base understanding of AI Agent Workflow patterns.
+
 ## Repo Directory
 
 - [Evaluator Optimizer](./evaluator-optimizer/)
@@ -74,7 +76,7 @@ In the orchestrator-workers workflow, a central LLM dynamically breaks down task
 
 ![The orchestrator-workers workflow](./images/orchestrator-workers.png)
 
-**When to use this workflow:** This workflow is well-suited for complex tasks where you can’t predict the subtasks needed (in coding, for example, the number of files that need to be changed and the nature of the change in each file likely depend on the task). Whereas it’s topographically similar, the key difference from parallelization is its flexibility—subtasks aren't pre-defined, but determined by the orchestrator based on the specific input.
+**When to use this workflow:** This workflow is well-suited for complex tasks where you can’t predict the subtasks needed (in coding, for example, the number of files that need to be changed and the nature of the change in each file likely depend on the task). Whereas it’s topographically similar to the routing example, the key difference from parallelization is its flexibility—subtasks aren't pre-defined, but determined by the orchestrator based on the specific input.
 
 **Examples where orchestrator-workers is useful:**
 

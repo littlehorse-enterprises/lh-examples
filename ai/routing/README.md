@@ -2,6 +2,8 @@
 
 This example demonstrates how to build an AI-powered customer service routing system using LittleHorse. The workflow automatically routes customer inquiries to the appropriate support channel based on the content of their message.
 
+This uses the [routing workflow pattern](../README.md#routing) that we discuss in the parent README.
+
 ## Features
 
 - AI-powered message classification using LangChain and OpenAI
@@ -41,7 +43,13 @@ pip install -r requirements.txt
 
 4. Set up your environment variables:
 
-Copy the `.env.example` file and rename it to `.env`. Now update the env with your OpenAI API key.
+Copy the `.env.example` file and rename it to `.env`.
+
+Now update the env with your OpenAI API key.
+
+```bash
+OPENAI_API_KEY=sk-proj-XXXXXXXX
+```
 
 ## How It Works
 
