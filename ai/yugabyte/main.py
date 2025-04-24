@@ -5,24 +5,21 @@ import numpy as np
 import os
 import time
 
+import psycopg2
 from littlehorse.config import LHConfig
 from littlehorse.worker import LHTaskWorker
 from littlehorse import create_task_def, create_workflow_spec
 import littlehorse
 import asyncio
-from littlehorse.workflow import Workflow
-from littlehorse.model import RunWfRequest, VariableValue
+from littlehorse.workflow import Workflow, WorkflowThread
+from littlehorse.model import RunWfRequest, VariableValue, ScheduleWfRequest
+from database import CONNECT
+
+from langchain.chat_models import init_chat_model
+
 
 config = LHConfig()
 client = config.stub()
-
-workers = [
-    LHTaskWorker(load_pdf, "load-pdf", config),
-    LHTaskWorker(chunk_text, "chunk-text", config),
-    LHTaskWorker(embed_and_store, "embed-and-store", config),
-    LHTaskWorker(generate, "generate-summary", config),
-    LHTaskWorker(store_summary, "store-summary", config)
-]
 
 async def get_pdf_hash(pdf_path):
 
@@ -30,19 +27,44 @@ async def get_pdf_hash(pdf_path):
         pdf_bytes = f.read()
     return hashlib.sha256(pdf_bytes).hexdigest()
 
-async def register_tasks():
 
-    create_task_def(load_pdf, "load-pdf", config)
-    create_task_def(chunk_text, "chunk-text", config)
-    create_task_def(embed_and_store, "embed-and-store", config)
-    create_task_def(generate, "generate-summary", config)
-    create_task_def(store_summary, "store-summary", config)
+async def summarize_all() -> str:
+    text_to_summarize = ""
+    with psycopg2.connect(CONNECT) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM summaries")
+            rows = cur.fetchall()
+            for row in rows:
+                text_to_summarize += row[1] + "\n"
+                
+    llm = init_chat_model("openai:gpt-4.1-mini")
+
+    promtpt = f""" Give me a detailed summary of the provided text: 
+
+                        {text_to_summarize}""" 
+
+    answer = llm.invoke(promtpt)
+
+    # print(answer.content)
+    return answer.content
 
 
+
+def get_summary_workflow() -> Workflow:
+
+    def wfSpec(wf: WorkflowThread) -> None:
+
+        wf.execute("summarize-all", timeout_seconds=100, retries=3)
+
+    return Workflow("summarize-all-text", wfSpec)
+
+    
 
 async def main():
 
     create_workflow_spec(get_workflow(), config)
+    create_workflow_spec(get_summary_workflow(), config)
+
 
     progress_trackers = {
             "Astronomy": 0,
@@ -50,8 +72,13 @@ async def main():
             "Evolution": 0,
         }
     
-    count = 0
+    client.ScheduleWf(ScheduleWfRequest(
+            wf_spec_name="summarize-all-text",
+            cron_expression="*/5 * * * *"))
+    
 
+    count = 0
+    
     while count < 3:
 
         topic = np.random.choice(['Astronomy', 'Oceanography', 'Evolution'])
@@ -59,7 +86,6 @@ async def main():
 
         tracker = progress_trackers[topic]
         if tracker >= len(pdfs):
-            print(f"All files in {topic} have been processed.")
             count+= 1
             continue
 
@@ -76,12 +102,9 @@ async def main():
             ))
         
         progress_trackers[topic] += 1
-        time.sleep(5)
-
-async def start_workers():
-    littlehorse.start(*workers)
+        time.sleep(15)
+        
 
 if __name__ == "__main__":
-    asyncio.run(register_tasks())
-    asyncio.run(start_workers())
     asyncio.run(main())
+    
