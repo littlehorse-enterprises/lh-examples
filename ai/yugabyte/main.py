@@ -1,6 +1,9 @@
-from process_data import load_pdf, chunk_text, embed_and_store, get_workflow
+from process_data import load_pdf, chunk_text, embed_and_store, generate, store_summary, get_workflow
 import sys
 import hashlib
+import numpy as np
+import os
+import time
 
 from littlehorse.config import LHConfig
 from littlehorse.worker import LHTaskWorker
@@ -16,7 +19,9 @@ client = config.stub()
 workers = [
     LHTaskWorker(load_pdf, "load-pdf", config),
     LHTaskWorker(chunk_text, "chunk-text", config),
-    LHTaskWorker(embed_and_store, "embed-and-store", config)
+    LHTaskWorker(embed_and_store, "embed-and-store", config),
+    LHTaskWorker(generate, "generate-summary", config),
+    LHTaskWorker(store_summary, "store-summary", config)
 ]
 
 async def get_pdf_hash(pdf_path):
@@ -25,37 +30,58 @@ async def get_pdf_hash(pdf_path):
         pdf_bytes = f.read()
     return hashlib.sha256(pdf_bytes).hexdigest()
 
-def get_object_size(obj) -> str:
-    """Returns the size of an object in a human-readable format."""
-    size_bytes = sys.getsizeof(obj)
-    if size_bytes < 1024:
-        return f"{size_bytes} bytes"
-    elif size_bytes < 1024 ** 2:
-        return f"{size_bytes / 1024:.2f} KB"
-    else:
-        return f"{size_bytes / (1024 ** 2):.2f} MB"
+async def register_tasks():
+
+    create_task_def(load_pdf, "load-pdf", config)
+    create_task_def(chunk_text, "chunk-text", config)
+    create_task_def(embed_and_store, "embed-and-store", config)
+    create_task_def(generate, "generate-summary", config)
+    create_task_def(store_summary, "store-summary", config)
+
 
 
 async def main():
-    file_path = "Astronomy/s41550-025-02480-3.pdf"
-
-    pdf_hash = await get_pdf_hash("./data/" + file_path)
-
-    create_task_def(load_pdf, "load-pdf", config, timeout=100),
-    create_task_def(chunk_text, "chunk-text", config),
-    create_task_def(embed_and_store, "embed-and-store", config)
 
     create_workflow_spec(get_workflow(), config)
 
-    request = RunWfRequest(
-                wf_spec_name="load-chunk-embed-pdf",
-                variables={"s3-id": VariableValue(str=file_path)},
-                id=pdf_hash
-        )
-    print(request)
-    client.RunWf(request)
+    progress_trackers = {
+            "Astronomy": 0,
+            "Oceanography": 0,
+            "Evolution": 0,
+        }
+    
+    count = 0
 
-    await littlehorse.start(workers[0], workers[1], workers[2])
+    while count < 3:
+
+        topic = np.random.choice(['Astronomy', 'Oceanography', 'Evolution'])
+        pdfs = sorted(os.listdir("./data/" + topic))
+
+        tracker = progress_trackers[topic]
+        if tracker >= len(pdfs):
+            print(f"All files in {topic} have been processed.")
+            count+= 1
+            continue
+
+
+        pdf = pdfs[tracker]
+        file_path = os.path.join(topic, pdf)
+
+        pdf_hash = await get_pdf_hash("./data/" + file_path)
+
+        client.RunWf(RunWfRequest(
+                    wf_spec_name="load-chunk-embed-pdf",
+                    variables={"s3-id": VariableValue(str=file_path)},
+                    id=pdf_hash
+            ))
+        
+        progress_trackers[topic] += 1
+        time.sleep(5)
+
+async def start_workers():
+    littlehorse.start(*workers)
 
 if __name__ == "__main__":
+    asyncio.run(register_tasks())
+    asyncio.run(start_workers())
     asyncio.run(main())
