@@ -18,8 +18,8 @@ def get_workflow() -> Workflow:
 
     def wfSpec(wf: WorkflowThread) -> None:
         # Inputs to the workflow
-        customer_message = wf.declare_str(VariableNames.CUSTOMER_MESSAGE).required()
         customer_id = wf.declare_str(VariableNames.CUSTOMER_ID).required().searchable()
+        customer_message = wf.declare_str(VariableNames.CUSTOMER_MESSAGE).required()
         
         customer_data = wf.declare_json_obj(VariableNames.CUSTOMER_DATA)
         customer_data.assign(wf.execute(TaskDefNames.FETCH_CUSTOMER_DATA, customer_id, retries=3))
@@ -70,20 +70,19 @@ put_user_task_def_req = PutUserTaskDefRequest(
     )
 
 async def main() -> None:
-    # Config
     config = LHConfig()
     client = config.stub()
 
+    # Run this incase you need to delete all the TaskDefs
     # WorkerRegistry.delete_all(client)
 
-    # Register Metadata
+    logger.info("Registering LittleHorse metadata.")
     WorkerRegistry.register_all(config)
-
-    logger.info("Registering UserTaskDef")
     client.PutUserTaskDef(put_user_task_def_req)
-
-    logger.info("Registering Workflow")
     create_workflow_spec(get_workflow(), config)
+
+    # Wait for the workflow to be registered
+    await asyncio.sleep(1)
 
     client.RunWf(RunWfRequest(
         wf_spec_name=WorkflowNames.CUSTOMER_SERVICE_ROUTING,
@@ -93,7 +92,6 @@ async def main() -> None:
         }
     ))
 
-    # Start Task Workers
     await WorkerRegistry.start_all(config)
 
 if __name__ == '__main__':

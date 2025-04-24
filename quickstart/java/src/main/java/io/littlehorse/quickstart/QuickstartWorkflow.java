@@ -1,6 +1,8 @@
 package io.littlehorse.quickstart;
 
 import io.littlehorse.sdk.common.proto.LHErrorType;
+import io.littlehorse.sdk.common.proto.VariableMutation;
+import io.littlehorse.sdk.common.proto.VariableMutationType;
 import io.littlehorse.sdk.wfsdk.NodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.Workflow;
@@ -24,7 +26,7 @@ public class QuickstartWorkflow {
         // as input.
         WfRunVariable firstName = wf.declareStr("first-name").searchable().required();
         WfRunVariable lastName = wf.declareStr("last-name").searchable().required();
-
+        var x = wf.declareJsonArr("x").extend(lastName);
         // Social Security Numbers are sensitive, so we mask the variable with
         // `.masked()`.
         WfRunVariable ssn = wf.declareInt("ssn").masked().required();

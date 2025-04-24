@@ -49,16 +49,18 @@ def get_workflow() -> Workflow:
 
 
 async def main() -> None:
-    # Config
     config = LHConfig()
     client = config.stub()
 
+    # Run this incase you need to delete all the TaskDefs
     # WorkerRegistry.delete_all(client) 
 
-    # Register
     logger.info("Registering LittleHorse metadata.")
     WorkerRegistry.register_all(config)
     create_workflow_spec(get_workflow(), config)
+
+    # Wait for the workflow to be registered
+    await asyncio.sleep(1)
 
     client.RunWf(RunWfRequest(
         wf_spec_name=WorkflowNames.STARTUP_GENERATOR,
@@ -67,7 +69,6 @@ async def main() -> None:
         }
     ))
 
-    # Start Task Workers
     await WorkerRegistry.start_all(config)
 
 

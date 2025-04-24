@@ -14,11 +14,6 @@ class WorkflowNames(str, Enum):
 
     SALES_EMAIL_PERSONALIZATION = "sales-email-personalization"
 
-
-class ThreadNames(str, Enum):
-    """Enumeration of Thread names."""
-
-
 class VariableNames(str, Enum):
     """Enumeration of Variable names."""
 
@@ -26,4 +21,4 @@ class VariableNames(str, Enum):
     APPROVED_EMAIL = "approved-email"
     INSTRUCTIONS = "instructions"
     FEEDBACK = "feedback"
-    PREVIOUS_EMAIL = "previous-email"
+    PREVIOUS_INTERACTIONS = "previous-interactions"

@@ -1,11 +1,13 @@
-from typing import Callable, Dict
-import littlehorse
-from littlehorse.worker import LHTaskWorker
-from littlehorse.config import LHConfig
-from littlehorse import create_task_def
-from littlehorse.model import LittleHorseStub, TaskDefId, TaskDef, DeleteTaskDefRequest
-from utils.logger import logger
 from enum import Enum
+from typing import Callable, Dict
+
+import littlehorse
+from littlehorse import create_task_def
+from littlehorse.config import LHConfig
+from littlehorse.model import DeleteTaskDefRequest, LittleHorseStub, TaskDefId
+from littlehorse.worker import LHTaskWorker
+from utils.logger import logger
+
 
 class WorkerRegistry:
     _workers: Dict[str, Callable] = {}
@@ -42,8 +44,8 @@ class WorkerRegistry:
             LHTaskWorker(worker_func, task_name, config)
             for task_name, worker_func in WorkerRegistry._workers.items()
         ]
-        await littlehorse.start(*workers)
         logger.info(f"Started {len(workers)} workers")
+        await littlehorse.start(*workers)
 
 # Create a convenient decorator
 def worker(task_name: str):

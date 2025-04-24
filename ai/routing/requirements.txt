@@ -1,4 +1,4 @@
-littlehorse-client==0.13.1
+littlehorse-client==0.13.2
 typing-extensions==4.13.2
 langchain-openai==0.3.14
 langchain==0.3.23

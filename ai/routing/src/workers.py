@@ -47,7 +47,7 @@ async def ai_router(customer_message: str) -> str:
     return response["route"]
 
 @worker(TaskDefNames.GENERAL_QUESTION)
-async def general_question(customer_message: str, customer_data: dict[str, Any]) -> str:
+async def general_question(customer_message: str, customer_data: dict[str, Any]) -> dict[str, Any]:
     chat = llm.with_structured_output({
         "title": "Email",
         "description": "The email to send to the customer.",
@@ -72,7 +72,7 @@ async def general_question(customer_message: str, customer_data: dict[str, Any])
     return {"subject": response["subject"], "body": response["body"]}
 
 @worker(TaskDefNames.TECHNICAL_SUPPORT)
-async def technical_support(customer_message: str, customer_data: dict[str, Any]) -> str:
+async def technical_support(customer_message: str, customer_data: dict[str, Any]) -> dict[str, Any]:
     chat = llm.with_structured_output({
         "title": "Email",
         "description": "The email to send to the customer.",
@@ -97,7 +97,7 @@ async def technical_support(customer_message: str, customer_data: dict[str, Any]
     return {"subject": response["subject"], "body": response["body"]}
 
 @worker(TaskDefNames.SEND_EMAIL)
-async def send_email(request: dict[str, Any]) -> None:
+async def send_email(request: dict[str, Any]) -> str:
     missing_fields = []
     if not request["to"]:
         missing_fields.append("to")
