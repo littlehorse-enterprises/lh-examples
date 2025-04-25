@@ -37,7 +37,7 @@ This example simulates a multi-agent Retrieval Augmented Generation (RAG) workfl
 
 4. Set up environment variables:
 
-   Rename the `.env.example` file to `.env`
+   Rename the `.env.example` file to `.env` and fill in the OPENAI_API_KEY variable with your API key.
 
 5. Set up your Littlehorse Server and Yugabyte db with Docker:
 
