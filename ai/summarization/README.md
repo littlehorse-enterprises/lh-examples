@@ -1,6 +1,6 @@
 # LittleHorse Enterprises - AI Yugabyte Examples
 
-This example simulates a multi-agent Retrieval Augmented Generation (RAG) workflow for real-time data processing and summarization. This workflow leverages a Yugabyte database with Postgres for data storage and LittleHorse for workflow orchestration. 
+This example simulates a multi-agent Retrieval Augmented Generation (RAG) workflow for real-time data processing and summarization. This workflow leverages a Yugabyte database with Postgres for data storage and LittleHorse for workflow orchestration.
 
 ## Features
 
@@ -13,65 +13,64 @@ This example simulates a multi-agent Retrieval Augmented Generation (RAG) workfl
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.9+
 - OpenAI API key
 - Docker
 
 ## Installation
 
 1. Clone the repository:
-```bash
-   git clone https://github.com/littlehorse-enterprises/lh-examples.git
-   cd lh-examples/ai/summarization
+
+   ```bash
+      git clone https://github.com/littlehorse-enterprises/lh-examples.git
+      cd lh-examples/ai/summarization
    ```
 
 2. Create and activate a python virtual environment:
-```bash
-   python -m venv my_env
-   source ./my_env/bin/activate
-```
+
+   ```bash
+      python -m venv .venv
+      source .venv/bin/activate # On Windows: .venv\Scripts\activate
+   ```
+
 3. Install python dependencies:
-```bash
-   pip install -r requirements.txt
-```
+
+   ```bash
+      pip install -r requirements.txt
+   ```
 
 4. Set up environment variables:
 
-   Rename the `.env.example` file to `.env` and fill in the OPENAI_API_KEY variable with your API key.
+   Rename the `.env.example` file to `.env` and fill in the `OPENAI_API_KEY` variable with your API key.
 
-5. Set up your Littlehorse Server and Yugabyte db with Docker:
+5. Set up your Littlehorse and Yugabyte instances with Docker:
 
-```bash
-   docker compose up
-```
+   ```bash
+      docker compose up
+   ```
+
 Note: you may need to preface the docker command with `sudo`
 
 ## How it Works
 
 The workflow simulates listening to a real-time data stream by keeping a `data` folder that has pdf documents containing research results from different scientific fields. When new data is received, the workflow extracts the text, converts it to embeddings, and stores them in a vector database provided by Yugabyte. An small specialized LLM then generates a quick summary of the data topic after the new results have been processed. The workflow then stores this brief summary in the database. The workflow also schedules a cron job where an LLM with a much larger context window extracts all of the summarized documents across all topics and outputs an overview of the research results at a specified interval.
 
-## Running the Example 
+## Running the Example
 
-Assuming `docker compose up` ran successfully, open up a new terminal, make sure your virtual environment is active and start the task workers by running:
-
-```bash
-   python start_workers.py
-```
-This will register the task definitions `TaskDef`s with the Littlehorse server and start each dedicated task worker to begin polling for tasks. These task workers live on your local machine, and persist until they are stopped. 
-
-Note: if the terminal output says something like: `Establishing insecure channel at localhost:2023`, that is OK.
-
-Next, open up another terminal and register the workflow specifications, or `WfSpec`s and execute `wfRun`s:
+Assuming `docker compose up` ran successfully, open up a new terminal and run:
 
 ```bash
+   source .venv/bin/activate # On Windows: .venv\Scripts\activate
    python main.py
 ```
 
-Again, if you see `Establishing insecure channel at localhost:2023` that is OK.
+This will register the task definitions `TaskDef`s with the Littlehorse server and start each dedicated task worker to begin polling for tasks. These task workers live on your local machine, and persist until they are stopped.
+
+Note: if the terminal output says something like: `Establishing insecure channel at localhost:2023`, that is OK.
 
 That is it! The workflow is now running on Littlehorse! You can view the UI by navigating to the Littlehorse Dashboard at:
 
-`localhost:8080`
+<https://localhost:8080>
 
 There, you will be able to see the various `TaskDef`s and `WfSpec`s that are registered. You can view all of the runs for a specific workflow by clicking on the workflow spec.
 
@@ -80,3 +79,5 @@ The `summarize-all` node in the graph will have a green check mark on it, naviga
 Littlehorse stores and logs the output of all workflow runs
 
 Note: if you want to restart the code, you need to run `docker compose down` and then `docker compose up` again to reset the server.
+
+> Note: This example runs a workflow every 5 minutes to simulate a real-time data stream so make sure when you are done to shut down the server with `docker compose down` to avoid extra charges to OpenAI.

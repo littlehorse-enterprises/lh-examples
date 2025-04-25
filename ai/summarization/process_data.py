@@ -1,21 +1,19 @@
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_openai import OpenAIEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.chat_models import init_chat_model
-from langchain_core.prompts import ChatPromptTemplate
-from dotenv import load_dotenv
-from langchain_postgres import PGVector
+import os
 from typing import Any
 
+import psycopg2
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_core.documents import Document
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import OpenAIEmbeddings
+from langchain_postgres import PGVector
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from littlehorse.workflow import Workflow, WorkflowThread
 
-from langchain_core.documents import Document
-from database import CONNECT
-import psycopg2
-
-
 load_dotenv() 
-
+CONNECT = os.getenv("CONNECT")
 
 async def load_pdf(s3_key: str) -> list[Any]:
 
@@ -80,7 +78,7 @@ async def generate() -> str:
     prompt = prompt.invoke(
         {
             "context": retrieve(),
-            "question": """give me a detailed summary of the context """
+            "question": "give me a detailed summary of the context"
         }
     )
 
@@ -118,10 +116,10 @@ def get_workflow() -> Workflow:
 
         s3_id = wf.declare_str("s3-id").required()
 
-        pages = wf.execute("load-pdf", s3_id, timeout_seconds=100, retries=3)
-        chunks = wf.execute("chunk-text", pages, timeout_seconds=100, retries=3)
-        wf.execute("embed-and-store", chunks, retries=3, timeout_seconds=100)
-        summary = wf.execute("generate-summary", retries=3, timeout_seconds=100)
-        wf.execute("store-summary", summary, retries=3, timeout_seconds=100)
+        pages = wf.execute("load-pdf", s3_id, timeout_seconds=300, retries=3)
+        chunks = wf.execute("chunk-text", pages, retries=3)
+        wf.execute("embed-and-store", chunks, retries=3)
+        summary = wf.execute("generate-summary", retries=3)
+        wf.execute("store-summary", summary, retries=3)
 
     return Workflow("load-chunk-embed-pdf", wfSpec)
