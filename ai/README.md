@@ -9,6 +9,7 @@ We highly recommend reading this entire README before diving into the examples t
 - [Evaluator Optimizer](./evaluator-optimizer/)
 - [Orchestrator Workers](./orchestrator-workers/)
 - [Routing](./routing/)
+- [Summarization](./summarization/)
 
 ## Building Blocks: The Augmented LLM
 

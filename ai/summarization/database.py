@@ -1,1 +1,0 @@
-CONNECT = "postgresql://yugabyte:yugabyte@127.0.1.1:5433/yugabyte"
