@@ -22,23 +22,14 @@ def get_workflow() -> Workflow:
         orchestrated_worker_prompts = wf.execute(
             TaskDefNames.ORCHESTRATE_TOPICS, initial_prompt)
 
-        worker_prompts.assign(
-            orchestrated_worker_prompts.with_json_path("$.topics"))
-
-        # Declare entrypoint variable
-        worker_content = wf.declare_json_arr(
-            VariableNames.WORKER_CONTENT, ["here2"])
+        worker_prompts.assign(orchestrated_worker_prompts.with_json_path("$.topics"))
 
         def delegate_workers(thread: WorkflowThread) -> None:
             worker_prompt = thread.add_variable("INPUT", VariableType.STR)
-            content = thread.execute(
-                TaskDefNames.DELEGATE_WORKER, worker_prompt)
+            content = thread.execute(TaskDefNames.DELEGATE_WORKER, worker_prompt)
+            return content
 
-            # Append to entrypoint variable
-            worker_content.add("item")
-
-        worker_threads = wf.spawn_thread_for_each(
-            worker_prompts, delegate_workers, ThreadNames.DELEGATE_WORKERS)
+        worker_threads = wf.spawn_thread_for_each(worker_prompts, delegate_workers, ThreadNames.DELEGATE_WORKERS)
 
         wf.wait_for_threads(worker_threads)
 

@@ -26,7 +26,6 @@ public class QuickstartWorkflow {
         // as input.
         WfRunVariable firstName = wf.declareStr("first-name").searchable().required();
         WfRunVariable lastName = wf.declareStr("last-name").searchable().required();
-        var x = wf.declareJsonArr("x").extend(lastName);
         // Social Security Numbers are sensitive, so we mask the variable with
         // `.masked()`.
         WfRunVariable ssn = wf.declareInt("ssn").masked().required();

@@ -1,0 +1,50 @@
+services:
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
+    container_name: littlehorse-kernel
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:1822/liveness" ]
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "8080:8080" # Dashboard Port
+      - "2023:2023" # LittleHorse Port
+    environment:
+      - LHC_API_HOST=http://127.0.0.1
+      - LHC_API_PORT=2023
+      - LHC_TENANT_ID=default
+
+  yugabyte:
+    image: yugabytedb/yugabyte:2.25.1.0-b381
+    container_name: yugabyte
+    command: |
+      bin/yugabyted start 
+      --master_flags="ysql_yb_enable_advisory_locks=true,allowed_preview_flags_csv={ysql_yb_enable_advisory_locks}"
+      --tserver_flags="ysql_yb_enable_advisory_locks=true,allowed_preview_flags_csv={ysql_yb_enable_advisory_locks}"
+      --daemon=false
+    ports:
+      - "7001:7000"  # YB Master web interface
+      - "9000:9000"  # TServer web interface
+      - "5433:5433"  # YSQL
+      - "9042:9042"  # YCQL
+      - "10100:10100" # YB Master RPC
+      - "11000:11000" # YB TServer RPC
+      - "12000:12000" # YEDIS
+      - "6379:6379"  # Redis-compatible YEDIS API
+      - "7100:7100"  # YB Master status/info
+      - "7200:7200"  # YB Master admin web server
+      - "9100:9100"  # YB TServer status/info
+    volumes:
+      - yugabyte_data:/home/yugabyte/yb_data
+    environment:
+      - PGDATA=/home/yugabyte/yb_data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7000/status" ]
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  yugabyte_data:
+    driver: local
