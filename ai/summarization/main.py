@@ -1,7 +1,6 @@
 import asyncio
 import hashlib
 import os
-import time
 
 import littlehorse
 import numpy as np
@@ -13,6 +12,7 @@ from littlehorse.config import LHConfig
 from littlehorse.model import RunWfRequest, ScheduleWfRequest, VariableValue
 from littlehorse.worker import LHTaskWorker
 from littlehorse.workflow import Workflow, WorkflowThread
+
 from process_data import (chunk_text, embed_and_store, generate, get_workflow,
                           load_pdf, store_summary)
 
@@ -112,7 +112,6 @@ async def main():
             count += 1
             continue
 
-
         pdf = pdfs[tracker]
         file_path = os.path.join(topic, pdf)
 
@@ -126,7 +125,9 @@ async def main():
             ))
         
         progress_trackers[topic] += 1
-        time.sleep(15)
+
+        await asyncio.sleep(15)
+
 
 async def start_workers():
     print("Starting Task Workers...")

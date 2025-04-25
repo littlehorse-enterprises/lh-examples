@@ -3,8 +3,7 @@ import asyncio
 from littlehorse import create_workflow_spec
 from littlehorse.config import LHConfig
 from littlehorse.model import (PutUserTaskDefRequest, RunWfRequest,
-                               UserTaskField, VariableMutationType,
-                               VariableType, VariableValue)
+                               UserTaskField, VariableType, VariableValue)
 from littlehorse.workflow import Workflow, WorkflowThread
 from utils.constants import (TaskDefNames, UserTaskDefNames, VariableNames,
                              WorkflowNames)
@@ -28,18 +27,12 @@ def get_workflow() -> Workflow:
         route.assign(wf.execute(TaskDefNames.AI_ROUTER, customer_message, retries=3))
         
         email_request = wf.declare_json_obj(VariableNames.EMAIL_REQUEST)
-        def handle_general_question(wf: WorkflowThread) -> None:
-            email_request.assign(wf.execute(TaskDefNames.GENERAL_QUESTION, customer_message, customer_data, retries=3))
 
-        def handle_technical_support(wf: WorkflowThread) -> None:
-            email_request.assign(wf.execute(TaskDefNames.TECHNICAL_SUPPORT, customer_message, customer_data, retries=3))
-
-        def handle_other(wf: WorkflowThread) -> None:
-            email_request.assign(wf.assign_user_task(UserTaskDefNames.OTHER, user_group="customer-support-team").with_notes(wf.format("Customer Data:\n{0}\n\nCustomer Message:\n{1}", customer_data, customer_message)))
-
-        wf.do_if(route.is_equal_to(TaskDefNames.GENERAL_QUESTION), handle_general_question)
-        wf.do_if(route.is_equal_to(TaskDefNames.TECHNICAL_SUPPORT), handle_technical_support)
-        wf.do_if(route.is_equal_to(UserTaskDefNames.OTHER), handle_other)
+        wf.do_if(
+            route.is_equal_to(TaskDefNames.GENERAL_QUESTION), lambda wf: email_request.assign(wf.execute(TaskDefNames.GENERAL_QUESTION, customer_message, customer_data, retries=3))
+        ).do_else_if(
+            route.is_equal_to(TaskDefNames.TECHNICAL_SUPPORT), lambda wf: email_request.assign(wf.execute(TaskDefNames.TECHNICAL_SUPPORT, customer_message, customer_data, retries=3))
+        ).do_else(lambda wf: email_request.assign(wf.assign_user_task(UserTaskDefNames.OTHER, user_group="customer-support-team").with_notes(wf.format("Customer Data:\n{0}\n\nCustomer Message:\n{1}", customer_data, customer_message))))
 
         email_request.with_json_path("$.to").assign(customer_data.with_json_path("$.email"))
 

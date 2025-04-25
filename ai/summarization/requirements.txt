@@ -42,7 +42,7 @@ langgraph-checkpoint==2.0.24
 langgraph-prebuilt==0.1.8
 langgraph-sdk==0.1.61
 langsmith==0.3.32
-littlehorse-client==0.13.1
+littlehorse-client==0.13.2
 marshmallow==3.26.1
 matplotlib-inline==0.1.7
 multidict==6.4.3
