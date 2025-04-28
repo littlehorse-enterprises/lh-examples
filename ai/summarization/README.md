@@ -49,7 +49,7 @@ This example simulates a multi-agent Retrieval Augmented Generation (RAG) workfl
       docker compose up
    ```
 
-Note: you may need to preface the docker command with `sudo`
+Note: you may need to add `sudo` before the docker command.
 
 ## How it Works
 
