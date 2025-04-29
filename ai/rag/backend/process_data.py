@@ -1,5 +1,6 @@
 import os
 from typing import Any
+import io
 
 import psycopg2
 from dotenv import load_dotenv
@@ -12,11 +13,15 @@ from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from littlehorse.workflow import Workflow, WorkflowThread
 
+from PyPDF2 import PdfReader
+
 load_dotenv() 
 CONNECT = os.getenv("CONNECT")
 if not os.getenv("OPENAI_API_KEY"):
     print("Please set the `OPENAI_API_KEY` variable in your `.env` file.")
     os._exit(1)
+
+
 
 async def load_pdf(s3_key: str) -> list[Any]:
 
@@ -27,6 +32,12 @@ async def load_pdf(s3_key: str) -> list[Any]:
 
     return pages #list of str
 
+# async def load_pdf(pdf_bytes: bytes) -> list[Any]:
+#     pdf_stream = io.BytesIO(pdf_bytes)
+#     reader = PdfReader(pdf_stream)
+#     pages = [page.extract_text() for page in reader.pages]
+#     print(type(pages))
+#     return pages
 
 async def chunk_text(pages: list[Any]) -> list[Any]: #Input and output is a list[str]
 
@@ -51,13 +62,13 @@ async def embed_and_store(chunks: list[Any]) -> None:
     document_ids = vector_store.add_documents(documents=[Document(chunk) for chunk in chunks])
 
 ##RAG CODE
-def retrieve():
+async def retrieve() -> str:
         embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
         vector_store = PGVector(
             embeddings=embedding_model,
             connection=CONNECT,
         )
-        question = """give me a detailed summary of {context}""" #key words specific to field here
+        question = "evolution, natural selection, genetics, experiment"
         retrieved_docs = vector_store.similarity_search(question)
         docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
 
@@ -80,7 +91,7 @@ async def generate() -> str:
 
     prompt = prompt.invoke(
         {
-            "context": retrieve(),
+            "context": await retrieve(),
             "question": "give me a detailed summary of the context"
         }
     )
@@ -113,11 +124,12 @@ async def store_summary(summary: str) -> str:
             )
         conn.commit()
 
-def get_workflow() -> Workflow:
+def get_process_data_workflow() -> Workflow:
 
     def wfSpec(wf: WorkflowThread) -> None:
 
         s3_id = wf.declare_str("s3-id").required()
+        # pdf_bytes = wf.declare_bytes("pdf-bytes").required()
 
         pages = wf.execute("load-pdf", s3_id, timeout_seconds=300, retries=3)
         chunks = wf.execute("chunk-text", pages, retries=3)
