@@ -52,8 +52,7 @@ async def embed_and_store(chunks: list[Any]) -> None: # Input is actually a list
 def get_process_data_workflow() -> Workflow:
 
     def wfSpec(wf: WorkflowThread) -> None:
-
-        s3_id = wf.declare_str("s3-id").required()
+        s3_id = wf.declare_str("s3-id").required().searchable()
 
         pages = wf.execute("load-pdf", s3_id, retries=3)
         chunks = wf.execute("chunk-text", pages, retries=3)
