@@ -51,20 +51,34 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
         const trimmedQuestion = customQuestion.trim();
         if (trimmedQuestion) {
             try {
-                await createNewChat(trimmedQuestion);
+                // createNewChat returns the chatId
+                const newChatId = await createNewChat(trimmedQuestion);
+                
+                // Store the new chat ID in sessionStorage
+                sessionStorage.setItem('selectChatId', newChatId);
+                
                 router.refresh();
-                
-                // Wait for the refresh to complete then select the latest chat
-                setTimeout(() => {
-                    setIsNewChat(false);
-                    setCurrentChatIndex(0); // Select the first chat (most recent)
-                }, 100);
-                
                 toast.success("Started new chat with your question!");
             } catch (error) {
                 console.error("Error starting chat with question:", error);
                 toast.error("Failed to start chat with question");
             }
+        }
+    };
+
+    const handleSampleQuestionClick = async (question: string) => {
+        try {
+            // Create new chat directly with the sample question
+            const newChatId = await createNewChat(question);
+            
+            // Store the new chat ID in sessionStorage
+            sessionStorage.setItem('selectChatId', newChatId);
+            
+            router.refresh();
+            toast.success("Started new chat with your question!");
+        } catch (error) {
+            console.error("Error starting chat with question:", error);
+            toast.error("Failed to start chat with question");
         }
     };
 
@@ -80,6 +94,31 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
             setCurrentChatIndex(chatHistories.length - 1);
         }
     }, [chatHistories, currentChatIndex]);
+
+    // Check for the flag to select specific chat on initial render
+    useEffect(() => {
+        if (chatHistories && chatHistories.length > 0) {
+            const chatIdToSelect = sessionStorage.getItem('selectChatId');
+            
+            if (chatIdToSelect) {
+                // Find the index of the chat with this ID
+                const indexToSelect = chatHistories.findIndex(chat => chat.wfRunId === chatIdToSelect);
+                
+                if (indexToSelect !== -1) {
+                    // If found, select that chat
+                    setIsNewChat(false);
+                    setCurrentChatIndex(indexToSelect);
+                } else {
+                    // If not found (which is unusual), select the first chat
+                    setIsNewChat(false);
+                    setCurrentChatIndex(0);
+                }
+                
+                // Clear the session storage so we don't reselect on subsequent renders
+                sessionStorage.removeItem('selectChatId');
+            }
+        }
+    }, [chatHistories]);
 
     // Show new chat page if explicitly set or no chats exist
     if (isNewChat || !chatHistories || chatHistories.length === 0) {
@@ -143,10 +182,7 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
                                     <button
                                         key={index}
                                         className="text-left p-4 rounded-lg bg-[#1a1c23] hover:bg-[#2e2f35] transition-colors border border-[#2e2f35] text-sm text-gray-300"
-                                        onClick={() => {
-                                            setCustomQuestion(question);
-                                            handleCustomQuestionSubmit();
-                                        }}
+                                        onClick={() => handleSampleQuestionClick(question)}
                                     >
                                         {question}
                                     </button>
