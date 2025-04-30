@@ -52,7 +52,7 @@ async def start_workers():
 
 async def process_data():
 
-    file_path = "evolution/s41467-021-23804-7.pdf"
+    file_path = "asset_upload_file425_3964.pdf"
 
     client.RunWf(RunWfRequest(
                     wf_spec_name="load-chunk-embed-pdf",
