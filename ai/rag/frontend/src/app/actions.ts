@@ -3,6 +3,7 @@
 import { getClient } from "@/lib/lhClient";
 import { writeFile } from "fs/promises";
 import { join } from "path";
+import { createHash } from "crypto";
 
 export async function getChatHistories() {
   const lhClient = await getClient({ tenantId: "default" });
@@ -44,9 +45,12 @@ export async function uploadPdf(formData: FormData) {
     throw new Error("Please upload a PDF file");
   }
 
-  // Save to temp directory
+  // Calculate SHA256 hash of the file
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
+  const hash = createHash("sha256").update(buffer).digest("hex");
+
+  // Save to temp directory
   const tempPath = join(process.cwd(), "../backend/temp", file.name);
   await writeFile(tempPath, buffer);
 
@@ -54,10 +58,11 @@ export async function uploadPdf(formData: FormData) {
   const lhClient = await getClient({ tenantId: "default" });
   await lhClient.runWf({
     wfSpecName: "load-chunk-embed-pdf",
+    id: hash,
     variables: {
       "s3-id": { str: file.name },
     },
   });
 
-  return { success: true };
+  return { success: true, wfRunId: hash };
 }
