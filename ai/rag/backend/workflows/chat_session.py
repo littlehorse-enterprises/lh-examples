@@ -1,0 +1,40 @@
+from langchain.chat_models import init_chat_model
+from littlehorse.workflow import Comparator, Workflow, WorkflowThread
+
+llm = init_chat_model(model="gpt-4o-mini")
+
+def chat_workflow() -> Workflow:
+
+    def wfSpec(wf: WorkflowThread) -> None:
+        # Input Variables
+        initial_user_message = wf.declare_str("initial-user-message").required()
+        history = wf.declare_json_arr("chat-history", [])
+
+        history.assign(history.add(initial_user_message))
+        
+        context = wf.execute("retrieve-context", history, timeout_seconds=100)
+        
+        answer = wf.execute("invoke-ai", history, context, timeout_seconds=100)
+        history.assign(history.add(answer))
+
+        wf.execute("post-webhook", history, timeout_seconds=100)
+
+        def chat_loop(loop_body: WorkflowThread) -> None:
+            user_message = loop_body.wait_for_event("user-message")
+            history.assign(history.add(user_message))
+            
+            context = loop_body.execute("retrieve-context", history, timeout_seconds=100)
+            
+            answer = loop_body.execute("invoke-ai", history, context, timeout_seconds=100)
+            history.assign(history.add(answer))
+
+            loop_body.execute("post-webhook", history, timeout_seconds=100)
+
+
+            # loop_body.execute("invoke-ai", user_message, timeout_seconds=100)
+
+        wf.do_while(wf.condition(True, Comparator.EQUALS ,True), chat_loop)
+
+        
+
+    return Workflow("chat-with-llm", wfSpec)

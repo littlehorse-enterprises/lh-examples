@@ -1,6 +1,5 @@
 import os
 from typing import Any
-import io
 
 import psycopg2
 from dotenv import load_dotenv
@@ -13,14 +12,13 @@ from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from littlehorse.workflow import Workflow, WorkflowThread
 
-from PyPDF2 import PdfReader
+# from PyPDF2 import PdfReader
 
 load_dotenv() 
 CONNECT = os.getenv("CONNECT")
 if not os.getenv("OPENAI_API_KEY"):
     print("Please set the `OPENAI_API_KEY` variable in your `.env` file.")
     os._exit(1)
-
 
 
 async def load_pdf(s3_key: str) -> list[Any]:
