@@ -1,13 +1,26 @@
-import ChatBar from "@/components/chat-bar";
+'use client';
+
+import { getChatHistories } from "./actions";
+import { ChatComponents } from "@/components/chat-components";
+import useSWR from 'swr';
 
 export default function Home() {
+
+  const { data: chatHistories, error } = useSWR(
+    'chat-histories',
+    getChatHistories,
+    {
+      refreshInterval: 1000,
+      revalidateOnFocus: true,
+    }
+  );
+
+  if (error) return <div>Failed to load chat histories</div>;
+  if (!chatHistories) return <div>Loading...</div>;
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="w-96">
-          <ChatBar />
-        </div>
-      </main>
+    <div className="flex h-full">
+      <ChatComponents chatHistories={chatHistories} />
     </div>
   );
 }

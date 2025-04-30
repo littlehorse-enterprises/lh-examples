@@ -3,9 +3,9 @@ typing_extensions==4.13.2
 dotenv==0.9.9
 langchain==0.3.24
 langchain_openai==0.3.14
-langchain_postgres==0.0.14
+langchain_postgres==0.0.13
 langchain_community==0.3.23
 
 # Remove later
 pypdf==5.4.0
-psycopg2==2.9.10
+psycopg[binary]==3.2.6
