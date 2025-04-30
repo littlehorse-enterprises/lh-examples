@@ -1,10 +1,10 @@
 "use client";
 
-import { createNewChat } from "@/app/actions";
+import { createNewChat, uploadPdf } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Send } from "lucide-react";
+import { PlusCircle, Send, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatSection } from "./chat";
 import { ChatHistory } from "./chat-history";
@@ -27,6 +27,9 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
     const [currentChatIndex, setCurrentChatIndex] = useState(0);
     const [isNewChat, setIsNewChat] = useState(true);
     const [customQuestion, setCustomQuestion] = useState('');
+    const [uploading, setUploading] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
     // Load prefilled question from localStorage on mount and ensure we start on new chat page
@@ -79,6 +82,82 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
         } catch (error) {
             console.error("Error starting chat with question:", error);
             toast.error("Failed to start chat with question");
+        }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+
+        const newFiles = Array.from(files).filter(file => file.type === 'application/pdf');
+        if (newFiles.length === 0) {
+            toast.error('Please select PDF files only');
+            return;
+        }
+        
+        setSelectedFiles(prev => [...prev, ...newFiles]);
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const removeFile = (index: number) => {
+        setSelectedFiles(prev => {
+            const newFiles = prev.filter((_, i) => i !== index);
+            if (newFiles.length === 0) {
+                toast.info('All files removed');
+            }
+            return newFiles;
+        });
+    };
+
+    const uploadFiles = async () => {
+        if (selectedFiles.length === 0) return;
+
+        try {
+            setUploading(true);
+            let processedCount = 0;
+            let alreadyProcessedCount = 0;
+            let failedCount = 0;
+
+            for (const file of selectedFiles) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    await uploadPdf(formData);
+                    processedCount++;
+                } catch (error: unknown) {
+                    // Check if this is an "already exists" error
+                    if (error instanceof Error && error.message.includes('ALREADY_EXISTS')) {
+                        console.log(`File ${file.name} was already processed`);
+                        alreadyProcessedCount++;
+                    } else {
+                        console.error('Error uploading file:', file.name, error);
+                        failedCount++;
+                    }
+                }
+            }
+            
+            // Show appropriate messages based on results
+            if (alreadyProcessedCount > 0) {
+                toast.info(`${alreadyProcessedCount} PDF${alreadyProcessedCount > 1 ? 's were' : ' was'} already processed.`);
+            }
+
+            if (processedCount > 0) {
+                toast.success(`${processedCount} PDF${processedCount > 1 ? 's' : ''} uploaded and being processed.`);
+            }
+            
+            if (failedCount > 0) {
+                toast.error(`Failed to upload ${failedCount} PDF${failedCount > 1 ? 's' : ''}.`);
+            }
+            
+            setSelectedFiles([]);
+        } catch (error) {
+            console.error('Error in batch upload process:', error);
+            toast.error('Failed to upload PDFs. Please try again.');
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -152,10 +231,39 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
                             <h1 className="text-2xl font-semibold mb-2">Welcome to RAG Chat</h1>
                             <p className="text-gray-400 mb-8">Upload documents or start asking questions about trade policies</p>
                             
+                            {selectedFiles.length > 0 && (
+                                <div className="mb-8 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-400">Selected Files:</span>
+                                        <button
+                                            onClick={uploadFiles}
+                                            disabled={uploading}
+                                            className="text-sm px-3 py-1 bg-[#10A37F] text-white rounded hover:bg-[#0d8e6c] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {uploading ? 'Processing...' : 'Process All'}
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {selectedFiles.map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between bg-[#1a1c23] p-2 rounded">
+                                                <span className="text-sm truncate">{file.name}</span>
+                                                <button
+                                                    onClick={() => removeFile(index)}
+                                                    className="p-1 hover:bg-[#2e2f35] rounded transition-colors"
+                                                    disabled={uploading}
+                                                >
+                                                    <X className="w-4 h-4 text-gray-400 hover:text-gray-200" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            
                             <div className="relative mb-8">
                                 <textarea
                                     placeholder="Type your question here..."
-                                    className="w-full rounded-xl border border-[#2e2f35] bg-[#1a1c23] p-4 pr-12 text-gray-100 placeholder-gray-400 focus:border-[#3e3f45] focus:outline-none focus:ring-1 focus:ring-[#3e3f45]"
+                                    className="w-full rounded-xl border border-[#2e2f35] bg-[#1a1c23] p-4 pr-24 text-gray-100 placeholder-gray-400 focus:border-[#3e3f45] focus:outline-none focus:ring-1 focus:ring-[#3e3f45]"
                                     rows={4}
                                     style={{ resize: 'none' }}
                                     value={customQuestion}
@@ -167,12 +275,30 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
                                         }
                                     }}
                                 />
-                                <button
-                                    onClick={handleCustomQuestionSubmit}
-                                    className="absolute right-2 bottom-2 p-2 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-[#2e2f35] transition-colors"
-                                >
-                                    <Send className="h-5 w-5" />
-                                </button>
+                                <div className="absolute right-2 bottom-2 flex gap-2">
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                        ref={fileInputRef}
+                                        multiple
+                                    />
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploading}
+                                        className="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-[#2e2f35] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Upload PDFs"
+                                    >
+                                        <Upload className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                        onClick={handleCustomQuestionSubmit}
+                                        className="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-[#2e2f35] transition-colors"
+                                    >
+                                        <Send className="h-5 w-5" />
+                                    </button>
+                                </div>
                             </div>
 
                             <p className="text-gray-400 mb-4">Or choose a sample question:</p>
@@ -207,8 +333,8 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
                     New Chat
                 </Button>
                 <div className="flex-1 overflow-y-auto">
-                    <ChatHistory
-                        chatHistories={chatHistories}
+        <ChatHistory
+            chatHistories={chatHistories}
                         setCurrentChatIndex={(index) => {
                             setCurrentChatIndex(index);
                             setIsNewChat(false);
@@ -223,9 +349,9 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
                 {chatHistories && 
                  currentChatIndex >= 0 && 
                  currentChatIndex < chatHistories.length ? (
-                    <ChatSection
-                        chatHistory={chatHistories[currentChatIndex].history}
-                        wfRunId={chatHistories[currentChatIndex].wfRunId}
+        <ChatSection
+            chatHistory={chatHistories[currentChatIndex].history}
+            wfRunId={chatHistories[currentChatIndex].wfRunId}
                         isNewChat={isNewChat}
                         onFirstMessage={() => {
                             setIsNewChat(false);
