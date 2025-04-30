@@ -23,13 +23,13 @@ export async function getChatHistories() {
         wfRunId: id,
         history: JSON.parse(chatHistory.value?.jsonArr ?? "[]"),
       };
-    })
+    }),
   );
 }
 
 export async function createNewChat(initialMessage: string) {
   const lhClient = await getClient({ tenantId: "default" });
-  
+
   // Generate a unique ID for the chat
   const chatId = createHash("sha256")
     .update(Date.now().toString())
