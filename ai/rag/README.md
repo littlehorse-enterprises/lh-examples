@@ -7,8 +7,11 @@ This example simulates a Retrieval Augmented Generation (RAG) workflow for real-
 - **PDF Processing**: Load and process PDF files from a specified directory.
 - **Text Chunking**: Split text into manageable chunks for embedding.
 - **AI Integration**: Use OpenAI models for text embedding and summarization.
-- **Database Storage**: Store and retrieve data from a Yugabyte database.
-- **Workflow Automation**: Automate tasks using LittleHorse Workflow Engine.
+- **YugabyteDB for Raw Storage**: Stores and retrieves raw PDFs efficiently, to implement persistent storage.  
+- **YugabyteDB's PGVector support for Vector Storage**: Indexes and retrieves high-dimensional embeddings for similarity search.  
+- **MultiVector Retriever**: Optimized for retrieving contextual information from multiple sources.  
+- **Workflow Automation**: Automate and orchestrate tasks using LittleHorse Workflow Engine.
+- **LLM Integration**: Uses a **GPT model** or any other LLM implementation to generate responses based on retrieved context.  
 - **Chat UI**: Talk to an LLM about your PDF data
 
 ## Prerequisites
@@ -55,7 +58,6 @@ Note: you may need to add `sudo` before the docker command.
 
 The workflow simulates uploading a PDF to an LLM by pulling a file from the `temp` directory. When the PDF is received, the workflow extracts the text, converts it to embeddings, and stores them in a vector database provided by Yugabyte. Another workflow is launched that allows the user to interact with a chatbot that uses the uploaded PDF data as context.
 
-
 ## Running the Example
 
 Assuming `docker compose up` ran successfully, open up a new terminal and run:
@@ -79,6 +81,6 @@ Note: Littlehorse stores and logs the output of all workflow runs, click on a li
 
 Note: if you want to restart the code, you need to run `docker compose down` and then `docker compose up` again to reset the server.
 
-
 ## Viewing the UI
+
 The chat interface is viewable by navigating to <https://localhost:3000> here you will be able to interact with the GPT model and ask questions relevant to your data!
