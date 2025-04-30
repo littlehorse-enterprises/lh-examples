@@ -13,14 +13,24 @@ interface ChatHistoryItem {
 interface ChatHistoryProps {
     chatHistories: ChatHistoryItem[];
     setCurrentChatIndex: (index: number) => void;
+    currentChatIndex?: number;
 }
 
-export function ChatHistory({ chatHistories, setCurrentChatIndex }: ChatHistoryProps) {
-    const [selectedIndex, setSelectedIndex] = useState(0);
+export function ChatHistory({ 
+    chatHistories, 
+    setCurrentChatIndex,
+    currentChatIndex = -1
+}: ChatHistoryProps) {
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+
+    // Update selectedIndex when currentChatIndex changes
+    useEffect(() => {
+        setSelectedIndex(currentChatIndex);
+    }, [currentChatIndex]);
 
     // Update selected index when chat histories change
     useEffect(() => {
-        if (selectedIndex >= chatHistories.length && chatHistories.length > 0) {
+        if (selectedIndex >= chatHistories.length && chatHistories.length > 0 && selectedIndex !== -1) {
             // If current selected index is out of bounds, select the last chat
             setSelectedIndex(chatHistories.length - 1);
             setCurrentChatIndex(chatHistories.length - 1);
@@ -44,12 +54,16 @@ export function ChatHistory({ chatHistories, setCurrentChatIndex }: ChatHistoryP
                 else if (chatHistories.length > 1) {
                     setSelectedIndex(0);
                     setCurrentChatIndex(0);
+                } else {
+                    // If no chats left, set to -1 (no selection)
+                    setSelectedIndex(-1);
+                    setCurrentChatIndex(-1);
                 }
             }
             // If we're deleting a chat before the selected one, update the index
             else if (index < selectedIndex) {
-                setSelectedIndex(prev => prev - 1);
-                setCurrentChatIndex(prev => prev - 1);
+                setSelectedIndex((prev: number) => prev - 1);
+                setCurrentChatIndex(selectedIndex - 1);
             }
         } catch (error) {
             console.error("Error deleting chat:", error);
