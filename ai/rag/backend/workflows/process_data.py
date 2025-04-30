@@ -1,10 +1,9 @@
 import os
 from typing import Any
+
 from dotenv import load_dotenv
-from langchain.chat_models import init_chat_model
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import OpenAIEmbeddings
 from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -17,7 +16,7 @@ if not os.getenv("OPENAI_API_KEY"):
     os._exit(1)
 
 
-async def load_pdf(s3_key: str) -> list[Any]:
+async def load_pdf(s3_key: str) -> list[Any]: # Output is actually a list[str]
 
     loader = PyPDFLoader("./data/" + s3_key)
     pages = []
@@ -27,7 +26,7 @@ async def load_pdf(s3_key: str) -> list[Any]:
     return pages #list of str
 
 
-async def chunk_text(pages: list[Any]) -> list[Any]: #Input and output is a list[str]
+async def chunk_text(pages: list[Any]) -> list[Any]: # Input and output are actually a list[str]
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -38,7 +37,7 @@ async def chunk_text(pages: list[Any]) -> list[Any]: #Input and output is a list
     return [chunk.page_content for chunk in chunks] #list of str 
 
 
-async def embed_and_store(chunks: list[Any]) -> None:
+async def embed_and_store(chunks: list[Any]) -> None: # Input is actually a list[str]
 
     embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 
@@ -56,8 +55,8 @@ def get_process_data_workflow() -> Workflow:
 
         s3_id = wf.declare_str("s3-id").required()
 
-        pages = wf.execute("load-pdf", s3_id, timeout_seconds=300, retries=3)
+        pages = wf.execute("load-pdf", s3_id, retries=3)
         chunks = wf.execute("chunk-text", pages, retries=3)
-        wf.execute("embed-and-store", chunks, retries=3)
+        wf.execute("embed-and-store", chunks, retries=3, timeout_seconds=60)
 
     return Workflow("load-chunk-embed-pdf", wfSpec)

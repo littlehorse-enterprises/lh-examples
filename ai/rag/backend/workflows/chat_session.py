@@ -1,12 +1,11 @@
-from typing import Any
 import os
-from langchain.chat_models import init_chat_model
-from littlehorse.workflow import Comparator, Workflow, WorkflowThread
-
-from langchain_openai import OpenAIEmbeddings
-from langchain_postgres import PGVector
+from typing import Any
 
 from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+from langchain_openai import OpenAIEmbeddings
+from langchain_postgres import PGVector
+from littlehorse.workflow import Comparator, Workflow, WorkflowThread
 
 load_dotenv() 
 CONNECT = os.getenv("CONNECT")
@@ -16,7 +15,7 @@ if not os.getenv("OPENAI_API_KEY"):
 
 llm = init_chat_model(model="gpt-4o-mini")
 
-async def invoke_ai(history: list[Any], context: str) -> str:
+async def invoke_ai(history: list[Any], context: str) -> str: # Input is actually a list[str]
     
     question = history[-1]
 
@@ -49,7 +48,7 @@ async def retrieve(question: str) -> str:
         return docs_content
 
 
-async def post_webhook() -> None:
+async def post_webhook(history: list[Any]) -> None: # Input is actually a list[str]
     return None
 
 def chat_workflow() -> Workflow:
