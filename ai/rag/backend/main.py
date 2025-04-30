@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import os
 
 import littlehorse
@@ -51,14 +52,14 @@ async def start_workers():
     await littlehorse.start(*workers)
 
 async def process_data():
-
-    file_path = "gmo-quarterly-letter---part-2_1q-2025.pdf"
-
-    client.RunWf(RunWfRequest(
-                    wf_spec_name="load-chunk-embed-pdf",
-                    variables={"s3-id": VariableValue(str=file_path)},
-                    # id=pdf_hash
-            ))
+    file_paths = ["GMO Quarterly Letter.pdf", "Tariff Schedule.pdf", "Tax Insights.pdf"]
+    for file_path in file_paths:
+        pdf_hash = hashlib.sha256(file_path.encode()).hexdigest()
+        client.RunWf(RunWfRequest(
+                        wf_spec_name="load-chunk-embed-pdf",
+                        variables={"s3-id": VariableValue(str=file_path)},
+                        id=pdf_hash
+                ))
         
 async def start_and_process():
     await asyncio.gather(start_workers(), process_data())
