@@ -5,7 +5,14 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     depends_on:
-      - littlehorse
+      littlehorse:
+        condition: service_healthy
+    environment:
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHC_TENANT_ID=default
+    networks:
+      - app-network
       
   frontend:
     build:
@@ -15,7 +22,14 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - littlehorse
+      backend:
+        condition: service_started
+    environment:
+      - LHC_API_HOST=littlehorse
+      - LHC_API_PORT=2023
+      - LHC_TENANT_ID=default
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       timeout: 10s
@@ -34,9 +48,11 @@ services:
       - "8080:8080" # Dashboard Port
       - "2023:2023" # LittleHorse Port
     environment:
-      - LHC_API_HOST=http://127.0.0.1
+      - LHC_API_HOST=http://littlehorse
       - LHC_API_PORT=2023
       - LHC_TENANT_ID=default
+    networks:
+      - app-network
 
   yugabyte:
     image: yugabytedb/yugabyte:2.25.1.0-b381
@@ -67,6 +83,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   yugabyte_data:
