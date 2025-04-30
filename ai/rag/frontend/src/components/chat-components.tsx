@@ -12,7 +12,7 @@ interface ChatHistoryItem {
 export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryItem[] }) {
     const [currentChatIndex, setCurrentChatIndex] = useState(0);
 
-    return <div className="flex">
+    return <div className="flex w-full">
         <ChatHistory
             chatHistories={chatHistories}
             setCurrentChatIndex={setCurrentChatIndex}
