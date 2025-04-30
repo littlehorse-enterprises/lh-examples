@@ -51,7 +51,7 @@ async def embed_and_store(chunks: list[Any]) -> None:
         connection=CONNECT,
     )
 
-    document_ids = vector_store.add_documents(documents=[Document(chunk) for chunk in chunks])
+    vector_store.add_documents(documents=[Document(chunk) for chunk in chunks])
 
 ##RAG CODE
 async def retrieve(question: str) -> str:

@@ -1,22 +1,17 @@
-import os
 import asyncio
+import os
+
 import littlehorse
-from littlehorse.workflow import Workflow, WorkflowThread
-from littlehorse.config import LHConfig
-from littlehorse import create_workflow_spec, create_task_def
-from littlehorse.model import RunWfRequest, ScheduleWfRequest, VariableValue
-from littlehorse.worker import LHTaskWorker
-
-from langchain.chat_models import init_chat_model
-from langchain_openai import OpenAIEmbeddings
-from langchain_postgres import PGVector
-from langchain.memory import ConversationBufferMemory
-from langchain.schema import SystemMessage, HumanMessage
-
 from dotenv import load_dotenv
-
-from workflows.process_data import get_process_data_workflow, load_pdf, chunk_text, embed_and_store, generate, store_summary, retrieve
+from langchain.chat_models import init_chat_model
+from littlehorse import create_task_def, create_workflow_spec
+from littlehorse.config import LHConfig
+from littlehorse.model import RunWfRequest, VariableValue
+from littlehorse.worker import LHTaskWorker
 from workflows.chat_session import chat_workflow, invoke_ai, post_webhook
+from workflows.process_data import (chunk_text, embed_and_store, generate,
+                                    get_process_data_workflow, load_pdf,
+                                    retrieve, store_summary)
 
 config = LHConfig()
 client = config.stub()
@@ -46,13 +41,11 @@ create_task_def(store_summary, "store-summary", config)
 
 create_workflow_spec(get_process_data_workflow(), config)
 
-
 create_task_def(retrieve, "retrieve-context", config)
 create_task_def(invoke_ai, "invoke-ai", config)
 create_task_def(post_webhook, "post-webhook", config)
 
 create_workflow_spec(chat_workflow(), config)
-
 
 async def start_workers():
     await littlehorse.start(*workers)
@@ -67,7 +60,6 @@ async def process_data():
                     # id=pdf_hash
             ))
     
-
 async def async_input(prompt: str = ""):
     return await asyncio.to_thread(input, prompt)
         

@@ -1,7 +1,7 @@
+from typing import Any
+
 from langchain.chat_models import init_chat_model
 from littlehorse.workflow import Comparator, Workflow, WorkflowThread
-from process_data import retrieve
-from typing import Any
 
 llm = init_chat_model(model="gpt-4o-mini")
 
@@ -9,11 +9,8 @@ async def invoke_ai(history: list[Any], context: str) -> str:
     
     question = history[-1]
 
-    context_chunks = await retrieve()
-    context = "\n\n".join(context_chunks)
+    context = "\n\n".join()
     context = context.join("\n\n" + history[:-1])
-
-
 
     prompt = f"""
         You are an assistant helping answer questions based on the following PDF content:
@@ -27,10 +24,8 @@ async def invoke_ai(history: list[Any], context: str) -> str:
     answer = llm.invoke(prompt)
     print(f"\nAssistant: {answer.content}\n")
 
-
 async def post_webhook() -> None:
     return None
-
 
 def chat_workflow() -> Workflow:
 
@@ -59,10 +54,6 @@ def chat_workflow() -> Workflow:
 
             loop_body.execute("post-webhook", history, timeout_seconds=100)
 
-
-
         wf.do_while(wf.condition(True, Comparator.EQUALS ,True), chat_loop)
-
-        
 
     return Workflow("chat-with-llm", wfSpec)
