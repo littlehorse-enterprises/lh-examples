@@ -67,7 +67,7 @@ export function ChatSection({
 
     try {
       setUploading(true);
-      for (const [_, file] of selectedFiles.entries()) {
+      for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append("file", file);
         await uploadPdf(formData);

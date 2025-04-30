@@ -46,10 +46,10 @@ This example simulates a Retrieval Augmented Generation (RAG) workflow for real-
 
    Rename the `.env.example` file to `.env` and fill in the `OPENAI_API_KEY` variable with your API key.
 
-5. Set up your Littlehorse and Yugabyte instances with Docker:
+5. Set up your instances with Docker:
 
    ```bash
-      docker compose up
+      docker compose up --build -d
    ```
 
 Note: you may need to add `sudo` before the docker command.

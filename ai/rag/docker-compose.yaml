@@ -1,18 +1,26 @@
 services:
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: frontend
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - littlehorse
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:3000"]
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 10s
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      - littlehorse
+      
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - littlehorse
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   littlehorse:
     image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
