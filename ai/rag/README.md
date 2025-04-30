@@ -84,4 +84,4 @@ Note: if you want to restart the code, you need to run `docker compose down` and
 
 
 ## Viewing the UI
-The chat interface is viewable by navigating to `localhost:3000` here you will be able to interact with the GPT model and ask questions relevant to your data!
+The chat interface is viewable by navigating to <https://localhost:3000> here you will be able to interact with the GPT model and ask questions relevant to your data!
