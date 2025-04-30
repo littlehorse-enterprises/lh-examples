@@ -90,7 +90,7 @@ export function ChatSection({
             <div className="flex-1 overflow-y-auto">
                 {handler.messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-[calc(100vh-180px)] text-gray-400">
-                        <h1 className="text-2xl font-semibold mb-2">ChatGPT</h1>
+                        <h1 className="text-2xl font-semibold mb-2">RAG Chat</h1>
                         <p className="text-sm">How can I help you today?</p>
                     </div>
                 ) : (
@@ -161,13 +161,13 @@ export function ChatSection({
                                 }
                             }
                         }}
-                        placeholder="Message ChatGPT..."
+                        placeholder="Type your message here..."
                         className="w-full rounded-xl border border-[#2e2f35] bg-[#1a1c23] p-4 pr-24 text-gray-100 placeholder-gray-400 focus:border-[#3e3f45] focus:outline-none focus:ring-1 focus:ring-[#3e3f45]"
                         rows={1}
                         style={{ resize: 'none', minHeight: '56px' }}
                     />
                     
-                    <div className="absolute right-2 bottom-2 flex gap-2">
+                    <div className="absolute inset-y-0 right-0 flex items-center justify-center pr-3 gap-2">
                         <input
                             type="file"
                             accept=".pdf"
@@ -198,7 +198,7 @@ export function ChatSection({
                     </div>
                 </div>
                 <p className="mt-2 text-center text-xs text-gray-500">
-                    ChatGPT can make mistakes. Consider checking important information.
+                    AI responses may contain inaccuracies. Verify important information.
                 </p>
             </div>
         </div>
