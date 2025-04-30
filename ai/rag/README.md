@@ -81,3 +81,7 @@ Littlehorse stores and logs the output of all workflow runs
 Note: if you want to restart the code, you need to run `docker compose down` and then `docker compose up` again to reset the server.
 
 > Note: This example runs a workflow every 5 minutes to simulate a real-time data stream so make sure when you are done to shut down the server with `docker compose down` to avoid extra charges to OpenAI.
+
+
+## Viewing the UI
+The chat interface is viewable by navigating to `localhost:3000` here you will be able to interact with the GPT model and ask questions relevant to your data!
