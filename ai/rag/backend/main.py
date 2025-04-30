@@ -15,8 +15,8 @@ from langchain.schema import SystemMessage, HumanMessage
 
 from dotenv import load_dotenv
 
-from backend.workflows.process_data import get_process_data_workflow, load_pdf, chunk_text, embed_and_store, generate, store_summary, retrieve
-from backend.workflows.chat import chat_workflow, invoke_chat
+from workflows.process_data import get_process_data_workflow, load_pdf, chunk_text, embed_and_store, generate, store_summary, retrieve
+from workflows.chat_session import chat_workflow, invoke_ai, post_webhook
 
 config = LHConfig()
 client = config.stub()
@@ -31,7 +31,8 @@ workers = [
     LHTaskWorker(generate, "generate-summary", config),
     LHTaskWorker(store_summary, "store-summary", config),
     LHTaskWorker(retrieve, "retrieve-context", config),
-    LHTaskWorker(invoke_chat, "invoke-chat", config)
+    LHTaskWorker(invoke_ai, "invoke-ai", config),
+    LHTaskWorker(post_webhook, "post-webhook", config)
     
 ]
 
@@ -47,7 +48,10 @@ create_workflow_spec(get_process_data_workflow(), config)
 
 
 create_task_def(retrieve, "retrieve-context", config)
-create_task_def(invoke_chat, "invoke-chat", config)
+create_task_def(invoke_ai, "invoke-ai", config)
+create_task_def(post_webhook, "post-webhook", config)
+
+create_workflow_spec(chat_workflow(), config)
 
 
 async def start_workers():

@@ -30,12 +30,6 @@ async def load_pdf(s3_key: str) -> list[Any]:
 
     return pages #list of str
 
-# async def load_pdf(pdf_bytes: bytes) -> list[Any]:
-#     pdf_stream = io.BytesIO(pdf_bytes)
-#     reader = PdfReader(pdf_stream)
-#     pages = [page.extract_text() for page in reader.pages]
-#     print(type(pages))
-#     return pages
 
 async def chunk_text(pages: list[Any]) -> list[Any]: #Input and output is a list[str]
 
@@ -60,13 +54,13 @@ async def embed_and_store(chunks: list[Any]) -> None:
     document_ids = vector_store.add_documents(documents=[Document(chunk) for chunk in chunks])
 
 ##RAG CODE
-async def retrieve() -> str:
+async def retrieve(question: str) -> str:
         embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
         vector_store = PGVector(
             embeddings=embedding_model,
             connection=CONNECT,
         )
-        question = "evolution, natural selection, genetics, experiment"
+        question = "evolution, natural selection, genetics, experiment".join("\n\n" + question)
         retrieved_docs = vector_store.similarity_search(question)
         docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
 
