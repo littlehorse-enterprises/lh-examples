@@ -18,20 +18,44 @@ llm = init_chat_model(model="gpt-4o-mini")
 async def invoke_ai(history: list[Any], context: str) -> str: # Input is actually a list[str]
     
     question = history[-1]
+    
+    prompt_text = f"""Human: You are an International Trade and Tariff Regulations expert who can answer questions only based on the context provided below.
 
-    prompt = f"""
-        You are an assistant helping answer questions based on the following PDF content:
+                    Answer the question STRICTLY based on the US Tariff data context provided in JSON below.
 
-        {context}
+                    Do not assume or retrieve any information outside of the context.
 
-        Message History (odd index is user, even index is assistant):
-        {history[:-1]}
+                    Keep the answer concise, using three sentences maximum for text responses.
 
-        User question: {question}
-        Answer:
-        """
+                    Think step-by-step to ensure accuracy based on the context provided.
+
+                    If multiple results exist (e.g., multiple tariff rates, product categories, exemptions), present them as a bulleted list, numbered list, or in a table.
+
+                    If numerical comparisons or trends are evident in the context, you may present a simple chart or table to make the information easier to understand.
+
+                    Use tables for structured data (e.g., tariff codes, product descriptions, rates) and simple bar or line charts for comparisons (e.g., tariff rate trends).
+
+                    Do not add any extra commentary, apologies, summaries, or retrievals beyond the provided context.
+
+                    Do not start the response with "Here is a summary" or similar phrasing.
+
+                    If the context is empty, respond with: None.
+
+                    Always prioritize clarity and relevance in the format you choose (plain text, table, or chart).
+
+                    Here is the context:
+                    <context>
+                    {context}
+                    </context>
+
+                    
+                    Message History (odd index is user, even index is assistant):
+                    {history[:-1]}
+                    Question:
+                    {question}
+                """
         
-    answer = llm.invoke(prompt)
+    answer = llm.invoke(prompt_text)
 
     return answer.content
 
@@ -42,7 +66,7 @@ async def retrieve(question: str) -> str:
         embeddings=embedding_model,
         connection=CONNECT,
     )
-    question = "evolution, natural selection, genetics, experiment".join("\n\n" + question)
+    question = "tarrifs, economy, national, US, country, impact".join("\n\n" + question)
     retrieved_docs = vector_store.similarity_search(question)
     docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
 

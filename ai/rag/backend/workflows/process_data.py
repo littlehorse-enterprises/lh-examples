@@ -18,7 +18,7 @@ if not os.getenv("OPENAI_API_KEY"):
 
 async def load_pdf(s3_key: str) -> list[Any]: # Output is actually a list[str]
 
-    loader = PyPDFLoader("./data/" + s3_key)
+    loader = PyPDFLoader("./temp/" + s3_key)
     pages = []
     for page in loader.lazy_load():
         pages.append(page.page_content)
