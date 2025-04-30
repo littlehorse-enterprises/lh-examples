@@ -6,9 +6,11 @@ from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from littlehorse import create_task_def, create_workflow_spec
 from littlehorse.config import LHConfig
-from littlehorse.model import RunWfRequest, VariableValue
+from littlehorse.model import (PutExternalEventDefRequest, RunWfRequest,
+                               VariableValue)
 from littlehorse.worker import LHTaskWorker
-from workflows.chat_session import chat_workflow, invoke_ai, post_webhook, retrieve
+from workflows.chat_session import (chat_workflow, invoke_ai, post_webhook,
+                                    retrieve)
 from workflows.process_data import (chunk_text, embed_and_store,
                                     get_process_data_workflow, load_pdf)
 
@@ -36,6 +38,9 @@ create_task_def(embed_and_store, "embed-and-store", config)
 
 create_workflow_spec(get_process_data_workflow(), config)
 
+client.PutExternalEventDef(PutExternalEventDefRequest(
+    name="user-message",
+))
 create_task_def(retrieve, "retrieve-context", config)
 create_task_def(invoke_ai, "invoke-ai", config)
 create_task_def(post_webhook, "post-webhook", config)
@@ -54,9 +59,6 @@ async def process_data():
                     variables={"s3-id": VariableValue(str=file_path)},
                     # id=pdf_hash
             ))
-    
-async def async_input(prompt: str = ""):
-    return await asyncio.to_thread(input, prompt)
         
 async def start_and_process():
     await asyncio.gather(start_workers(), process_data())
