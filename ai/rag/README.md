@@ -46,7 +46,7 @@ This example simulates a Retrieval Augmented Generation (RAG) workflow for real-
 
    Rename the `.env.example` file to `.env` and fill in the `OPENAI_API_KEY` variable with your API key.
 
-5. Set up your instances with Docker:
+5. Set up your instances of the Frontend, LittleHorse, and Yugabyte with Docker:
 
    ```bash
       docker compose up --build -d

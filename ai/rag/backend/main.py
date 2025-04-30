@@ -15,11 +15,12 @@ from workflows.chat_session import (chat_workflow, invoke_ai, post_webhook,
 from workflows.process_data import (chunk_text, embed_and_store,
                                     get_process_data_workflow, load_pdf)
 
+load_dotenv()
+CONNECT = os.getenv("CONNECT")
+
 config = LHConfig()
 client = config.stub()
 
-load_dotenv()
-CONNECT = os.getenv("CONNECT")
 
 workers = [
     LHTaskWorker(load_pdf, "load-pdf", config),
@@ -49,6 +50,7 @@ create_task_def(post_webhook, "post-webhook", config)
 create_workflow_spec(chat_workflow(), config)
 
 async def start_workers():
+    print(f"Starting workers with config: bootstrap_server={config.bootstrap_server}")
     await littlehorse.start(*workers)
 
 async def process_data():
