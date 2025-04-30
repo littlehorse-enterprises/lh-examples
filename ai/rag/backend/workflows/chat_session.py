@@ -1,7 +1,18 @@
 from typing import Any
-
+import os
 from langchain.chat_models import init_chat_model
 from littlehorse.workflow import Comparator, Workflow, WorkflowThread
+
+from langchain_openai import OpenAIEmbeddings
+from langchain_postgres import PGVector
+
+from dotenv import load_dotenv
+
+load_dotenv() 
+CONNECT = os.getenv("CONNECT")
+if not os.getenv("OPENAI_API_KEY"):
+    print("Please set the `OPENAI_API_KEY` variable in your `.env` file.")
+    os._exit(1)
 
 llm = init_chat_model(model="gpt-4o-mini")
 
@@ -23,6 +34,20 @@ async def invoke_ai(history: list[Any], context: str) -> str:
         
     answer = llm.invoke(prompt)
     print(f"\nAssistant: {answer.content}\n")
+
+
+async def retrieve(question: str) -> str:
+        embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
+        vector_store = PGVector(
+            embeddings=embedding_model,
+            connection=CONNECT,
+        )
+        question = "evolution, natural selection, genetics, experiment".join("\n\n" + question)
+        retrieved_docs = vector_store.similarity_search(question)
+        docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
+
+        return docs_content
+
 
 async def post_webhook() -> None:
     return None

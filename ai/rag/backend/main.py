@@ -8,10 +8,9 @@ from littlehorse import create_task_def, create_workflow_spec
 from littlehorse.config import LHConfig
 from littlehorse.model import RunWfRequest, VariableValue
 from littlehorse.worker import LHTaskWorker
-from workflows.chat_session import chat_workflow, invoke_ai, post_webhook
-from workflows.process_data import (chunk_text, embed_and_store, generate,
-                                    get_process_data_workflow, load_pdf,
-                                    retrieve, store_summary)
+from workflows.chat_session import chat_workflow, invoke_ai, post_webhook, retrieve
+from workflows.process_data import (chunk_text, embed_and_store,
+                                    get_process_data_workflow, load_pdf)
 
 config = LHConfig()
 client = config.stub()
@@ -23,8 +22,6 @@ workers = [
     LHTaskWorker(load_pdf, "load-pdf", config),
     LHTaskWorker(chunk_text, "chunk-text", config),
     LHTaskWorker(embed_and_store, "embed-and-store", config),
-    LHTaskWorker(generate, "generate-summary", config),
-    LHTaskWorker(store_summary, "store-summary", config),
     LHTaskWorker(retrieve, "retrieve-context", config),
     LHTaskWorker(invoke_ai, "invoke-ai", config),
     LHTaskWorker(post_webhook, "post-webhook", config)
@@ -36,8 +33,6 @@ llm = init_chat_model("openai:gpt-4o-mini")
 create_task_def(load_pdf, "load-pdf", config)
 create_task_def(chunk_text, "chunk-text", config)
 create_task_def(embed_and_store, "embed-and-store", config)
-create_task_def(generate, "generate-summary", config)
-create_task_def(store_summary, "store-summary", config)
 
 create_workflow_spec(get_process_data_workflow(), config)
 
