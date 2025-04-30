@@ -16,6 +16,7 @@ if not os.getenv("OPENAI_API_KEY"):
 llm = init_chat_model(model="gpt-4o-mini")
 
 async def invoke_ai(history: list[Any], context: str) -> str: # Input is actually a list[str]
+
     
     prompt_text = f"""Human: You are an International Trade and Tariff Regulations expert who can answer questions only based on the context provided below.
 
@@ -36,8 +37,6 @@ async def invoke_ai(history: list[Any], context: str) -> str: # Input is actuall
                     Do not add any extra commentary, apologies, summaries, or retrievals beyond the provided context.
 
                     Do not start the response with "Here is a summary" or similar phrasing.
-
-                    If the context is empty, respond with: The context provided to me is empty.
 
                     Always prioritize clarity and relevance in the format you choose (plain text, table, or chart).
 
