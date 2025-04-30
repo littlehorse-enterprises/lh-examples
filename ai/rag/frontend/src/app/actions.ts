@@ -27,6 +27,26 @@ export async function getChatHistories() {
   );
 }
 
+export async function createNewChat(initialMessage: string) {
+  const lhClient = await getClient({ tenantId: "default" });
+  
+  // Generate a unique ID for the chat
+  const chatId = createHash("sha256")
+    .update(Date.now().toString())
+    .digest("hex");
+
+  // Start the chat workflow with initial message
+  await lhClient.runWf({
+    wfSpecName: "chat-with-llm",
+    id: chatId,
+    variables: {
+      "initial-user-message": { str: initialMessage },
+    },
+  });
+
+  return chatId;
+}
+
 export async function postChatMessage(message: string, wfRunId: string) {
   const lhClient = await getClient({ tenantId: "default" });
 

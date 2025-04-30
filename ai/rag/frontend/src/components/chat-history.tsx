@@ -2,7 +2,7 @@
 
 import { deleteChat } from "@/app/actions";
 import { MessageSquare, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ChatHistoryItem {
@@ -17,6 +17,45 @@ interface ChatHistoryProps {
 
 export function ChatHistory({ chatHistories, setCurrentChatIndex }: ChatHistoryProps) {
     const [selectedIndex, setSelectedIndex] = useState(0);
+
+    // Update selected index when chat histories change
+    useEffect(() => {
+        if (selectedIndex >= chatHistories.length && chatHistories.length > 0) {
+            // If current selected index is out of bounds, select the last chat
+            setSelectedIndex(chatHistories.length - 1);
+            setCurrentChatIndex(chatHistories.length - 1);
+        }
+    }, [chatHistories, selectedIndex, setCurrentChatIndex]);
+
+    const handleDelete = async (e: React.MouseEvent, chatId: string, index: number) => {
+        e.stopPropagation();
+        try {
+            await deleteChat(chatId);
+            toast.success("Chat deleted");
+            
+            // If we're deleting the currently selected chat
+            if (index === selectedIndex) {
+                // If there are chats before this one, select the previous chat
+                if (index > 0) {
+                    setSelectedIndex(index - 1);
+                    setCurrentChatIndex(index - 1);
+                }
+                // If this is the first chat and there are more chats, select the next one
+                else if (chatHistories.length > 1) {
+                    setSelectedIndex(0);
+                    setCurrentChatIndex(0);
+                }
+            }
+            // If we're deleting a chat before the selected one, update the index
+            else if (index < selectedIndex) {
+                setSelectedIndex(prev => prev - 1);
+                setCurrentChatIndex(prev => prev - 1);
+            }
+        } catch (error) {
+            console.error("Error deleting chat:", error);
+            toast.error("Failed to delete chat");
+        }
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -54,11 +93,7 @@ export function ChatHistory({ chatHistories, setCurrentChatIndex }: ChatHistoryP
                             </div>
                             <button
                                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#3e3f45] rounded transition-all"
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    await deleteChat(chat.wfRunId);
-                                    toast.success("Chat deleted");
-                                }}
+                                onClick={(e) => handleDelete(e, chat.wfRunId, index)}
                                 aria-label="Delete chat"
                             >
                                 <Trash2 className="w-4 h-4 text-gray-400 hover:text-gray-200" />
