@@ -60,7 +60,7 @@ async def process_data():
         client.RunWf(RunWfRequest(
                         wf_spec_name="load-chunk-embed-pdf",
                         variables={"s3-id": VariableValue(str=file_path)},
-                        # id=pdf_hash
+                        id=pdf_hash
                 ))
         
 async def start_and_process():
