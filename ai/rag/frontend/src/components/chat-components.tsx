@@ -25,8 +25,7 @@ export function ChatComponents({ chatHistories }: { chatHistories: ChatHistoryIt
             <div className="w-[260px] bg-[#1a1c23] flex flex-col h-full border-r border-[#2e2f35]">
                 <Button
                     onClick={handleNewChat}
-                    variant="outline"
-                    className="m-2 border border-[#2e2f35] hover:bg-[#2e2f35] text-white flex items-center gap-2"
+                    className="m-2 bg-[#2e2f35] hover:bg-[#3e3f45] text-gray-200 flex items-center gap-2 transition-colors border-0"
                 >
                     <PlusCircle className="w-4 h-4" />
                     New Chat

@@ -7,14 +7,16 @@ import {
 } from '@llamaindex/chat-ui'
 
 import '@llamaindex/chat-ui/styles/markdown.css'
-import { Bot, Send, Upload, User } from 'lucide-react'
+import { Bot, Send, Upload, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], wfRunId: string }) {
   const handler = useChat(chatHistory, wfRunId)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -25,22 +27,51 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
   }, [handler.messages])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = e.target.files
+    if (!files) return
+
+    const newFiles = Array.from(files).filter(file => file.type === 'application/pdf')
+    if (newFiles.length === 0) {
+      toast.error('Please select PDF files only')
+      return
+    }
+    
+    setSelectedFiles(prev => [...prev, ...newFiles])
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => {
+      const newFiles = prev.filter((_, i) => i !== index)
+      if (newFiles.length === 0) {
+        toast.info('All files removed')
+      }
+      return newFiles
+    })
+  }
+
+  const uploadFiles = async () => {
+    if (selectedFiles.length === 0) return
 
     try {
       setUploading(true)
-      const formData = new FormData()
-      formData.append('file', file)
-      await uploadPdf(formData)
+      for (const [_, file] of selectedFiles.entries()) {
+        const formData = new FormData()
+        formData.append('file', file)
+        await uploadPdf(formData)
+      }
+      
+      toast.success("PDFs have been uploaded and currently being processed.")
+
+      setSelectedFiles([]) // Clear files after successful upload
     } catch (error) {
-      console.error('Error uploading file:', error)
-      alert('Failed to upload PDF. Please try again.')
+      console.error('Error uploading files:', error)
+      toast.error('Failed to upload PDFs. Please try again.')
     } finally {
       setUploading(false)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
     }
   }
 
@@ -81,6 +112,34 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
       </div>
       <div className="border-t border-[#2e2f35] bg-[#0f1117] p-4">
         <div className="max-w-3xl mx-auto">
+          {selectedFiles.length > 0 && (
+            <div className="mb-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Selected Files:</span>
+                <button
+                  onClick={uploadFiles}
+                  disabled={uploading}
+                  className="text-sm px-3 py-1 bg-[#10A37F] text-white rounded hover:bg-[#0d8e6c] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploading ? 'Processing...' : 'Process All'}
+                </button>
+              </div>
+              <div className="space-y-2">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-[#1a1c23] p-2 rounded">
+                    <span className="text-sm truncate">{file.name}</span>
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="p-1 hover:bg-[#2e2f35] rounded transition-colors"
+                      disabled={uploading}
+                    >
+                      <X className="w-4 h-4 text-gray-400 hover:text-gray-200" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="relative">
             <textarea
               value={handler.input}
@@ -106,12 +165,13 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
                 onChange={handleFileUpload}
                 className="hidden"
                 ref={fileInputRef}
+                multiple
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 className="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-[#2e2f35] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Upload PDF"
+                title="Upload PDFs"
               >
                 <Upload className="h-5 w-5" />
               </button>

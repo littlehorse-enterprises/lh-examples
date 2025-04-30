@@ -1,9 +1,9 @@
 "use server";
 
 import { getClient } from "@/lib/lhClient";
+import { createHash } from "crypto";
 import { writeFile } from "fs/promises";
 import { join } from "path";
-import { createHash } from "crypto";
 
 export async function getChatHistories() {
   const lhClient = await getClient({ tenantId: "default" });
@@ -37,6 +37,11 @@ export async function postChatMessage(message: string, wfRunId: string) {
       str: message,
     },
   });
+}
+
+export async function deleteChat(wfRunId: string) {
+  const lhClient = await getClient({ tenantId: "default" });
+  await lhClient.deleteWfRun({ id: { id: wfRunId } });
 }
 
 export async function uploadPdf(formData: FormData) {
