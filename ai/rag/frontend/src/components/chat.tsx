@@ -7,8 +7,8 @@ import {
 } from '@llamaindex/chat-ui'
 
 import '@llamaindex/chat-ui/styles/markdown.css'
-import { useState, useEffect, useRef } from 'react'
-import { Send, Upload } from 'lucide-react'
+import { Bot, Send, Upload, User } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], wfRunId: string }) {
   const handler = useChat(chatHistory, wfRunId)
@@ -45,31 +45,42 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full bg-[#0f1117] text-gray-100">
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto">
-          {handler.messages.map((message, index) => (
-            <div
-              key={index}
-              className={`py-6 px-4 ${message.role === 'assistant' ? 'bg-[#171819]' : ''
-                }`}
-            >
-              <div className="max-w-2xl mx-auto flex gap-4 items-start">
-                <div className={`w-8 h-8 rounded-sm flex items-center justify-center ${message.role === 'assistant' ? 'bg-[#10A37F]' : 'bg-[#202123]'
+        <div className="max-w-3xl mx-auto">
+          {handler.messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-180px)] text-gray-400">
+              <h1 className="text-2xl font-semibold mb-2">ChatGPT</h1>
+              <p className="text-sm">How can I help you today?</p>
+            </div>
+          ) : (
+            handler.messages.map((message, index) => (
+              <div
+                key={index}
+                className={`py-6 px-4 ${message.role === 'assistant' ? 'bg-[#1a1c23]' : ''}`}
+              >
+                <div className="max-w-3xl mx-auto flex gap-4 items-start">
+                  <div className={`w-8 h-8 rounded-sm flex items-center justify-center ${
+                    message.role === 'assistant' ? 'bg-[#10A37F]' : 'bg-[#5437DB]'
                   }`}>
-                  {message.role === 'assistant' ? 'AI' : 'U'}
-                </div>
-                <div className="prose dark:prose-invert flex-1">
-                  {message.content}
+                    {message.role === 'assistant' ? (
+                      <Bot className="w-5 h-5 text-white" />
+                    ) : (
+                      <User className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+                  <div className="prose prose-invert flex-1 prose-p:leading-relaxed">
+                    {message.content}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="border-t border-[#2A2B32] bg-[#171819] p-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="border-t border-[#2e2f35] bg-[#0f1117] p-4">
+        <div className="max-w-3xl mx-auto">
           <div className="relative">
             <textarea
               value={handler.input}
@@ -84,7 +95,7 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
                 }
               }}
               placeholder="Message ChatGPT..."
-              className="w-full rounded-xl border border-[#2A2B32] bg-[#202123] p-4 pr-24 text-white placeholder-gray-400 focus:border-[#2A2B32] focus:outline-none focus:ring-1 focus:ring-[#2A2B32]"
+              className="w-full rounded-xl border border-[#2e2f35] bg-[#1a1c23] p-4 pr-24 text-gray-100 placeholder-gray-400 focus:border-[#3e3f45] focus:outline-none focus:ring-1 focus:ring-[#3e3f45]"
               rows={1}
               style={{ resize: 'none', minHeight: '56px' }}
             />
@@ -99,7 +110,7 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-[#2A2B32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-[#2e2f35] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Upload PDF"
               >
                 <Upload className="h-5 w-5" />
@@ -111,7 +122,7 @@ export function ChatSection({ chatHistory, wfRunId }: { chatHistory: string[], w
                     handler.setInput('')
                   }
                 }}
-                className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-[#2A2B32] transition-colors"
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-[#2e2f35] transition-colors"
               >
                 <Send className="h-5 w-5" />
               </button>
