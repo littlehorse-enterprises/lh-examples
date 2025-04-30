@@ -17,11 +17,9 @@ llm = init_chat_model(model="gpt-4o-mini")
 
 async def invoke_ai(history: list[Any], context: str) -> str: # Input is actually a list[str]
     
-    question = history[-1]
-    
     prompt_text = f"""Human: You are an International Trade and Tariff Regulations expert who can answer questions only based on the context provided below.
 
-                    Answer the question STRICTLY based on the US Tariff data context provided in JSON below.
+                    Answer the question STRICTLY based on the US Tariff data context provided in html tag below.
 
                     Do not assume or retrieve any information outside of the context.
 
@@ -39,7 +37,7 @@ async def invoke_ai(history: list[Any], context: str) -> str: # Input is actuall
 
                     Do not start the response with "Here is a summary" or similar phrasing.
 
-                    If the context is empty, respond with: None.
+                    If the context is empty, respond with: The context provided to me is empty.
 
                     Always prioritize clarity and relevance in the format you choose (plain text, table, or chart).
 
@@ -49,12 +47,10 @@ async def invoke_ai(history: list[Any], context: str) -> str: # Input is actuall
                     </context>
 
                     
-                    Message History (odd index is user, even index is assistant):
-                    {history[:-1]}
-                    Question:
-                    {question}
+                    Chat History (0 or odd indexes is user, even indexes are the AI's response):
+                    {history}
                 """
-        
+    
     answer = llm.invoke(prompt_text)
 
     return answer.content

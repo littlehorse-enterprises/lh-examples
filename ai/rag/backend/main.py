@@ -52,7 +52,7 @@ async def start_workers():
     await littlehorse.start(*workers)
 
 async def process_data():
-    file_paths = ["GMO Quarterly Letter.pdf", "Tariff Schedule.pdf", "Tax Insights.pdf"]
+    file_paths = ["GMO Quarterly Letter.pdf", "Tax Insights.pdf"]
     for file_path in file_paths:
         pdf_hash = hashlib.sha256(file_path.encode()).hexdigest()
         client.RunWf(RunWfRequest(
