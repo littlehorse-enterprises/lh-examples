@@ -44,28 +44,15 @@ Your system needs:
 
 ## Python Setup
 
-We need a python environment that has the `littlehorse-client` pip package. We recommend making a python virtual environment. To install the `littlehorse` package, you can use a package manager of your choice. We show you below how to do it with `pip` or `poetry`:
-
-The first option is to install via `pip`:
+We need a python environment that has the `littlehorse-client` pip package. We recommend making a python virtual environment. To install the required packages:
 
 ```bash
-pip install typing_extensions
-pip install littlehorse-client
-```
+# Create and activate a virtual environment (optional but recommended)
+python -m venv .venv
+source .venv/bin/activate  # On Windows, use: .venv\Scripts\activate
 
-Alternatively, you can install via `poetry` using our `pyproject.toml` file as follows:
-
-```bash
-poetry install
-poetry shell
-```
-
-After installing our Python SDK via your preferred method, you should be able to import the `littlehorse` python package:
-
-```bash
--> python
->>> import littlehorse
->>>
+# Install dependencies
+pip install -r requirements.txt
 ```
 
 ## LittleHorse CLI
@@ -119,7 +106,7 @@ At this point, whether you are using a local Docker deployment or a LittleHorse 
 
 **You should also be able to see the dashboard** at `http://localhost:8080`. It should be empty, but we will put some data in there soon when we run the workflow!
 
-If you _can't_ get the above to work, please let us know on our [Community Slack Workspace](https://launchpass.com/littlehorsecommunity). We'll be happy to help.
+If you _can't_ get the above to work, please let us know on our [Community Slack Workspace](https://launchpass.com/littlehorsecommunity/free). We'll be happy to help.
 
 # Running the Example
 
@@ -218,7 +205,7 @@ If you go to the `WfRun` page in your browser, you will see that the workflow ha
 
 # Next Steps
 
-If you've made it this far, then it's time you become a full-fledged LittleHorse Knight!
+If you've made it this far, then it's time you became a full-fledged LittleHorse Knight!
 
 Visit our [docs](https://littlehorse.io/docs) or learn more about LittleHorse [here](https://littlehorse.io/learn).
 
