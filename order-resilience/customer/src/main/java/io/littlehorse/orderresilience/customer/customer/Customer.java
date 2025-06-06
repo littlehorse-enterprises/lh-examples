@@ -8,32 +8,23 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "customers")
 public class Customer {
 
   @Id
-  @Column(name = "id")
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  private int id;
 
-  @Column(name = "firstname")
-  private String firstname;
+  private String name;
 
-  @Column(name = "lastname")
-  private String lastname;
-
-  @Column(name = "email")
   private String email;
 
-  public Customer(String firstname, String lastname, String email) {
-    this.firstname = firstname;
-    this.lastname = lastname;
-    this.email = email;
-  }
 }
