@@ -8,3 +8,5 @@ tmp/
 .env.local
 .env*.local
 .directory
+.idea/*
+.vscode/*
