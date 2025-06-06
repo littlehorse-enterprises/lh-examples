@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="workflow" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ai-customer-support-call-actions.main" options="-parameters" />
+      <module name="ai-document-processing.main" options="-parameters" />
+      <module name="ai-incident-responder.main" options="-parameters" />
+      <module name="api.app" options="-parameters" />
+      <module name="api.app.main" options="-parameters" />
+      <module name="api.app.test" options="-parameters" />
+      <module name="customer" options="-parameters -Xlint:-processing" />
+      <module name="customer.main" options="-parameters -Xlint:-processing" />
+      <module name="customer.test" options="-parameters -Xlint:-processing" />
+      <module name="io.littlehorse.customer" options="-parameters -Xlint:-processing" />
+      <module name="io.littlehorse.customer.main" options="-parameters -Xlint:-processing" />
+      <module name="io.littlehorse.customer.test" options="-parameters -Xlint:-processing" />
+      <module name="io.littlehorse.quickstart.lh-quickstart-java.main" options="-parameters" />
+      <module name="it-request.api.app" options="-parameters" />
+      <module name="it-request.api.app.main" options="-parameters" />
+      <module name="it-request.api.app.test" options="-parameters" />
+      <module name="ledger" options="-parameters -Xlint:-processing" />
+      <module name="ledger.main" options="-parameters -Xlint:-processing" />
+      <module name="ledger.test" options="-parameters -Xlint:-processing" />
+      <module name="lh-quickstart-java.main" options="-parameters" />
+      <module name="notifications" options="-parameters -Xlint:-processing" />
+      <module name="notifications.main" options="-parameters -Xlint:-processing" />
+      <module name="notifications.test" options="-parameters -Xlint:-processing" />
+      <module name="verification" options="-parameters -Xlint:-processing" />
+      <module name="verification.main" options="-parameters -Xlint:-processing" />
+      <module name="verification.test" options="-parameters -Xlint:-processing" />
+      <module name="workflow" options="-parameters -Xlint:-processing" />
+      <module name="workflow.main" options="-parameters -Xlint:-processing" />
+      <module name="workflow.test" options="-parameters -Xlint:-processing" />
+    </option>
+  </component>
+</project>

@@ -32,6 +32,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Gradle.customer [:io.littlehorse.orderresilience.customer.Application.main()].executor": "Run",
     "last_opened_file_path": "/Users/christiancaicedo/projects/lh/lh-examples/order-resilience/backend/customer"
   }
 }]]></component>
