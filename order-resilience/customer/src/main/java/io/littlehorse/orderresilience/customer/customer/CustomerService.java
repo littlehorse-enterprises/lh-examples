@@ -40,7 +40,7 @@ public class CustomerService {
     Customer customer = get(id);
     repository.delete(customer);
   }
-  public List<Customer> findByName(String name){
-    return repository.findByName(name) ;
+  public List<Customer> findBySearchCriteria(String name){
+    return repository.findBySearchCriteria(name) ;
   }
 }

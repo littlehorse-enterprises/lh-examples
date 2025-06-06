@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.littlehorse.orderresilience.customer.customer.dto.CustomerRequest;
@@ -41,6 +42,12 @@ public class CustomerController {
     public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable("id") UUID id) throws CustomerNotFoundException {
         Customer customer = customerService.get(id);
         return new ResponseEntity<>(customerMapper.toResponse(customer), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerResponse>> getCustomersByName(@RequestParam("criteria") String criteria) {
+        List<Customer> customers = customerService.findBySearchCriteria(criteria);
+        return new ResponseEntity<>(customerMapper.toResponseList(customers), HttpStatus.OK);
     }
 
     @PostMapping
