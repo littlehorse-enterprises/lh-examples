@@ -7,8 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import io.littlehorse.orderresilience.product.product.exceptions.InsufficientStockException;
-import io.littlehorse.orderresilience.product.product.exceptions.ProductNotFoundException;
+import io.littlehorse.orderresilience.product.exceptions.InsufficientStockException;
+import io.littlehorse.orderresilience.product.exceptions.ProductNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;

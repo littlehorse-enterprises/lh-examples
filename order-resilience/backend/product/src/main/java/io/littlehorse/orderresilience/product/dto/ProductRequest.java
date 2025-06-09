@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.product.product.dto;
+package io.littlehorse.orderresilience.product.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

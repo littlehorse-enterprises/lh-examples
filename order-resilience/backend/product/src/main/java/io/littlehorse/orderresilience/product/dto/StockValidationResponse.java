@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.product.product.dto;
+package io.littlehorse.orderresilience.product.dto;
 
 import java.util.Map;
 import java.util.UUID;

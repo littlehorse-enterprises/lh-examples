@@ -1,6 +1,4 @@
-package io.littlehorse.orderresilience.product.product;
-
-import java.util.UUID;
+package io.littlehorse.orderresilience.product;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,7 +1,6 @@
-package io.littlehorse.orderresilience.product.product.dto;
+package io.littlehorse.orderresilience.product.dto;
 
 import java.util.Map;
-import java.util.UUID;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;

@@ -1,13 +1,13 @@
-package io.littlehorse.orderresilience.product.product.mapper;
+package io.littlehorse.orderresilience.product.mapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import io.littlehorse.orderresilience.product.product.Product;
-import io.littlehorse.orderresilience.product.product.dto.ProductRequest;
-import io.littlehorse.orderresilience.product.product.dto.ProductResponse;
+import io.littlehorse.orderresilience.product.Product;
+import io.littlehorse.orderresilience.product.dto.ProductRequest;
+import io.littlehorse.orderresilience.product.dto.ProductResponse;
 
 @Component
 public class ProductMapper {

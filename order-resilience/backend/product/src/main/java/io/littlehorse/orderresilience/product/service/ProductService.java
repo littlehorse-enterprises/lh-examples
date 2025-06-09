@@ -1,18 +1,18 @@
-package io.littlehorse.orderresilience.product.product;
+package io.littlehorse.orderresilience.product.service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+import io.littlehorse.orderresilience.product.Product;
+import io.littlehorse.orderresilience.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.littlehorse.orderresilience.product.product.exceptions.InsufficientStockException;
-import io.littlehorse.orderresilience.product.product.exceptions.ProductNotFoundException;
+import io.littlehorse.orderresilience.product.exceptions.InsufficientStockException;
+import io.littlehorse.orderresilience.product.exceptions.ProductNotFoundException;
 
 @Service
 public class ProductService {
