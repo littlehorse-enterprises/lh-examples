@@ -16,6 +16,13 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-jackson'
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-hibernate-orm-panache'
+    implementation "io.littlehorse:littlehorse-quarkus:0.13.2"
+
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
 }

@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.customer.dto;
+package io.littlehorse.examples.dto;
 
 import java.util.UUID;
 
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerResponse {
-    private int id;
+    private Long id;
     private String name;
     private String email;
 }

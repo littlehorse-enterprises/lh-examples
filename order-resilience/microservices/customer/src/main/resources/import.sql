@@ -1,6 +1,6 @@
--- This file allow to write SQL commands that will be emitted in test and dev.
--- The commands are commented as their support depends of the database
--- insert into myentity (id, field) values(1, 'field-1');
--- insert into myentity (id, field) values(2, 'field-2');
--- insert into myentity (id, field) values(3, 'field-3');
--- alter sequence myentity_seq restart with 4;
+-- Initial data for customer microservice
+INSERT INTO customer (id, name, email, status, type) VALUES (1, 'Chewbacca', 'chewie@rebellion.org', 0, 0);
+INSERT INTO customer (id, name, email, status, type) VALUES (2, 'R2D2', 'r2d2@rebellion.org', 1, 1);
+INSERT INTO customer (id, name, email, status, type) VALUES (3, 'Darth Vader', 'vader@empire.gov', 0, 0);
+-- Reset sequence to avoid conflicts
+ALTER SEQUENCE customer_seq RESTART WITH 4;

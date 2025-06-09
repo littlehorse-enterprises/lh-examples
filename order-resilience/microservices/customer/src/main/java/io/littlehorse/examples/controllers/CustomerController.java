@@ -1,7 +1,10 @@
-package io.littlehorse.orderresilience.customer.controllers;
+package io.littlehorse.examples.controllers;
 
 import java.util.List;
 
+import io.littlehorse.examples.mapper.CustomerMapper;
+import io.littlehorse.examples.models.Customer;
+import io.littlehorse.examples.services.CustomerService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -9,9 +12,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import io.littlehorse.orderresilience.customer.mapper.CustomerMapper;
-import io.littlehorse.orderresilience.customer.models.Customer;
-import io.littlehorse.orderresilience.customer.services.CustomerService;
 
 @Path("/api/customers")
 @Produces(MediaType.APPLICATION_JSON)

@@ -1,9 +1,10 @@
-package io.littlehorse.orderresilience.customer.mapper;
+package io.littlehorse.examples.mapper;
 
+import io.littlehorse.examples.dto.CustomerRequest;
+import io.littlehorse.examples.dto.CustomerResponse;
+import io.littlehorse.examples.models.Customer;
 import jakarta.enterprise.context.ApplicationScoped;
-import io.littlehorse.orderresilience.customer.dto.CustomerRequest;
-import io.littlehorse.orderresilience.customer.dto.CustomerResponse;
-import io.littlehorse.orderresilience.customer.models.Customer;
+
 import java.util.List;
 import java.util.stream.Collectors;
 

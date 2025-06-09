@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.customer.models;
+package io.littlehorse.examples.models;
 
 public enum CustomerStatus {
     ACTIVE,

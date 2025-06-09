@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.customer.exceptions;
+package io.littlehorse.examples.exceptions;
 
 public class CustomerException extends Exception{
     public CustomerException(String message) {
