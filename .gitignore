@@ -8,5 +8,17 @@ tmp/
 .env.local
 .env*.local
 .directory
-.idea/*
-.vscode/*
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+.shelf/
+.ideaDataSources/
+.vscode/
+*.code-workspace
+.classpath
+.project
+.settings/

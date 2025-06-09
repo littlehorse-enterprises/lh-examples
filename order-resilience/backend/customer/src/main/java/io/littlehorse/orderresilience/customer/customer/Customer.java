@@ -1,8 +1,5 @@
 package io.littlehorse.orderresilience.customer.customer;
 
-import java.util.UUID;
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,4 +24,19 @@ public class Customer {
 
   private String email;
 
+  private CustomerStatus status = CustomerStatus.ACTIVE;
+  
+  private CustomerType type = CustomerType.CUSTOMER; 
+
+}
+
+enum CustomerStatus {
+    ACTIVE,
+    INACTIVE,
+    SUSPENDED
+}
+
+enum CustomerType {
+    CUSTOMER,
+    ADMIN
 }

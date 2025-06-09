@@ -14,7 +14,7 @@ import jakarta.annotation.PreDestroy;
 
 public class Worker implements Closeable {
   private List<LHTaskWorker> workers = new ArrayList<>();
-  private static List<String> tasks = List.of("create-customer");
+  private static List<String> tasks = List.of("validate-customer");
 
   public Worker(LittleHorseBlockingStub client, LHConfig config, CustomerService customerService) {
     Tasks customerTasks = new Tasks(customerService);

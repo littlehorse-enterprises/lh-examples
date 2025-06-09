@@ -14,11 +14,11 @@ public class Tasks {
     this.customerService = customerService;
   }
 
-  @LHTaskMethod("create-customer")
-  public Customer shipItem(Customer customer) throws Exception {
+  @LHTaskMethod("validate-customer")
+  public void validateCustomer(Integer customerId) throws Exception {
     try {
-      log.info(String.format("Creating customer: %s", customer.getEmail()));
-      return this.customerService.create(customer);
+      log.info(String.format("Validating customer: %s", customerId));
+       this.customerService.validateCustomer(customerId);
     } catch (Exception e) {
       // Business exception
       log.error(e.getMessage());

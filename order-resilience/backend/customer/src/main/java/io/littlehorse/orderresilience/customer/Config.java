@@ -1,6 +1,5 @@
 package io.littlehorse.orderresilience.customer;
 
-import io.littlehorse.orderresilience.customer.Worker;
 import io.littlehorse.orderresilience.customer.customer.CustomerService;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
