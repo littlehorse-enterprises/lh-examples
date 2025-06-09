@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.customer.customer.dto;
+package io.littlehorse.orderresilience.customer.dto;
 
 import java.util.UUID;
 

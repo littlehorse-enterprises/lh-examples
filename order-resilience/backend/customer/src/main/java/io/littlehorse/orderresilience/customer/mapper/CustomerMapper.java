@@ -1,10 +1,9 @@
-package io.littlehorse.orderresilience.customer.customer.mapper;
+package io.littlehorse.orderresilience.customer.mapper;
 
-import io.littlehorse.orderresilience.customer.customer.Customer;
-import io.littlehorse.orderresilience.customer.customer.dto.CustomerRequest;
-import io.littlehorse.orderresilience.customer.customer.dto.CustomerResponse;
 import org.springframework.stereotype.Component;
-
+import io.littlehorse.orderresilience.customer.dto.CustomerRequest;
+import io.littlehorse.orderresilience.customer.dto.CustomerResponse;
+import io.littlehorse.orderresilience.customer.model.Customer;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -1,13 +1,14 @@
-package io.littlehorse.orderresilience.customer.customer;
+package io.littlehorse.orderresilience.customer.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import io.littlehorse.orderresilience.customer.customer.exceptions.CustomerException;
-
+import io.littlehorse.orderresilience.customer.exceptions.CustomerException;
+import io.littlehorse.orderresilience.customer.model.Customer;
+import io.littlehorse.orderresilience.customer.model.CustomerStatus;
+import io.littlehorse.orderresilience.customer.repository.CustomerRepository;
 
 @Service
 public class CustomerService {

@@ -1,7 +1,6 @@
 package io.littlehorse.orderresilience.customer;
 
-import io.littlehorse.orderresilience.customer.customer.Customer;
-import io.littlehorse.orderresilience.customer.customer.CustomerService;
+import io.littlehorse.orderresilience.customer.service.CustomerService;
 import io.littlehorse.sdk.common.exception.LHTaskException;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import lombok.extern.log4j.Log4j2;

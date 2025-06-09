@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.customer.customer;
+package io.littlehorse.orderresilience.customer.controller;
 
 import java.util.List;
 
@@ -8,9 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.littlehorse.orderresilience.customer.customer.dto.CustomerResponse;
-import io.littlehorse.orderresilience.customer.customer.mapper.CustomerMapper;
+import io.littlehorse.orderresilience.customer.dto.CustomerResponse;
+import io.littlehorse.orderresilience.customer.mapper.CustomerMapper;
+import io.littlehorse.orderresilience.customer.model.Customer;
+import io.littlehorse.orderresilience.customer.service.CustomerService;
 
 @RestController
 @RequestMapping("/api/customers")

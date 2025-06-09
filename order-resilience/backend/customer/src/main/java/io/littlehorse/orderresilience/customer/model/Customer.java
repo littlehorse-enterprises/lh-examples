@@ -1,4 +1,4 @@
-package io.littlehorse.orderresilience.customer.customer;
+package io.littlehorse.orderresilience.customer.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,15 +28,4 @@ public class Customer {
   
   private CustomerType type = CustomerType.CUSTOMER; 
 
-}
-
-enum CustomerStatus {
-    ACTIVE,
-    INACTIVE,
-    SUSPENDED
-}
-
-enum CustomerType {
-    CUSTOMER,
-    ADMIN
 }

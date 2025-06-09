@@ -4,8 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.littlehorse.orderresilience.customer.customer.CustomerService;
+import io.littlehorse.orderresilience.customer.service.CustomerService;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.worker.LHTaskWorker;

@@ -1,9 +1,8 @@
 package io.littlehorse.orderresilience.customer;
 
-import io.littlehorse.orderresilience.customer.customer.CustomerService;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
-
+import io.littlehorse.orderresilience.customer.service.CustomerService;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
