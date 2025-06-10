@@ -1,4 +1,4 @@
-package io.littlehorse.examples;
+package io.littlehorse.examples.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 

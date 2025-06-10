@@ -1,4 +1,4 @@
-package io.littlehorse.examples;
+package io.littlehorse.examples.models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +31,9 @@ public class Order {
 
   private int clientId;
   
-  private String error;
+  private String errorMessage;
   
-  private double totalPrice;
+  private double total;
   
   @Enumerated(EnumType.STRING)
   private OrderStatus status = OrderStatus.PENDING;
@@ -52,12 +52,3 @@ public class Order {
     orderLine.setOrder(null);
   }
 }
-
-/**
- * The status of an order
- */
-enum OrderStatus {
-  PENDING,
-  COMPLETED,
-  CANCELLED
-} 

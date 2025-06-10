@@ -1,5 +1,6 @@
-package io.littlehorse.examples;
+package io.littlehorse.examples.repositories;
 
+import io.littlehorse.examples.models.Order;
 import jakarta.enterprise.context.ApplicationScoped;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
