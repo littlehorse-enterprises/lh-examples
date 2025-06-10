@@ -1,6 +1,5 @@
 package io.littlehorse.examples.dto;
 
-import io.littlehorse.examples.models.OrderStatus;
 import lombok.Data;
 
 import java.util.List;
@@ -11,11 +10,11 @@ public class OrderResponse {
 
     private int clientId;
 
-    private String errorMessage;
+    private String message;
 
     private double total;
 
-    private OrderStatus status = OrderStatus.PENDING;
+    private String status = "PENDING";
 
     private List<OrderLineRequest> orderLines;
     

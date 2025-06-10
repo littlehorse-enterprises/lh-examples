@@ -2,8 +2,6 @@ package io.littlehorse.examples.tasks;
 
 import io.littlehorse.examples.dto.OrderRequest;
 import io.littlehorse.examples.dto.OrderResponse;
-import io.littlehorse.examples.models.Order;
-import io.littlehorse.examples.models.OrderStatus;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import jakarta.inject.Inject;
@@ -28,7 +26,7 @@ public class OrderTask {
     }
 
     @LHTaskMethod(UPDATE_ORDER_STATUS)
-    public OrderResponse updateOrderStatus(int orderId, OrderStatus orderStatus) {
-        return this.orderService.updateOrderStatus(orderId,orderStatus);
+    public OrderResponse updateOrderStatus(Long orderId, String orderStatus, String message) {
+        return this.orderService.updateOrderStatus(orderId, orderStatus, message);
     }
 }

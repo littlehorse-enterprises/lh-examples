@@ -1,7 +1,9 @@
 package io.littlehorse.examples.exceptions;
 
-public class ProductNotFoundException extends Exception {
+import io.littlehorse.sdk.common.exception.LHTaskException;
+
+public class ProductNotFoundException extends LHTaskException {
     public ProductNotFoundException(String message) {
-        super(message);
+        super("product-not-found",message);
     }
 }

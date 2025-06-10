@@ -2,5 +2,3 @@
 INSERT INTO customer (id, name, email, status, type) VALUES (1, 'Chewbacca', 'chewie@rebellion.org', 0, 0);
 INSERT INTO customer (id, name, email, status, type) VALUES (2, 'R2D2', 'r2d2@rebellion.org', 1, 1);
 INSERT INTO customer (id, name, email, status, type) VALUES (3, 'Darth Vader', 'vader@empire.gov', 0, 0);
--- Reset sequence to avoid conflicts
-ALTER SEQUENCE customer_seq RESTART WITH 4;

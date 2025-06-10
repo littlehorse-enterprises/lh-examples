@@ -10,7 +10,7 @@ public class OrderRequest {
 
     private int clientId;
 
-    private String errorMessage;
+    private String message;
 
     private double total;
 

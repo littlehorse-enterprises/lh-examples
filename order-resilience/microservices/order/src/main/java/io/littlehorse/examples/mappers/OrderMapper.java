@@ -20,7 +20,7 @@ public class OrderMapper {
         Order order = new Order();
         order.setOrderId(orderRequest.getOrderId());
         order.setClientId(orderRequest.getClientId());
-        order.setErrorMessage(orderRequest.getErrorMessage());
+        order.setMessage(orderRequest.getMessage());
         order.setTotal(orderRequest.getTotal());
 
         if (orderRequest.getOrderLines() != null) {
@@ -45,7 +45,7 @@ public class OrderMapper {
         OrderResponse response = new OrderResponse();
         response.setOrderId(order.getOrderId());
         response.setClientId(order.getClientId());
-        response.setErrorMessage(order.getErrorMessage());
+        response.setMessage(order.getMessage());
         response.setTotal(order.getTotal());
         response.setStatus(order.getStatus());
         
@@ -68,7 +68,7 @@ public class OrderMapper {
      */
     public Order updateEntityFromRequest(Order order, OrderRequest orderRequest) {
         order.setClientId(orderRequest.getClientId());
-        order.setErrorMessage(orderRequest.getErrorMessage());
+        order.setMessage(orderRequest.getMessage());
         order.setTotal(orderRequest.getTotal());
 
         // Clear existing order lines and add new ones

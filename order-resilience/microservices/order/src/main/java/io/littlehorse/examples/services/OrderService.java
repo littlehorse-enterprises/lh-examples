@@ -7,7 +7,6 @@ import io.littlehorse.examples.dto.OrderResponse;
 import io.littlehorse.examples.mappers.OrderMapper;
 import io.littlehorse.examples.models.Order;
 import io.littlehorse.examples.models.OrderLine;
-import io.littlehorse.examples.models.OrderStatus;
 import io.littlehorse.examples.repositories.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -36,7 +35,7 @@ public class OrderService {
         
         // Ensure status is set
         if (order.getStatus() == null) {
-            order.setStatus(OrderStatus.PENDING);
+            order.setStatus("PENDING");
         }
         
         orderRepository.persist(order);
@@ -61,14 +60,15 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse updateOrderStatus(int orderId, OrderStatus newStatus) {
-        Order order = orderRepository.findById((long) orderId);
+    public OrderResponse updateOrderStatus(Long orderId, String newStatus, String message) {
+        Order order = orderRepository.findById( orderId);
         
         if (order == null) {
             return null;
         }
         
         order.setStatus(newStatus);
+        order.setMessage(message);
         orderRepository.persist(order);
         
         return orderMapper.toResponse(order);

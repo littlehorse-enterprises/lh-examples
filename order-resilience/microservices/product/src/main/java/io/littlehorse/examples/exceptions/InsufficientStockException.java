@@ -1,7 +1,9 @@
 package io.littlehorse.examples.exceptions;
 
-public class InsufficientStockException extends Exception {
+import io.littlehorse.sdk.common.exception.LHTaskException;
+
+public class InsufficientStockException extends LHTaskException {
     public InsufficientStockException(String message) {
-        super(message);
+        super("no-stock",message);
     }
 }

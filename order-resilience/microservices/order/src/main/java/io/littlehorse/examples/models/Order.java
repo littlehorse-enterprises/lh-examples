@@ -31,12 +31,11 @@ public class Order {
 
   private int clientId;
   
-  private String errorMessage;
+  private String message;
   
   private double total;
   
-  @Enumerated(EnumType.STRING)
-  private OrderStatus status = OrderStatus.PENDING;
+  private String status;
   
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
