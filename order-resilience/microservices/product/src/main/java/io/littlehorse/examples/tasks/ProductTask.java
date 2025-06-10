@@ -1,7 +1,9 @@
 package io.littlehorse.examples.tasks;
 
+import java.util.List;
 import java.util.Map;
 
+import io.littlehorse.examples.dto.ProductStockItem;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
 import io.littlehorse.examples.service.ProductService;
@@ -19,9 +21,9 @@ public class ProductTask {
     public ProductTask(ProductService productService) {
         this.productService = productService;
     }
-
+    
     @LHTaskMethod(REDUCE_STOCK)
-    public Map<Long, Integer> reduceStock(Map<Long, Integer> productQuantities) throws ProductNotFoundException, InsufficientStockException {
-        return this.productService.reduceStock(productQuantities);
+    public void reduceStock(List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException {
+         this.productService.reduceStock(productItems);
     }
 }

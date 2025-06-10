@@ -18,7 +18,7 @@ public class OrderMapper {
      */
     public Order toEntity(OrderRequest orderRequest) {
         Order order = new Order();
-        order.setId(orderRequest.getId());
+        order.setOrderId(orderRequest.getOrderId());
         order.setClientId(orderRequest.getClientId());
         order.setErrorMessage(orderRequest.getErrorMessage());
         order.setTotal(orderRequest.getTotal());
@@ -43,7 +43,7 @@ public class OrderMapper {
      */
     public OrderResponse toResponse(Order order) {
         OrderResponse response = new OrderResponse();
-        response.setId(order.getId());
+        response.setOrderId(order.getOrderId());
         response.setClientId(order.getClientId());
         response.setErrorMessage(order.getErrorMessage());
         response.setTotal(order.getTotal());

@@ -59,4 +59,20 @@ public class OrderService {
             .map(orderMapper::toResponse)
             .toList();
     }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(int orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById((long) orderId);
+        
+        if (order == null) {
+            return null;
+        }
+        
+        order.setStatus(newStatus);
+        orderRepository.persist(order);
+        
+        return orderMapper.toResponse(order);
+    }
+
+
 }

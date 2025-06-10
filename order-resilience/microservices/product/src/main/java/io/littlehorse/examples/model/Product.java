@@ -18,7 +18,7 @@ public class Product {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private Long id;
+  private Long productId;
 
   private String name;
   
@@ -26,7 +26,7 @@ public class Product {
   
   private double price;
   
-  private int stock;
+  private int quantity;
   
   private String category;
 }

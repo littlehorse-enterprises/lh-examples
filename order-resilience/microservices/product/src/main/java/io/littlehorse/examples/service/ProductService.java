@@ -1,10 +1,12 @@
 package io.littlehorse.examples.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.littlehorse.examples.dto.ProductStockItem;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
 import io.littlehorse.examples.model.Product;
@@ -27,35 +29,72 @@ public class ProductService {
   }
 
   @Transactional
-  public Map<Long, Integer> reduceStock(Map<Long, Integer> productQuantities) throws ProductNotFoundException, InsufficientStockException {
-    // Validate all products exist and have sufficient stock
-    for (Map.Entry<Long, Integer> entry : productQuantities.entrySet()) {
-      Long productId = entry.getKey();
-      int requestedQuantity = entry.getValue();
-      
-      Product product = get(productId);
-      if (product.getStock() < requestedQuantity) {
-        throw new InsufficientStockException("Insufficient stock for product: " + product.getName() + " (ID: " + productId + "). Available: " + product.getStock() + ", Requested: " + requestedQuantity);
+  public void reduceStock(List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException {
+    if (productItems == null || productItems.isEmpty()) {
+      return; // No items to process
+    }
+
+    // Collect all product IDs to validate
+    List<Long> productIds = productItems.stream()
+        .map(ProductStockItem::getProductId)
+        .collect(Collectors.toList());
+    
+    // Find all products in one go
+    Map<Long, Product> productMap = repository.find("productId in ?1", productIds)
+        .stream()
+        .collect(Collectors.toMap(Product::getProductId, product -> product));
+    
+    // Validate all products exist
+    List<Long> notFoundIds = new ArrayList<>();
+    for (Long id : productIds) {
+      if (!productMap.containsKey(id)) {
+        notFoundIds.add(id);
       }
     }
     
-    // Reduce stock for all products
-    return productQuantities.entrySet().stream()
-        .collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> {
-              Long productId = entry.getKey();
-              int quantity = entry.getValue();
-              try {
-                Product product = get(productId);
-                product.setStock(product.getStock() - quantity);
-                repository.persist(product);
-                return quantity;
-              } catch (ProductNotFoundException e) {
-                // This shouldn't happen as we already validated all products exist
-                throw new RuntimeException("Product disappeared during transaction: " + productId);
-              }
-            }
-        ));
+    // Throw exception if any products not found
+    if (!notFoundIds.isEmpty()) {
+      throw new ProductNotFoundException("Products not found: " + notFoundIds);
+    }
+    
+    // Validate stock and accumulate reductions for each product
+    Map<Long, Integer> stockReductions = new HashMap<>();
+    for (ProductStockItem item : productItems) {
+      Long productId = item.getProductId();
+      Integer quantity = item.getQuantity();
+      
+      // Accumulate quantities in case the same product appears multiple times
+      stockReductions.merge(productId, quantity, Integer::sum);
+    }
+    
+    // Check stock availability and update products
+    List<String> insufficientStockProducts = new ArrayList<>();
+    for (Map.Entry<Long, Integer> entry : stockReductions.entrySet()) {
+      Long productId = entry.getKey();
+      Integer requestedQuantity = entry.getValue();
+      Product product = productMap.get(productId);
+      
+      if (product.getQuantity() < requestedQuantity) {
+        insufficientStockProducts.add(
+            String.format("Product ID %d has %d items in stock, but %d were requested", 
+                productId, product.getQuantity(), requestedQuantity)
+        );
+      }
+    }
+    
+    // Throw exception if any products have insufficient stock
+    if (!insufficientStockProducts.isEmpty()) {
+      throw new InsufficientStockException("Insufficient stock: " + String.join("; ", insufficientStockProducts));
+    }
+    
+    // All validations passed, now reduce the stock
+    for (Map.Entry<Long, Integer> entry : stockReductions.entrySet()) {
+      Long productId = entry.getKey();
+      Integer requestedQuantity = entry.getValue();
+      Product product = productMap.get(productId);
+      
+      product.setQuantity(product.getQuantity() - requestedQuantity);
+      repository.persist(product);
+    }
   }
 }

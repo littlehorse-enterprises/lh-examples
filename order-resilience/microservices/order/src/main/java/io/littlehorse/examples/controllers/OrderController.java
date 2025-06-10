@@ -5,7 +5,6 @@ import java.util.List;
 import io.littlehorse.examples.dto.OrderRequest;
 import io.littlehorse.examples.dto.OrderResponse;
 import io.littlehorse.examples.services.OrderService;
-import io.littlehorse.examples.models.Order;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;

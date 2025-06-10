@@ -14,11 +14,11 @@ public class ProductMapper {
 
     public ProductResponse toResponse(Product product) {
         return new ProductResponse(
-                product.getId(),
+                product.getProductId(),
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getStock(),
+                product.getQuantity(),
                 product.getCategory()
         );
     }
@@ -34,7 +34,7 @@ public class ProductMapper {
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
-        product.setStock(request.getStock());
+        product.setQuantity(request.getQuantity());
         product.setCategory(request.getCategory());
         return product;
     }

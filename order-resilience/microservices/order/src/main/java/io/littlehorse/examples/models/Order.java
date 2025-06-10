@@ -27,7 +27,7 @@ public class Order {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private int id;
+  private int orderId;
 
   private int clientId;
   

@@ -23,7 +23,7 @@ public class ProductRequest {
     
     @NotNull(message = "Stock is required")
     @Min(value = 0, message = "Stock cannot be negative")
-    private Integer stock;
+    private Integer quantity;
     
     private String category;
 }

@@ -2,12 +2,11 @@ package io.littlehorse.examples.dto;
 
 import java.util.List;
 
-import io.littlehorse.examples.models.OrderStatus;
 import lombok.Data;
 
 @Data
 public class OrderRequest {
-    private int id;
+    private int orderId;
 
     private int clientId;
 

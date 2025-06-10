@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class OrderResponse {
-    private int id;
+    private int orderId;
 
     private int clientId;
 
