@@ -6,6 +6,8 @@ import io.littlehorse.examples.exceptions.OrderBlocked;
 import io.littlehorse.examples.exceptions.CustomerNotFoundException;
 import io.littlehorse.examples.models.Customer;
 import io.littlehorse.examples.repository.CustomerRepository;
+import io.littlehorse.sdk.common.proto.VariableValue;
+import io.littlehorse.sdk.common.proto.VariableValueOrBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -27,10 +29,14 @@ public class CustomerService {
     public void validateCustomer(Long id) {
         Customer customer = repository.findById(id);
         if (customer == null) {
-            throw new CustomerNotFoundException("Customer not found with id: " + id);
+            String errorMessage = "Customer not found with id: " + id;
+            throw new CustomerNotFoundException( errorMessage,
+                    VariableValue.newBuilder().setStr(errorMessage).build());
         }
         if (!customer.getCanPlaceOrders()) {
-            throw new OrderBlocked(String.format("%s is not allowed to place orders",customer.getName()));
+            String errorMessage = String.format("%s is not allowed to place orders",customer.getName());
+            throw new OrderBlocked(errorMessage,
+                    VariableValue.newBuilder().setStr(errorMessage).build());
         }
     }
 

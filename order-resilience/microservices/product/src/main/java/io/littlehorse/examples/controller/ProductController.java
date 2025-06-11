@@ -3,17 +3,13 @@ package io.littlehorse.examples.controller;
 import java.util.List;
 import java.util.Map;
 
-import io.littlehorse.examples.dto.ProductResponse;
 import io.littlehorse.examples.dto.ProductStockItem;
-import io.littlehorse.examples.dto.StockValidationListRequest;
-import io.littlehorse.examples.dto.StockValidationRequest;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
 import io.littlehorse.examples.mapper.ProductMapper;
 import io.littlehorse.examples.model.Product;
 import io.littlehorse.examples.service.ProductService;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;

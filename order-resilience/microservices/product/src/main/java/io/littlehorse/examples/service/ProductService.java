@@ -11,6 +11,7 @@ import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
 import io.littlehorse.examples.model.Product;
 import io.littlehorse.examples.repositories.ProductRepository;
+import io.littlehorse.sdk.common.proto.VariableValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -76,15 +77,16 @@ public class ProductService {
       
       if (product.getQuantity() < requestedQuantity) {
         insufficientStockProducts.add(
-            String.format("Product %s with ID %d has %d items in stock, but %d were requested",
-                product.getName(),productId, product.getQuantity(), requestedQuantity)
+            String.format("Product [%s] has %d items in stock, but %d were requested",
+                product.getName(), product.getQuantity(), requestedQuantity)
         );
       }
     }
     
     // Throw exception if any products have insufficient stock
     if (!insufficientStockProducts.isEmpty()) {
-      throw new InsufficientStockException("Insufficient stock: " + String.join("; ", insufficientStockProducts));
+      String message = String.join("; ", insufficientStockProducts);
+      throw new InsufficientStockException("Insufficient stock: " + message, VariableValue.newBuilder().setStr("Insufficient stock: " + message).build());
     }
     
     // All validations passed, now reduce the stock
