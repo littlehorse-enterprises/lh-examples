@@ -76,8 +76,8 @@ public class ProductService {
       
       if (product.getQuantity() < requestedQuantity) {
         insufficientStockProducts.add(
-            String.format("Product ID %d has %d items in stock, but %d were requested", 
-                productId, product.getQuantity(), requestedQuantity)
+            String.format("Product %s with ID %d has %d items in stock, but %d were requested",
+                product.getName(),productId, product.getQuantity(), requestedQuantity)
         );
       }
     }

@@ -22,7 +22,9 @@ public class CustomerMapper {
         return new CustomerResponse(
                 customer.getId(),
                 customer.getName(),
-                customer.getEmail()
+                customer.getEmail(),
+                customer.getDescription(),
+                customer.getType()
         );
     }
 
