@@ -1,13 +1,23 @@
 package io.littlehorse.examples.services;
 
 import java.util.List;
+import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.littlehorse.examples.dto.OrderRequest;
 import io.littlehorse.examples.dto.OrderResponse;
 import io.littlehorse.examples.mappers.OrderMapper;
 import io.littlehorse.examples.models.Order;
 import io.littlehorse.examples.models.OrderLine;
 import io.littlehorse.examples.repositories.OrderRepository;
+import io.littlehorse.examples.tasks.OrderTask;
+import io.littlehorse.examples.workflows.OrderWorkflow;
+import io.littlehorse.sdk.common.LHLibUtil;
+import io.littlehorse.sdk.common.proto.*;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
+
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -15,12 +25,21 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class OrderService {
 
-    @Inject
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
     
-    @Inject
-    private OrderMapper orderMapper;
-    
+    private final OrderMapper orderMapper;
+
+    ObjectMapper objectMapper;
+
+    private final LittleHorseFutureStub futureStub;
+
+   OrderService(OrderRepository orderRepository, OrderMapper orderMapper, ObjectMapper objectMapper, LittleHorseFutureStub littleHorseFutureStub){
+    this.orderRepository = orderRepository;
+    this.orderMapper = orderMapper;
+    this.objectMapper = objectMapper;
+    this.futureStub = littleHorseFutureStub;
+   }
+
     @Transactional
     public Order createOrder(OrderRequest request) {
         Order order = orderMapper.toEntity(request);
@@ -72,6 +91,28 @@ public class OrderService {
         orderRepository.persist(order);
         
         return orderMapper.toResponse(order);
+    }
+
+
+    public Uni<String> runOrderWorkflow(OrderRequest orderRequest) throws JsonProcessingException {
+        String wfRunId = UUID.randomUUID().toString().replace("-", "");
+
+        RunWfRequest request = RunWfRequest.newBuilder()
+                .setWfSpecName(OrderWorkflow.ORDER_WORKFLOW)
+                .putVariables(OrderWorkflow.ORDER_VARIABLE, VariableValue.newBuilder().setJsonObj(objectMapper.writeValueAsString(orderRequest)).build())
+                .setId(wfRunId)
+                .build();
+
+        AwaitWorkflowEventRequest awaitEvent = AwaitWorkflowEventRequest.newBuilder()
+                .addEventDefIds(
+                        WorkflowEventDefId.newBuilder().setName(OrderWorkflow.ORDER_WORKFLOW))
+                .setWfRunId(LHLibUtil.wfRunIdFromString(wfRunId))
+                .build();
+
+        return Uni.createFrom()
+                .future(futureStub.runWf(request))
+                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)))
+                .map(wfEvent -> wfEvent.getContent().getJsonObj());
     }
 
 

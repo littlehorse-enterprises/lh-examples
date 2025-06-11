@@ -15,6 +15,8 @@ public class OrderWorkflow implements LHWorkflowDefinition {
     public static final String ORDER_VARIABLE = "order";
     public static final String REDUCE_STOCK = "reduce-stock";
     public static final String VALIDATE_CUSTOMER = "validate-customer";
+    public static final String NOTIFY = "notify";
+
 
 
     @Override
@@ -22,11 +24,11 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         WfRunVariable order = wf.declareJsonObj(ORDER_VARIABLE).required();
         WfRunVariable shouldExit = wf.declareBool("exit").withDefault(false);
         WfRunVariable orderId = wf.declareInt("order-id").withDefault(-1);
-        NodeOutput orderNode= wf.execute(OrderTask.SAVE_ORDER_TASK, order);
-        NodeOutput customerNode = wf.execute(VALIDATE_CUSTOMER,order.jsonPath("$.clientId"));
+        NodeOutput orderResponse= wf.execute(OrderTask.SAVE_ORDER_TASK, order);
+        NodeOutput customerResponse = wf.execute(VALIDATE_CUSTOMER,order.jsonPath("$.clientId"));
 //        wf.mutate(orderId, VariableMutationType.ASSIGN,1);
-        orderId.assign(orderNode.jsonPath("$.orderId"));
-        wf.handleException(customerNode,"order-blocked", handler->{
+        orderId.assign(orderResponse.jsonPath("$.orderId"));
+        wf.handleException(customerResponse,"order-blocked", handler->{
             WfRunVariable content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             handler.execute(OrderTask.UPDATE_ORDER_STATUS,1,"CANCELED",content);
             shouldExit.assign(true);
@@ -39,6 +41,8 @@ public class OrderWorkflow implements LHWorkflowDefinition {
             shouldExit.assign(true);
         });
         wf.doIf(shouldExit.isEqualTo(true), WorkflowThread::complete);
-        wf.execute(OrderTask.UPDATE_ORDER_STATUS,orderId, "COMPLETED","Order completed successfully");
+        NodeOutput finalOutput=wf.execute(OrderTask.UPDATE_ORDER_STATUS,orderId, "COMPLETED","Order completed successfully");
+        wf.throwEvent(ORDER_WORKFLOW,finalOutput);
+
     }
 }

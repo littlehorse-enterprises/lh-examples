@@ -2,9 +2,11 @@ package io.littlehorse.examples.controllers;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.littlehorse.examples.dto.OrderRequest;
 import io.littlehorse.examples.dto.OrderResponse;
 import io.littlehorse.examples.services.OrderService;
+import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -24,9 +26,8 @@ public class OrderController {
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveOrder(OrderRequest request) {
-        OrderResponse response = orderService.saveOrder(request);
-        return Response.ok(response).build();
+    public Uni<String> placeOrder(OrderRequest request) throws JsonProcessingException {
+        return orderService.runOrderWorkflow(request);
     }
     
     @GET
