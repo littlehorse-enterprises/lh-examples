@@ -20,29 +20,30 @@ public class OrderWorkflow implements LHWorkflowDefinition {
     @Override
     public void define(WorkflowThread wf) {
         WfRunVariable order = wf.declareJsonObj(ORDER_VARIABLE).required();
-        WfRunVariable shouldExit = wf.declareBool("exit").withDefault(false);
+        WfRunVariable shouldExit = wf.declareStr("exit").withDefault("");
         WfRunVariable orderId = wf.declareInt("order-id").withDefault(-1);
         NodeOutput orderResponse= wf.execute(OrderTask.SAVE_ORDER_TASK, order);
-        NodeOutput customerResponse = wf.execute(VALIDATE_CUSTOMER,order.jsonPath("$.clientId"));
-//        wf.mutate(orderId, VariableMutationType.ASSIGN,1);
         orderId.assign(orderResponse.jsonPath("$.orderId"));
-        wf.handleException(customerResponse,"order-blocked", handler->{
+        NodeOutput customerResponse = wf.execute(VALIDATE_CUSTOMER,order.jsonPath("$.clientId"));
+        wf.handleException(customerResponse, handler->{
             WfRunVariable content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            NodeOutput orderCanceled =handler.execute(OrderTask.UPDATE_ORDER_STATUS,1,"CANCELED",content);
-            shouldExit.assign(true);
+            NodeOutput orderCanceled =handler.execute(OrderTask.UPDATE_ORDER_STATUS,orderId,"CANCELED",content);
+            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW,orderCanceled);
         });
-        wf.doIf(shouldExit.isEqualTo(true), WorkflowThread::complete);
+        wf.doIf(shouldExit.isNotEqualTo(""), handler ->{
+            handler.fail("customer-validation-failure","Something happened validating the customer.");
+        });
         NodeOutput productNode= wf.execute(REDUCE_STOCK,order.jsonPath("$.orderLines"));
-        wf.handleException(productNode,"out-of-stock",handler->{
+        wf.handleException(productNode,handler->{
             WfRunVariable content= handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             NodeOutput orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS,orderId,"CANCELED",content);
             shouldExit.assign(true);
             handler.throwEvent(ORDER_WORKFLOW,orderCanceled);
         });
-        wf.doIf(shouldExit.isEqualTo(true), WorkflowThread::complete);
-        NodeOutput finalOutput=wf.execute(OrderTask.UPDATE_ORDER_STATUS,orderId, "COMPLETED","Your order has been completed and successfully dispatched!");
+        wf.doIf(shouldExit.isNotEqualTo(""), handler ->{
+            handler.fail("customer-failure","Failed to dispatch the order");
+        });        NodeOutput finalOutput=wf.execute(OrderTask.UPDATE_ORDER_STATUS,orderId, "COMPLETED","Your order has been completed and successfully dispatched!");
         wf.throwEvent(ORDER_WORKFLOW,finalOutput);
-
     }
 }

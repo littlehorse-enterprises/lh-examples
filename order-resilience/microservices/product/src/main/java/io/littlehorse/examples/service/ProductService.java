@@ -55,7 +55,8 @@ public class ProductService {
     
     // Throw exception if any products not found
     if (!notFoundIds.isEmpty()) {
-      throw new ProductNotFoundException("Products not found: " + notFoundIds);
+      String errorMessage = "Products not found: " + notFoundIds;
+      throw new ProductNotFoundException(errorMessage,VariableValue.newBuilder().setStr(errorMessage).build());
     }
     
     // Validate stock and accumulate reductions for each product
@@ -94,7 +95,6 @@ public class ProductService {
       Long productId = entry.getKey();
       Integer requestedQuantity = entry.getValue();
       Product product = productMap.get(productId);
-      
       product.setQuantity(product.getQuantity() - requestedQuantity);
       repository.persist(product);
     }
