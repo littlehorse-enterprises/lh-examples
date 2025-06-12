@@ -11,85 +11,92 @@ import io.littlehorse.examples.mappers.OrderMapper;
 import io.littlehorse.examples.models.Order;
 import io.littlehorse.examples.models.OrderLine;
 import io.littlehorse.examples.repositories.OrderRepository;
-import io.littlehorse.examples.tasks.OrderTask;
 import io.littlehorse.examples.workflows.OrderWorkflow;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.*;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 
+import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    
+
     private final OrderMapper orderMapper;
 
-    ObjectMapper objectMapper;
 
     private final LittleHorseFutureStub futureStub;
 
-   OrderService(OrderRepository orderRepository, OrderMapper orderMapper, ObjectMapper objectMapper, LittleHorseFutureStub littleHorseFutureStub){
-    this.orderRepository = orderRepository;
-    this.orderMapper = orderMapper;
-    this.objectMapper = objectMapper;
-    this.futureStub = littleHorseFutureStub;
-   }
+    private static final Logger LOG = Logger.getLogger(OrderService.class);
+
+
+    OrderService(OrderRepository orderRepository, OrderMapper orderMapper,LittleHorseFutureStub littleHorseFutureStub) {
+        this.orderRepository = orderRepository;
+        this.orderMapper = orderMapper;
+        this.futureStub = littleHorseFutureStub;
+    }
+
+    void onStart(@Observes StartupEvent ev) {
+        LOG.info("Enabling output topic");
+        this.futureStub.putTenant(PutTenantRequest.newBuilder().setId("default").setOutputTopicConfig(OutputTopicConfig.newBuilder()).build());
+    }
 
     @Transactional
     public Order createOrder(OrderRequest request) {
         Order order = orderMapper.toEntity(request);
-        
+
         // Calculate total if not already set
         if (order.getTotal() == 0 && order.getOrderLines() != null && !order.getOrderLines().isEmpty()) {
             double totalPrice = order.getOrderLines().stream()
-                .mapToDouble(OrderLine::getSubtotal)
-                .sum();
+                    .mapToDouble(OrderLine::getSubtotal)
+                    .sum();
             order.setTotal(totalPrice);
         }
-        
+
         // Ensure status is set
         if (order.getStatus() == null) {
             order.setStatus("PENDING");
         }
-        
+
         orderRepository.persist(order);
         return order;
     }
-    
+
     @Transactional
     public OrderResponse saveOrder(OrderRequest request) {
         Order order = createOrder(request);
         return orderMapper.toResponse(order);
     }
-    
+
     public List<Order> getOrdersByClientId(int clientId) {
         return orderRepository.findByClientId(clientId);
     }
-    
+
     public List<OrderResponse> getOrderResponsesByClientId(int clientId) {
         List<Order> orders = orderRepository.findByClientId(clientId);
         return orders.stream()
-            .map(orderMapper::toResponse)
-            .toList();
+                .map(orderMapper::toResponse)
+                .toList();
     }
 
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, String newStatus, String message) {
-        Order order = orderRepository.findById( orderId);
-        
+        Order order = orderRepository.findById(orderId);
+
         if (order == null) {
             return null;
         }
-        
+
         order.setStatus(newStatus);
         order.setMessage(message);
         orderRepository.persist(order);
-        
+
         return orderMapper.toResponse(order);
     }
 
@@ -99,7 +106,7 @@ public class OrderService {
 
         RunWfRequest request = RunWfRequest.newBuilder()
                 .setWfSpecName(OrderWorkflow.ORDER_WORKFLOW)
-                .putVariables(OrderWorkflow.ORDER_VARIABLE, VariableValue.newBuilder().setJsonObj(objectMapper.writeValueAsString(orderRequest)).build())
+                .putVariables(OrderWorkflow.ORDER_VARIABLE, LHLibUtil.objToVarVal(orderRequest))
                 .setId(wfRunId)
                 .build();
 

@@ -12,13 +12,8 @@ public class OrderTask {
     public static final String SAVE_ORDER_TASK = "save-order";
     public static final String UPDATE_ORDER_STATUS = "update-order-status";
 
-
     @Inject
     OrderService orderService;
-
-    public OrderTask(OrderService orderService) {
-        this.orderService = orderService;
-    }
 
     @LHTaskMethod(SAVE_ORDER_TASK)
     public OrderResponse saveOrder(OrderRequest orderRequest) {

@@ -38,7 +38,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         wf.handleException(productNode,handler->{
             WfRunVariable content= handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             NodeOutput orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS,orderId,"CANCELED",content);
-            shouldExit.assign(true);
+            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW,orderCanceled);
         });
         wf.doIf(shouldExit.isNotEqualTo(""), handler ->{
