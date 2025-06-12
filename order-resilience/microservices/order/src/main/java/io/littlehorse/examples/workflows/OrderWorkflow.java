@@ -3,7 +3,6 @@ package io.littlehorse.examples.workflows;
 import io.littlehorse.examples.tasks.OrderTask;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
-import io.littlehorse.sdk.common.proto.VariableMutationType;
 import io.littlehorse.sdk.wfsdk.NodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
@@ -13,9 +12,8 @@ import java.lang.annotation.Annotation;
 public class OrderWorkflow implements LHWorkflowDefinition {
     public static final String ORDER_WORKFLOW = "order-workflow";
     public static final String ORDER_VARIABLE = "order";
-    public static final String REDUCE_STOCK = "reduce-stock";
+    public static final String REDUCE_STOCK = "dispatch-order";
     public static final String VALIDATE_CUSTOMER = "validate-customer";
-    public static final String NOTIFY = "notify";
 
 
 
@@ -30,18 +28,20 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         orderId.assign(orderResponse.jsonPath("$.orderId"));
         wf.handleException(customerResponse,"order-blocked", handler->{
             WfRunVariable content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            handler.execute(OrderTask.UPDATE_ORDER_STATUS,1,"CANCELED",content);
+            NodeOutput orderCanceled =handler.execute(OrderTask.UPDATE_ORDER_STATUS,1,"CANCELED",content);
             shouldExit.assign(true);
+            handler.throwEvent(ORDER_WORKFLOW,orderCanceled);
         });
         wf.doIf(shouldExit.isEqualTo(true), WorkflowThread::complete);
         NodeOutput productNode= wf.execute(REDUCE_STOCK,order.jsonPath("$.orderLines"));
         wf.handleException(productNode,"out-of-stock",handler->{
             WfRunVariable content= handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            handler.execute(OrderTask.UPDATE_ORDER_STATUS,orderId,"CANCELED",content);
+            NodeOutput orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS,orderId,"CANCELED",content);
             shouldExit.assign(true);
+            handler.throwEvent(ORDER_WORKFLOW,orderCanceled);
         });
         wf.doIf(shouldExit.isEqualTo(true), WorkflowThread::complete);
-        NodeOutput finalOutput=wf.execute(OrderTask.UPDATE_ORDER_STATUS,orderId, "COMPLETED","Order completed successfully");
+        NodeOutput finalOutput=wf.execute(OrderTask.UPDATE_ORDER_STATUS,orderId, "COMPLETED","Your order has been completed and successfully dispatched!");
         wf.throwEvent(ORDER_WORKFLOW,finalOutput);
 
     }

@@ -1,21 +1,18 @@
 package io.littlehorse.examples.tasks;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import io.littlehorse.examples.dto.ProductStockItem;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
 import io.littlehorse.examples.service.ProductService;
 import io.littlehorse.quarkus.task.LHTask;
-import io.littlehorse.sdk.common.exception.LHTaskException;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import jakarta.inject.Inject;
 
 @LHTask
 public class ProductTask {
-    public static final String REDUCE_STOCK = "reduce-stock";
+    public static final String DISPATCH_ORDER = "dispatch-order";
 
     @Inject
     ProductService productService;
@@ -24,8 +21,8 @@ public class ProductTask {
         this.productService = productService;
     }
 
-    @LHTaskMethod(REDUCE_STOCK)
-    public void reduceStock(ProductStockItem[] productItems) throws ProductNotFoundException, InsufficientStockException {
+    @LHTaskMethod(DISPATCH_ORDER)
+    public void dispatchOrder(ProductStockItem[] productItems) throws ProductNotFoundException, InsufficientStockException {
          this.productService.reduceStock(Arrays.asList(productItems));
     }
 }

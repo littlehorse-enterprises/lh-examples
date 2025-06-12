@@ -77,7 +77,7 @@ public class ProductService {
       
       if (product.getQuantity() < requestedQuantity) {
         insufficientStockProducts.add(
-            String.format("Product [%s] has %d items in stock, but %d were requested",
+            String.format("Product [ %s ] has %d items in stock, but %d were requested",
                 product.getName(), product.getQuantity(), requestedQuantity)
         );
       }
@@ -85,8 +85,8 @@ public class ProductService {
     
     // Throw exception if any products have insufficient stock
     if (!insufficientStockProducts.isEmpty()) {
-      String message = String.join("; ", insufficientStockProducts);
-      throw new InsufficientStockException("Insufficient stock: " + message, VariableValue.newBuilder().setStr("Insufficient stock: " + message).build());
+      String message ="Error dispatching the order, " + String.join("; ", insufficientStockProducts);
+      throw new InsufficientStockException( message, VariableValue.newBuilder().setStr(message).build());
     }
     
     // All validations passed, now reduce the stock
