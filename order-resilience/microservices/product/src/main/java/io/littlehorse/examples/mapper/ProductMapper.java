@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
+import io.littlehorse.examples.dto.DispatchErrorResponse;
 import io.littlehorse.examples.dto.ProductRequest;
 import io.littlehorse.examples.dto.ProductResponse;
 import io.littlehorse.examples.model.Product;
@@ -13,14 +14,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class ProductMapper {
 
     public ProductResponse toResponse(Product product) {
-        return new ProductResponse(
-                product.getProductId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getQuantity(),
-                product.getCategory()
-        );
+        return  ProductResponse.builder()
+                .productId(product.getProductId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .quantity(product.getQuantity())
+                .category(product.getCategory())
+                .build();
     }
 
     public List<ProductResponse> toResponseList(List<Product> products) {
@@ -37,5 +38,12 @@ public class ProductMapper {
         product.setQuantity(request.getQuantity());
         product.setCategory(request.getCategory());
         return product;
+    }
+    public DispatchErrorResponse toDispatchErrorResponse(long clientId, List<ProductResponse> products, String errorMessage) {
+        return DispatchErrorResponse.builder()
+                .clientId(clientId)
+                .products(products)
+                .message(errorMessage)
+                .build();
     }
 }

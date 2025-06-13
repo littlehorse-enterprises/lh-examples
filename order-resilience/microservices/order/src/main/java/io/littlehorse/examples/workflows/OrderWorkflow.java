@@ -22,8 +22,10 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         WfRunVariable order = wf.declareJsonObj(ORDER_VARIABLE).required();
         WfRunVariable shouldExit = wf.declareStr("exit").withDefault("");
         WfRunVariable orderId = wf.declareInt("order-id").withDefault(-1);
+        WfRunVariable clientId = wf.declareInt("client-id").withDefault(-1);
         NodeOutput orderResponse= wf.execute(OrderTask.SAVE_ORDER_TASK, order);
         orderId.assign(orderResponse.jsonPath("$.orderId"));
+        clientId.assign(orderResponse.jsonPath("$.clientId"));
         NodeOutput customerResponse = wf.execute(VALIDATE_CUSTOMER,order.jsonPath("$.clientId"));
         wf.handleException(customerResponse, handler->{
             WfRunVariable content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
@@ -34,7 +36,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         wf.doIf(shouldExit.isNotEqualTo(""), handler ->{
             handler.fail("customer-validation-failure","Something happened validating the customer.");
         });
-        NodeOutput productNode= wf.execute(REDUCE_STOCK,order.jsonPath("$.orderLines"));
+        NodeOutput productNode= wf.execute(REDUCE_STOCK,clientId,order.jsonPath("$.orderLines"));
         wf.handleException(productNode,handler->{
             WfRunVariable content= handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             NodeOutput orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS,orderId,"CANCELED",content);

@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.littlehorse.examples.dto.DispatchErrorResponse;
+import io.littlehorse.examples.dto.ProductResponse;
 import io.littlehorse.examples.dto.ProductStockItem;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
 import io.littlehorse.examples.model.Product;
 import io.littlehorse.examples.repositories.ProductRepository;
-import io.littlehorse.sdk.common.proto.VariableValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -20,6 +23,9 @@ import jakarta.transaction.Transactional;
 public class ProductService {
     @Inject
     private ProductRepository repository;
+
+    @Inject
+    private ObjectMapper objectMapper;
 
     public List<Product> getAllProducts() {
         return repository.listAll();
@@ -30,7 +36,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void reduceStock(List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException {
+    public void dispatch(int clientId,List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
         if (productItems == null || productItems.isEmpty()) {
             return; // No items to process
         }
@@ -64,30 +70,35 @@ public class ProductService {
         for (ProductStockItem item : productItems) {
             Long productId = item.getProductId();
             Integer quantity = item.getQuantity();
-
-            // Accumulate quantities in case the same product appears multiple times
             stockReductions.merge(productId, quantity, Integer::sum);
         }
 
         // Check stock availability and update products
-        List<String> insufficientStockProducts = new ArrayList<>();
+        List <ProductResponse> insufficientStockProducts = new ArrayList<>();
         for (Map.Entry<Long, Integer> entry : stockReductions.entrySet()) {
             Long productId = entry.getKey();
             Integer requestedQuantity = entry.getValue();
             Product product = productMap.get(productId);
 
             if (product.getQuantity() < requestedQuantity) {
-                insufficientStockProducts.add(
-                        String.format("Product [ %s ] has %d items in stock, but %d were requested",
-                                product.getName(), product.getQuantity(), requestedQuantity)
-                );
+                ProductResponse productResponse=ProductResponse.builder()
+                        .productId(productId)
+                        .requestedQuantity(requestedQuantity)
+                        .availableStock(product.getQuantity())
+                        .name(product.getName())
+                        .build();
+                insufficientStockProducts.add(productResponse);
             }
         }
 
         // Throw exception if any products have insufficient stock
         if (!insufficientStockProducts.isEmpty()) {
-            String message = "Error dispatching the order, " + String.join("; ", insufficientStockProducts);
-            throw new InsufficientStockException(message);
+            DispatchErrorResponse dispatchErrorResponse=DispatchErrorResponse.builder()
+                    .clientId(clientId)
+                    .products(insufficientStockProducts)
+                    .message("Insufficient stock for products")
+                    .build();
+            throw new InsufficientStockException(objectMapper.writeValueAsString(dispatchErrorResponse));
         }
 
         // All validations passed, now reduce the stock

@@ -2,6 +2,7 @@ package io.littlehorse.examples.tasks;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.littlehorse.examples.dto.ProductStockItem;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
@@ -22,7 +23,7 @@ public class ProductTask {
     }
 
     @LHTaskMethod(DISPATCH_ORDER)
-    public void dispatchOrder(ProductStockItem[] productItems) throws ProductNotFoundException, InsufficientStockException {
-         this.productService.reduceStock(Arrays.asList(productItems));
+    public void dispatch(int clientid, ProductStockItem[] productItems) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
+         this.productService.dispatch(clientid,Arrays.asList(productItems));
     }
 }
