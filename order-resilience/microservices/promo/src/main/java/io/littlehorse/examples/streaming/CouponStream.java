@@ -89,28 +89,13 @@ public class CouponStream {
                 .groupByKey()
                 .count(Materialized.with(Serdes.String(), Serdes.Long()))
                 .toStream()
-                .filter((key, count) -> count == 3) // you get discount after 3 failures only once
-                .process(() -> new org.apache.kafka.streams.processor.AbstractProcessor<String, Long>() {
-                    private KeyValueStore<String, Boolean> rewardedStore;
-
-                    @Override
-                    public void init(org.apache.kafka.streams.processor.ProcessorContext context) {
-                        super.init(context);
-                        this.rewardedStore = (KeyValueStore<String, Boolean>) context.getStateStore("rewarded-keys-store");
+                .filter((key, count) -> count >= 3) // you get discount after 3 failures only once
+                .foreach((key, count) -> {
+                    System.out.println("key:" + key + " count:" + count);
+                    if (count == 3) {
+                        System.out.printf("Cuppont granted to Client/Product [%s] failed 3 times — total count: %d%n", key, count);
                     }
-
-                    @Override
-                    public void process(String key, Long count) {
-                        if (rewardedStore.get(key) == null) {
-                            System.out.printf("🎁 Reward client/product [%s] for reaching 3 failures.%n", key);
-                            // Your reward logic here
-                            rewardedStore.put(key, true);
-                        } else {
-                            System.out.printf("🔁 Already rewarded client/product [%s], skipping.%n", key);
-                        }
-                    }
-                }, "rewarded-keys-store");
-
+                });
 
         streams = new KafkaStreams(builder.build(), props);
         streams.start();

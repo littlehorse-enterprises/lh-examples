@@ -19,7 +19,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 @ApplicationScoped
-@Startup
+//@Startup
 public class Consumer {
 
     private KafkaConsumer<String, OutputTopicRecord> consumer;
