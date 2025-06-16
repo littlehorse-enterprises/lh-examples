@@ -42,6 +42,7 @@ public class Consumer {
                     var status = record.value().getTaskRun().getStatus();
 
                     if (status == TaskStatus.TASK_EXCEPTION) {
+                        record.value().getWfRun().getWfSpecId().getName();
                         var totalAttempts = record.value().getTaskRun().getAttemptsCount() - 1;
                         var exceptionName = record.value().getTaskRun().getAttempts(totalAttempts).getException().getName();
                         var exceptionMessage = record.value().getTaskRun().getAttempts(totalAttempts).getException().getMessage();

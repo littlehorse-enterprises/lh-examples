@@ -30,7 +30,6 @@ public class OrderService {
 
     private final OrderMapper orderMapper;
 
-
     private final LittleHorseFutureStub futureStub;
 
     private static final Logger LOG = Logger.getLogger(OrderService.class);

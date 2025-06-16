@@ -1,111 +1,80 @@
 package io.littlehorse.examples.streaming;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.littlehorse.examples.model.ExceptionDetails;
-import io.littlehorse.sdk.common.proto.OutputTopicRecord;
-import io.littlehorse.sdk.common.proto.TaskStatus;
+import io.littlehorse.examples.services.CouponService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.StoreBuilder;
-import org.apache.kafka.streams.state.Stores;
 
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 @ApplicationScoped
 @Startup
 public class CouponStream {
 
-    private KafkaStreams streams;
     @Inject
-    ObjectMapper mapper;
+    CouponService couponService;
+
+    private KafkaConsumer<String, Long> consumer;
+    private Thread consumerThread;
+    private volatile boolean running = true;
+    String topicName = WorkflowExcecutionStream.OUTPUT_TOPIC_NAME;
 
     @PostConstruct
-    public void start() {
-        System.out.println("✅ Starting Kafka Streams app...");
+    public void init() {
+        System.out.println("Starting Kafka Consumer...");
+        Properties props = getProperties();
+
+        consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(List.of(topicName));
+
+        consumerThread = new Thread(() -> {
+            while (running) {
+                ConsumerRecords<String, Long> records = consumer.poll(Duration.ofMillis(500));
+                for (ConsumerRecord<String, Long> record : records) {
+                    System.out.println("Key from coupun stream: " + record.key());
+                    long clientId = Long.parseLong(record.key().split(":")[0]); // Example logic to derive clientId
+                    long productId = Long.parseLong(record.key().split(":")[1]);
+                    String productName = record.key().split(":")[2];
+                    System.out.println("Creating coupon for clientId: " + clientId + ", productId: " + productId + ", productName: " + productName);
+                    couponService.runGenerateCouponWorkflow(clientId,productId,productName);
+                }
+            }
+        });
+        consumerThread.start();
+    }
+
+    private static Properties getProperties() {
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "cupon-stream-app");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
-
-        StoreBuilder<KeyValueStore<String, Boolean>> rewardedKeysStoreBuilder =
-                Stores.keyValueStoreBuilder(
-                        Stores.persistentKeyValueStore("rewarded-keys-store"),
-                        Serdes.String(),
-                        Serdes.Boolean()
-                );
-        StreamsBuilder builder = new StreamsBuilder();
-        builder.addStateStore(rewardedKeysStoreBuilder);
-
-        KStream<String, OutputTopicRecord> stream = builder.stream(
-                "my-cluster_default_execution",
-                Consumed.with(
-                        Serdes.String(),
-                        new OutputTopicRecordSerde()
-                )
-        );
-
-        stream
-                .filter((key, value) -> value.getTaskRun().getStatus() == TaskStatus.TASK_EXCEPTION)
-                .flatMap((key, value) -> {
-                    List<KeyValue<String, Integer>> results = new ArrayList<>();
-                    try {
-                        var lastAttempt = value.getTaskRun().getAttempts(value.getTaskRun().getAttemptsCount() - 1);
-                        String exceptionJson = lastAttempt.getException().getMessage();
-
-                        ExceptionDetails details = mapper.readValue(exceptionJson, ExceptionDetails.class);
-                        int clientId = details.clientId;
-
-                        if (details.products != null) {
-                            for (ExceptionDetails.Product product : details.products) {
-                                if (product.availableStock != null && product.requestedQuantity != null &&
-                                        product.requestedQuantity > product.availableStock) {
-                                    String composedKey = clientId + ":" + product.productId;
-                                    System.out.println(composedKey);
-                                    results.add(KeyValue.pair(composedKey, 1));
-                                }
-                            }
-                        }
-                    } catch (Exception e) {
-                        System.err.println("❌ Failed to parse exception JSON: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                    return results;
-                })
-                .groupByKey()
-                .count(Materialized.with(Serdes.String(), Serdes.Long()))
-                .toStream()
-                .filter((key, count) -> count >= 3) // you get discount after 3 failures only once
-                .foreach((key, count) -> {
-                    System.out.println("key:" + key + " count:" + count);
-                    if (count == 3) {
-                        System.out.printf("Cuppont granted to Client/Product [%s] failed 3 times — total count: %d%n", key, count);
-                    }
-                });
-
-        streams = new KafkaStreams(builder.build(), props);
-        streams.start();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+//        props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "promo-app");
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, Serdes.Long().deserializer().getClass());
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, Serdes.String().deserializer().getClass());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        return props;
     }
 
     @PreDestroy
-    public void stop() {
-        System.out.println("🛑 Shutting down Kafka Streams app...");
-        if (streams != null) {
-            streams.close();
+    public void shutdown() {
+        running = false;
+        if (consumer != null) {
+            consumer.wakeup();
+            try {
+                consumerThread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            consumer.close();
         }
     }
 }
