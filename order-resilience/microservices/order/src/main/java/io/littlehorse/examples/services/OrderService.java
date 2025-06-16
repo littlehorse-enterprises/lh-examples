@@ -1,5 +1,6 @@
 package io.littlehorse.examples.services;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -7,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.littlehorse.examples.dto.OrderRequest;
 import io.littlehorse.examples.dto.OrderResponse;
+import io.littlehorse.examples.dto.ProductDiscountItem;
+import io.littlehorse.examples.dto.ProductPriceItem;
 import io.littlehorse.examples.mappers.OrderMapper;
 import io.littlehorse.examples.models.Order;
 import io.littlehorse.examples.models.OrderLine;
@@ -35,7 +38,7 @@ public class OrderService {
     private static final Logger LOG = Logger.getLogger(OrderService.class);
 
 
-    OrderService(OrderRepository orderRepository, OrderMapper orderMapper,LittleHorseFutureStub littleHorseFutureStub) {
+    OrderService(OrderRepository orderRepository, OrderMapper orderMapper, LittleHorseFutureStub littleHorseFutureStub) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.futureStub = littleHorseFutureStub;
@@ -49,15 +52,6 @@ public class OrderService {
     @Transactional
     public Order createOrder(OrderRequest request) {
         Order order = orderMapper.toEntity(request);
-
-        // Calculate total if not already set
-        if (order.getTotal() == 0 && order.getOrderLines() != null && !order.getOrderLines().isEmpty()) {
-            double totalPrice = order.getOrderLines().stream()
-                    .mapToDouble(OrderLine::getSubtotal)
-                    .sum();
-            order.setTotal(totalPrice);
-        }
-
         // Ensure status is set
         if (order.getStatus() == null) {
             order.setStatus("PENDING");
@@ -96,6 +90,38 @@ public class OrderService {
         order.setMessage(message);
         orderRepository.persist(order);
 
+        return orderMapper.toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse finalizeOrder(Long orderId, ProductPriceItem[] productPrices, ProductDiscountItem[] discountItems) throws JsonProcessingException {
+        Order order = orderRepository.findById(orderId);
+        if (order == null) {
+            return null;
+        }
+        // Apply discounts to order
+        double totalDiscount = 0.0;
+        for (var orderLine : order.getOrderLines()) {
+            var productPrice = Arrays.stream(productPrices)
+                    .filter(item -> item.getProductId() == orderLine.getProductId())
+                    .findFirst()
+                    .map(ProductPriceItem::getUnitPrice)
+                    .orElseThrow();
+            orderLine.setUnitPrice(productPrice);
+            double discountPercentage = Arrays.stream(discountItems)
+                    .filter(item -> item.getProductId() == orderLine.getProductId())
+                    .findFirst()
+                    .map(ProductDiscountItem::getDiscountPercentage)
+                    .orElse(0.0);
+            orderLine.setDiscountPercentage(discountPercentage);
+            orderLine.setUnitPrice(orderLine.getUnitPrice());
+            orderLine.setTotalPrice(orderLine.getUnitPrice() * orderLine.getQuantity() * (1 - discountPercentage / 100));
+            totalDiscount += orderLine.getTotalPrice();
+        }
+        order.setTotal(totalDiscount);
+        order.setStatus("COMPLETED");
+        order.setMessage("Order finalized and dispatched successfully");
+        orderRepository.persist(order);
         return orderMapper.toResponse(order);
     }
 

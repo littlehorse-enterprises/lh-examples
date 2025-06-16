@@ -1,10 +1,14 @@
 package io.littlehorse.examples.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Builder
 public class OrderResponse {
     private int orderId;
 
@@ -16,12 +20,19 @@ public class OrderResponse {
 
     private String status = "PENDING";
 
-    private List<OrderLineRequest> orderLines;
-    
+    private List<OrderLineResponse> orderLines;
+
+    private List<String> discountCodes;
+
     @Data
-    public static class OrderLineRequest {
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderLineResponse {
         private int productId;
         private int quantity;
         private double unitPrice;
+        private double discountPercentage;
+        private double totalPrice;
     }
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-import io.littlehorse.examples.dto.DispatchErrorResponse;
+import io.littlehorse.examples.exceptions.dto.ProductError;
 import io.littlehorse.examples.dto.ProductRequest;
 import io.littlehorse.examples.dto.ProductResponse;
 import io.littlehorse.examples.model.Product;
@@ -39,8 +39,8 @@ public class ProductMapper {
         product.setCategory(request.getCategory());
         return product;
     }
-    public DispatchErrorResponse toDispatchErrorResponse(long clientId, List<ProductResponse> products, String errorMessage) {
-        return DispatchErrorResponse.builder()
+    public ProductError toDispatchErrorResponse(long clientId, List<ProductResponse> products, String errorMessage) {
+        return ProductError.builder()
                 .clientId(clientId)
                 .products(products)
                 .message(errorMessage)

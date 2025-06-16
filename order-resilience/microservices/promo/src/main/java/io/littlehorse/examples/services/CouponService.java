@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import io.littlehorse.examples.repositories.CouponRepository;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,27 +36,38 @@ public class CouponService {
                 .clientId(clientId)
                 .productId(productId)
                 .code("COUPON-" + clientId + "-" + productId + "-" + productName)
-                .description("Coupon for " + productName + " with a discount of 20%")
+                .description("Coupon for " + productName + " with a discount of 20% that can be applied to the next single purchase.")
                 .discountPercentage(20) // Default discount percentage
-                .isActive(true) // Default active status
+                .redeemed(false)
                 .build();
         couponRepository.persist(coupon);
     }
 
     @Transactional
-    public void useCoupon(String code) {
-        Coupon coupon = couponRepository.find("code", code).firstResult();
-        if (coupon != null && coupon.isActive()) {
-            // Logic to apply the coupon
-            coupon.setActive(false); // Mark the coupon as used
-            couponRepository.persist(coupon);
-        } else {
-            throw new CouponAlreadyRedeemedException("Invalid or inactive coupon code: " + code);
+    public Coupon[] useCoupons(String[] codes) {
+        if(codes == null || codes.length == 0) {
+            return new Coupon[0]; // No coupons to redeem
         }
+        var coupons= couponRepository.listByCouponCodes(Arrays.asList(codes));
+        // validate unique coupon codes
+        if (coupons.size() != codes.length) {
+            List<String> redeemedCodes = new ArrayList<>();
+            for (Coupon c : coupons) {
+                redeemedCodes.add(c.getCode());
+            }
+            throw new CouponAlreadyRedeemedException("Some coupons are already redeemed or inactive: " + redeemedCodes);
+        }
+
+        // Mark all coupons as redeemed
+        for (Coupon coupon : coupons) {
+            coupon.setRedeemed(true);
+            couponRepository.persist(coupon);
+        }
+        return coupons.toArray(Coupon[]::new);
     }
 
     public List<Coupon> getAllCoupnsForClient(Long clientId) {
-        return couponRepository.listByClientId(clientId);
+        return couponRepository.listActiveByClientId(clientId);
     }
 
     public void runGenerateCouponWorkflow(Long clientId, Long productId, String productName) {

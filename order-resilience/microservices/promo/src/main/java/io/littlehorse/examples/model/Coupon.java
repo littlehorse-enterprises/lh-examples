@@ -20,5 +20,5 @@ public class Coupon {
     private String code;
     private String description;
     private double discountPercentage;
-    private boolean isActive;
+    private boolean redeemed;
 }

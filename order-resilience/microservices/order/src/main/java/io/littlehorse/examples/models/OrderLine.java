@@ -32,7 +32,11 @@ public class OrderLine {
   private int quantity;
   
   private double unitPrice;
-  
+
+  private double discountPercentage;
+
+  private double totalPrice;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "order_id")
   @ToString.Exclude
