@@ -1,0 +1,26 @@
+<mat-toolbar color="primary">
+  <span class="title">Little Horse Shopping</span>
+  <span class="spacer"></span>
+  
+  <div class="toolbar-icons">
+    <button mat-icon-button 
+            [matBadge]="cartItemCount" 
+            matBadgeColor="accent"
+            [matBadgeHidden]="cartItemCount === 0"
+            (click)="viewCart()" 
+            matTooltip="View Cart">
+      <mat-icon>shopping_basket</mat-icon>
+    </button>
+    
+    <div *ngIf="selectedUser" class="user-info">
+      <span class="username">{{ selectedUser.name }}</span>
+      <img class="user-avatar" 
+           src="/assets/images/profiles/{{ selectedUser.id }}.png" 
+           [alt]="selectedUser.name">
+    </div>
+    
+    <button mat-icon-button (click)="changeUser()" matTooltip="Change User">
+      <mat-icon>swap_horiz</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>

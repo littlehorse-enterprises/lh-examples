@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ProductService } from './services/product.service';
+import { ShopService } from './services/shop.service';
+import { TopBarService } from '../shared/top-bar.service';
 import { Product } from './models/product.model';
 import { ProductStockItem } from './models/product-stock-item.model';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { TopBarComponent } from '../shared/top-bar.component';
 
 @Component({
   selector: 'app-shop',
@@ -28,7 +31,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatProgressSpinnerModule,
     MatChipsModule,
     MatDividerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    TopBarComponent
   ],
   templateUrl: './shop.component.html',
   styleUrls: ['./shop.component.scss']
@@ -38,16 +42,25 @@ export class ShopComponent implements OnInit {
   loading = true;
   error = false;
   errorMessage = '';
-  cart: Map<number, number> = new Map<number, number>(); // productId -> quantity
   clientId: number = 1; // Default client ID, can be changed later if needed
   isProcessing = false;
   orderSuccess = false;
   orderError = false;
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private shopService: ShopService,
+    private topBarService: TopBarService
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
+    
+    // Subscribe to cart changes to update the top bar
+    this.shopService.cartItems$.subscribe(cart => {
+      const count = this.getCartItemCount();
+      this.topBarService.updateCartCount(count);
+    });
   }
 
   loadProducts(): void {
@@ -70,64 +83,51 @@ export class ShopComponent implements OnInit {
 
   addToCart(product: Product): void {
     if (product.quantity <= 0) return;
-    
-    const currentQuantity = this.cart.get(product.productId) || 0;
-    if (currentQuantity < product.quantity) {
-      this.cart.set(product.productId, currentQuantity + 1);
-    }
+    this.shopService.addToCart(product);
   }
 
   removeFromCart(productId: number): void {
-    const currentQuantity = this.cart.get(productId) || 0;
-    if (currentQuantity > 0) {
-      if (currentQuantity === 1) {
-        this.cart.delete(productId);
-      } else {
-        this.cart.set(productId, currentQuantity - 1);
-      }
-    }
+    this.shopService.removeFromCart(productId);
   }
 
   getCartQuantity(productId: number): number {
-    return this.cart.get(productId) || 0;
+    return this.shopService.getCartQuantity(productId);
   }
 
   getCartTotal(): number {
-    let total = 0;
-    this.cart.forEach((quantity, productId) => {
-      const product = this.products.find(p => p.productId === productId);
-      if (product) {
-        total += product.unitPrice * quantity;
-      }
-    });
-    return total;
+    return this.shopService.getCartTotal(this.products);
   }
 
   getCartItemCount(): number {
-    let count = 0;
-    this.cart.forEach(quantity => {
-      count += quantity;
-    });
-    return count;
+    return this.shopService.getCartItemCount();
   }
 
   checkout(): void {
-    if (this.cart.size === 0) return;
+    const cart = this.shopService.getCart();
+    if (cart.size === 0) return;
     
     this.isProcessing = true;
     this.orderSuccess = false;
     this.orderError = false;
 
     const productItems: ProductStockItem[] = [];
-    this.cart.forEach((quantity, productId) => {
+    cart.forEach((quantity, productId) => {
       productItems.push({
         productId,
         quantity
       });
     });
+    
+    // Add checkout logic here
+    // For demonstration, we'll just simulate a successful order
+    setTimeout(() => {
+      this.isProcessing = false;
+      this.orderSuccess = true;
+      this.shopService.clearCart();
+    }, 1500);
   }
 
   isProductInCart(productId: number): boolean {
-    return this.cart.has(productId);
+    return this.shopService.getCartQuantity(productId) > 0;
   }
 }
