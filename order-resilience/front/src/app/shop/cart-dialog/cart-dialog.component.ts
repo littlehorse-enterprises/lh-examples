@@ -15,7 +15,7 @@ import { ShopService } from '../services/shop.service';
 
 export interface CartDialogData {
   products: Product[];
-  cartItems: Map<number, number>;
+  cartItems: Map<number, CartItem>;
 }
 
 interface CartItem {
@@ -63,14 +63,14 @@ export class CartDialogComponent implements OnInit {
   
   private initializeCartItems(): void {
     this.cartItems = [];
-    this.data.cartItems.forEach((quantity, productId) => {
+    this.data.cartItems.forEach((item, productId) => {
       const product = this.data.products.find(p => p.productId === productId);
       if (product) {
         this.cartItems.push({
           product,
-          quantity,
-          discountCode: '',
-          discountApplied: false
+          quantity: item.quantity,
+          discountCode: item.discountCode || '',
+          discountApplied: item.discountApplied || false
         });
       }
     });
@@ -117,6 +117,7 @@ export class CartDialogComponent implements OnInit {
     // For now, we'll simulate applying a 10% discount if any code is entered
     if (item.discountCode.trim() !== '') {
       item.discountApplied = true;
+      this.shopService.setDiscountCode(item.product.productId, item.discountCode);
       this.calculateTotals();
     }
   }
@@ -124,6 +125,7 @@ export class CartDialogComponent implements OnInit {
   removeDiscount(item: CartItem): void {
     item.discountApplied = false;
     item.discountCode = '';
+    this.shopService.clearDiscountCode(item.product.productId);
     this.calculateTotals();
   }
   
@@ -145,6 +147,13 @@ export class CartDialogComponent implements OnInit {
   }
   
   checkout(): void {
+    // Ensure any pending discount codes are applied before proceeding
+    this.cartItems.forEach(item => {
+      if (item.discountCode && !item.discountApplied) {
+        this.applyDiscountCode(item);
+      }
+    });
+    
     this.dialogRef.close('checkout');
   }
   

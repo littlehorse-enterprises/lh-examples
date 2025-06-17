@@ -49,6 +49,7 @@ public class OrderMapper {
                 .status(order.getStatus())
                 .message(order.getMessage())
                 .total(order.getTotal())
+                .creationDate(order.getCreationDate())
                 .discountCodes(
                     order.getDiscountCodes() != null ?
                     Arrays.asList(order.getDiscountCodes().split(",")) :

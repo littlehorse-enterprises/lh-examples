@@ -3,6 +3,16 @@
   <span class="spacer"></span>
   
   <div class="toolbar-icons">
+    <button mat-button color="primary" (click)="goToShop()" matTooltip="Shop">
+      <mat-icon>storefront</mat-icon>
+      Shop
+    </button>
+
+    <button mat-button color="primary" (click)="goToOrders()" matTooltip="View Orders">
+      <mat-icon>receipt_long</mat-icon>
+      Orders
+    </button>
+    
     <button mat-icon-button 
             [matBadge]="cartItemCount" 
             matBadgeColor="accent"

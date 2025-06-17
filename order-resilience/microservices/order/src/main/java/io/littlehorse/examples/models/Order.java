@@ -1,6 +1,7 @@
 package io.littlehorse.examples.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -34,6 +35,10 @@ public class Order {
 
     private String discountCodes;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creation_date", nullable = false, updatable = false)
+    private Date creationDate;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<OrderLine> orderLines;
@@ -46,5 +51,9 @@ public class Order {
     public void removeOrderLine(OrderLine orderLine) {
         orderLines.remove(orderLine);
         orderLine.setOrder(null);
+    }
+    @PrePersist
+    protected void onCreate() {
+        this.creationDate = new Date();
     }
 }

@@ -2,11 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { Router, ActivatedRoute } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductService } from './services/product.service';
 import { ShopService } from './services/shop.service';
+import { OrderService } from './services/order.service';
 import { TopBarService } from '../shared/top-bar.service';
+import { UserService } from '../shared/user.service';
 import { Product } from './models/product.model';
 import { ProductStockItem } from './models/product-stock-item.model';
+import { OrderRequest, OrderLineRequest } from './models/order.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -50,7 +55,12 @@ export class ShopComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private shopService: ShopService,
-    private topBarService: TopBarService
+    private orderService: OrderService,
+    private userService: UserService,
+    private topBarService: TopBarService,
+    private snackBar: MatSnackBar,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +70,13 @@ export class ShopComponent implements OnInit {
     this.shopService.cartItems$.subscribe(cart => {
       const count = this.getCartItemCount();
       this.topBarService.updateCartCount(count);
+    });
+    
+    // Handle checkout parameter from URL
+    this.route.queryParams.subscribe(params => {
+      if (params['checkout'] === 'true' && this.getCartItemCount() > 0) {
+        setTimeout(() => this.checkout(), 500); // Give a small delay to ensure everything is loaded
+      }
     });
   }
 
@@ -110,21 +127,60 @@ export class ShopComponent implements OnInit {
     this.orderSuccess = false;
     this.orderError = false;
 
-    const productItems: ProductStockItem[] = [];
-    cart.forEach((quantity, productId) => {
-      productItems.push({
+    // Get the selected user ID
+    const user = this.userService.getSelectedUser();
+    if (!user) {
+      this.snackBar.open('Please select a user before checkout', 'Close', {
+        duration: 3000
+      });
+      this.isProcessing = false;
+      return;
+    }
+
+    // Create order request
+    const orderLines: OrderLineRequest[] = [];
+    cart.forEach((item, productId) => {
+      orderLines.push({
         productId,
-        quantity
+        quantity: item.quantity
       });
     });
+
+    const orderRequest: OrderRequest = {
+      clientId: user.id,
+      orderLines: orderLines,
+      discountCodes: this.shopService.getAppliedDiscountCodes()
+    };
     
-    // Add checkout logic here
-    // For demonstration, we'll just simulate a successful order
-    setTimeout(() => {
-      this.isProcessing = false;
-      this.orderSuccess = true;
-      this.shopService.clearCart();
-    }, 1500);
+    // Send order to the backend
+    this.orderService.placeOrder(orderRequest).subscribe({
+      next: (orderId) => {
+        console.log('Order placed successfully, ID:', orderId);
+        this.isProcessing = false;
+        this.orderSuccess = true;
+        this.shopService.clearCart();
+        
+        // Show success message
+        this.snackBar.open('Order placed successfully!', 'View Orders', {
+          duration: 5000
+        }).onAction().subscribe(() => {
+          this.router.navigate(['/orders']);
+        });
+        
+        // Redirect to orders page after a brief delay
+        setTimeout(() => {
+          this.router.navigate(['/orders']);
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('Error placing order:', err);
+        this.isProcessing = false;
+        this.orderError = true;
+        this.snackBar.open('Failed to place order. Please try again.', 'Close', {
+          duration: 5000
+        });
+      }
+    });
   }
 
   isProductInCart(productId: number): boolean {

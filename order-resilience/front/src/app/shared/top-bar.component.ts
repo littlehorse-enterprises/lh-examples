@@ -71,11 +71,19 @@ export class TopBarComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'checkout') {
-          // Navigate to checkout or trigger checkout process
-          this.router.navigate(['/shop']);
+          // Redirect to the shop page and trigger checkout
+          this.router.navigate(['/shop'], { queryParams: { checkout: true } });
         }
       });
     });
+  }
+  
+  goToShop(): void {
+    this.router.navigate(['/shop']);
+  }
+
+  goToOrders(): void {
+    this.router.navigate(['/orders']);
   }
   
   changeUser(): void {

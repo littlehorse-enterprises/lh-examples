@@ -5,24 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
 @Builder
 public class OrderResponse {
     private int orderId;
-
     private int clientId;
-
     private String message;
-
     private double total;
-
     private String status = "PENDING";
-
     private List<OrderLineResponse> orderLines;
-
     private List<String> discountCodes;
+    private Date creationDate;
 
     @Data
     @Builder

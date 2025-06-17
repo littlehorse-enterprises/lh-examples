@@ -4,4 +4,5 @@ import { AccountSelectComponent } from './account-select/account-select.componen
 export const routes: Routes = [
   { path: '', component: AccountSelectComponent },
   { path: 'shop', loadComponent: () => import('./shop/shop.component').then(m => m.ShopComponent) },
+  { path: 'orders', loadComponent: () => import('./orders/orders.component').then(m => m.OrdersComponent) },
 ];
