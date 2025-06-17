@@ -8,13 +8,12 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.littlehorse.examples.dto.*;
 import io.littlehorse.examples.exceptions.dto.ProductError;
-import io.littlehorse.examples.dto.ProductPriceItem;
-import io.littlehorse.examples.dto.ProductResponse;
-import io.littlehorse.examples.dto.ProductStockItem;
 import io.littlehorse.examples.exceptions.InsufficientStockException;
 import io.littlehorse.examples.exceptions.InvalidPriceException;
 import io.littlehorse.examples.exceptions.ProductNotFoundException;
+import io.littlehorse.examples.mapper.ProductMapper;
 import io.littlehorse.examples.model.Product;
 import io.littlehorse.examples.repositories.ProductRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,6 +28,10 @@ public class ProductService {
     @Inject
     private ObjectMapper objectMapper;
 
+    @Inject
+    private ProductMapper productMapper;
+
+
     public List<Product> getAllProducts() {
         return repository.listAll();
     }
@@ -38,10 +41,7 @@ public class ProductService {
     }
 
     @Transactional
-    public void dispatch(int clientId, List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
-        if (productItems == null || productItems.isEmpty()) {
-            return; // No items to process
-        }
+    public ProductResponse[] dispatch(int clientId, List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
         // Collect all product IDs to validate
         List<Long> productIds = productItems.stream()
                 .map(ProductStockItem::getProductId)
@@ -93,6 +93,10 @@ public class ProductService {
             product.setQuantity(product.getQuantity() - requestedQuantity);
             repository.persist(product);
         }
+        // Return the updated product responses
+        return productItems.stream()
+                .map(item -> productMapper.toResponse(productMap.get(item.getProductId())))
+                .toArray(ProductResponse[]::new);
     }
 
     @Transactional
@@ -119,40 +123,36 @@ public class ProductService {
     }
 
     @Transactional
-    public void validateProductPrice(int clientId, List<ProductPriceItem> productItems) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
-        if (productItems == null || productItems.isEmpty()) {
-            return; // No items to process
-        }
-
+    public ProductResponse[] applyDiscpunts(int clientId, List<ProductPriceItem> products, List<ProductDiscountItem> discounts) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
         // Collect all product IDs to validate
-        List<Long> productIds = productItems.stream()
+        List<Long> productIds = products.stream()
                 .map(ProductPriceItem::getProductId)
                 .collect(Collectors.toList());
 
         // Validate product existence
-        Map<Long, Product> productMap = validateProductExistance(productIds);
+        Map<Long, ProductResponse> productMap = validateProductExistance(productIds).entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> productMapper.toResponse(entry.getValue())
+                ));
 
         // Validate price for each product, it shouldn't be less than the cost
         List<ProductResponse> invalidPriceProducts = new ArrayList<>();
-        for (ProductPriceItem item : productItems) {
-            Long productId = item.getProductId();
-            Double price = item.getPrice();
-            Product product = productMap.get(productId);
+        for (ProductPriceItem item : products) {
+            long productId = item.getProductId();
+            ProductResponse product = productMap.get(productId);
+            double discountPercentage = discounts.stream()
+                    .filter(discount -> discount.getProductId() == productId)
+                    .findFirst()
+                    .map(ProductDiscountItem::getDiscountPercentage)
+                    .orElse(0.0);
+            double price = product.getUnitPrice() * (1 - discountPercentage / 100);
+            product.setUnitPrice(price);
+            product.setDiscountPercentage(discountPercentage);
 
-            if (product == null) {
-                continue; // This should not happen due to previous validation
+            if (product.getUnitPrice() < product.getCost()) {
+                invalidPriceProducts.add(product);
             }
-
-            if (price < product.getCost()) {
-                ProductResponse productResponse = ProductResponse.builder()
-                        .productId(productId)
-                        .name(product.getName())
-                        .price(price)
-                        .cost(product.getCost())
-                        .build();
-                invalidPriceProducts.add(productResponse);
-            }
-
         }
         // Throw exception if any products have invalid price
         if (!invalidPriceProducts.isEmpty()) {
@@ -163,5 +163,9 @@ public class ProductService {
                     .build();
             throw new InvalidPriceException(objectMapper.writeValueAsString(productError));
         }
+        // All validations passed, return the product responses
+        return products.stream()
+                .map(item -> productMap.get(item.getProductId()))
+                .toArray(ProductResponse[]::new);
     }
 }

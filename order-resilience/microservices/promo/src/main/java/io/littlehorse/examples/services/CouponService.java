@@ -26,17 +26,19 @@ public class CouponService {
         this.couponRepository = couponRepository;
         this.blockingStub = blockingStub;
     }
+
     @Transactional
     public void generateCoupon(Long clientId, Long productId, String productName) {
         Coupon existingCoupon = couponRepository.findByClientIdAndProductId(clientId, productId);
         if (existingCoupon != null) {
             throw new CouponAlreadyCreatedException("Coupon already exists for clientId: " + clientId + " and productId: " + productId);
         }
+        var code = "COUPON-" + clientId + "-" + productId + "-" + productName;
         Coupon coupon = Coupon.builder()
                 .clientId(clientId)
                 .productId(productId)
-                .code("COUPON-" + clientId + "-" + productId + "-" + productName)
-                .description("Coupon for " + productName + " with a discount of 20% that can be applied to the next single purchase.")
+                .code(code.toUpperCase())
+                .description("Coupon for " + productName + " with a discount of 20% , you can use it in the next order :)")
                 .discountPercentage(20) // Default discount percentage
                 .redeemed(false)
                 .build();
@@ -44,30 +46,43 @@ public class CouponService {
     }
 
     @Transactional
-    public Coupon[] useCoupons(String[] codes) {
-        if(codes == null || codes.length == 0) {
+    public Coupon[] redeemCoupons(int clientId, String[] codes) {
+        if (codes == null || codes.length == 0) {
             return new Coupon[0]; // No coupons to redeem
         }
-        var coupons= couponRepository.listByCouponCodes(Arrays.asList(codes));
-        // validate unique coupon codes
-        if (coupons.size() != codes.length) {
-            List<String> redeemedCodes = new ArrayList<>();
-            for (Coupon c : coupons) {
-                redeemedCodes.add(c.getCode());
-            }
-            throw new CouponAlreadyRedeemedException("Some coupons are already redeemed or inactive: " + redeemedCodes);
-        }
+        var coupons = getCouponsByCodes(clientId, codes);
+
 
         // Mark all coupons as redeemed
         for (Coupon coupon : coupons) {
             coupon.setRedeemed(true);
             couponRepository.persist(coupon);
         }
-        return coupons.toArray(Coupon[]::new);
+        return coupons;
     }
 
     public List<Coupon> getAllCoupnsForClient(Long clientId) {
-        return couponRepository.listActiveByClientId(clientId);
+        return couponRepository.listByClientId(clientId);
+    }
+
+    @Transactional
+    public Coupon[] getCouponsByCodes(int clientId, String[] codes) {
+        if (codes == null || codes.length == 0) {
+            return new Coupon[0]; // No coupons to retrieve
+        }
+        var coupons = couponRepository.listByCouponCodes(Arrays.asList(codes));
+        // validate unique coupon codes or existence
+        List<String> invalidCodes = new ArrayList<>();
+        for (String code : codes) {
+            var coupon = coupons.stream().filter(c -> c.getCode().equals(code)).findFirst();
+            if (coupon.isEmpty() || coupon.get().getClientId() != clientId || coupon.get().isRedeemed()) {
+                invalidCodes.add(code);
+            }
+        }
+        if (!invalidCodes.isEmpty()) {
+            throw new CouponAlreadyRedeemedException("Coupons already redeemed or not found for codes: " + invalidCodes);
+        }
+        return couponRepository.listByCouponCodes(Arrays.asList(codes)).toArray(Coupon[]::new);
     }
 
     public void runGenerateCouponWorkflow(Long clientId, Long productId, String productName) {
@@ -81,7 +96,6 @@ public class CouponService {
                 .setId(wfRunId)
                 .build();
         blockingStub.runWf(request);
-
     }
 
 }

@@ -30,7 +30,7 @@ public class OrderTask {
     }
 
     @LHTaskMethod(FINALIZE_ORDER_TASK)
-    public OrderResponse finalizeOrder(Long orderId, ProductPriceItem[] productPrices, ProductDiscountItem[] discountItems) throws JsonProcessingException {
-        return this.orderService.finalizeOrder(orderId, productPrices, discountItems);
+    public OrderResponse finalizeOrder(Long orderId, ProductPriceItem[] productPrices) throws JsonProcessingException {
+        return this.orderService.finalizeOrder(orderId, productPrices);
     }
 }

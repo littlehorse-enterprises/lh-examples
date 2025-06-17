@@ -94,33 +94,27 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse finalizeOrder(Long orderId, ProductPriceItem[] productPrices, ProductDiscountItem[] discountItems) throws JsonProcessingException {
+    public OrderResponse finalizeOrder(Long orderId, ProductPriceItem[] productPrices) throws JsonProcessingException {
         Order order = orderRepository.findById(orderId);
         if (order == null) {
             return null;
         }
         // Apply discounts to order
-        double totalDiscount = 0.0;
+        double total = 0.0;
         for (var orderLine : order.getOrderLines()) {
             var productPrice = Arrays.stream(productPrices)
                     .filter(item -> item.getProductId() == orderLine.getProductId())
                     .findFirst()
-                    .map(ProductPriceItem::getUnitPrice)
                     .orElseThrow();
-            orderLine.setUnitPrice(productPrice);
-            double discountPercentage = Arrays.stream(discountItems)
-                    .filter(item -> item.getProductId() == orderLine.getProductId())
-                    .findFirst()
-                    .map(ProductDiscountItem::getDiscountPercentage)
-                    .orElse(0.0);
-            orderLine.setDiscountPercentage(discountPercentage);
+            orderLine.setUnitPrice(productPrice.getUnitPrice());
+            orderLine.setDiscountPercentage(productPrice.getDiscountPercentage());
             orderLine.setUnitPrice(orderLine.getUnitPrice());
-            orderLine.setTotalPrice(orderLine.getUnitPrice() * orderLine.getQuantity() * (1 - discountPercentage / 100));
-            totalDiscount += orderLine.getTotalPrice();
+            orderLine.setTotalPrice(orderLine.getUnitPrice() * orderLine.getQuantity());
+            total += orderLine.getTotalPrice();
         }
-        order.setTotal(totalDiscount);
+        order.setTotal(total);
         order.setStatus("COMPLETED");
-        order.setMessage("Order finalized and dispatched successfully");
+        order.setMessage("Order completed and dispatched successfully");
         orderRepository.persist(order);
         return orderMapper.toResponse(order);
     }

@@ -1,6 +1,8 @@
 package io.littlehorse.examples.mappers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import io.littlehorse.examples.dto.OrderRequest;
@@ -18,9 +20,13 @@ public class OrderMapper {
      * @return The Order entity
      */
     public Order toEntity(OrderRequest orderRequest) {
+        List<String> discountCodes = orderRequest.getDiscountCodes();
+        String discountCodesString = String.join(",", discountCodes != null ? discountCodes : List.of());
+
         Order order = Order.builder()
                 .clientId(orderRequest.getClientId())
-                .discountCodes(String.join(",", orderRequest.getDiscountCodes()))
+                .orderLines(new ArrayList<>())
+                .discountCodes(discountCodesString)
                 .build();
 
         if (orderRequest.getOrderLines() != null) {

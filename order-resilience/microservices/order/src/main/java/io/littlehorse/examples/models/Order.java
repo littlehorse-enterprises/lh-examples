@@ -19,32 +19,32 @@ import lombok.NoArgsConstructor;
 @Table(name = "orders")
 public class Order {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private int orderId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private int orderId;
 
-  private int clientId;
+    private int clientId;
 
-  @Column(columnDefinition = "TEXT")
-  private String message;
-  
-  private double total;
-  
-  private String status;
+    @Column(columnDefinition = "TEXT")
+    private String message;
 
-  private String discountCodes;
-  
-  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonManagedReference
-  private List<OrderLine> orderLines = new ArrayList<>();
-  
-  public void addOrderLine(OrderLine orderLine) {
-    orderLines.add(orderLine);
-    orderLine.setOrder(this);
-  }
-  
-  public void removeOrderLine(OrderLine orderLine) {
-    orderLines.remove(orderLine);
-    orderLine.setOrder(null);
-  }
+    private double total;
+
+    private String status;
+
+    private String discountCodes;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<OrderLine> orderLines;
+
+    public void addOrderLine(OrderLine orderLine) {
+        orderLines.add(orderLine);
+        orderLine.setOrder(this);
+    }
+
+    public void removeOrderLine(OrderLine orderLine) {
+        orderLines.remove(orderLine);
+        orderLine.setOrder(null);
+    }
 }

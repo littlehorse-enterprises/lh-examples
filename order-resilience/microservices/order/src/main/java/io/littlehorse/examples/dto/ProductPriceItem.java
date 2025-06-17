@@ -8,4 +8,5 @@ import lombok.Data;
 public class ProductPriceItem {
     Long productId;
     private double unitPrice;
+    private double discountPercentage;
 }

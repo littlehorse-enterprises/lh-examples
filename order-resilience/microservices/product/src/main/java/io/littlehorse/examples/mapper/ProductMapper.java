@@ -18,8 +18,10 @@ public class ProductMapper {
                 .productId(product.getProductId())
                 .name(product.getName())
                 .description(product.getDescription())
-                .price(product.getPrice())
+                .unitPrice(product.getPrice())
+                .cost(product.getCost())
                 .quantity(product.getQuantity())
+                .availableStock(product.getQuantity())
                 .category(product.getCategory())
                 .build();
     }
@@ -37,6 +39,16 @@ public class ProductMapper {
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
         product.setCategory(request.getCategory());
+        return product;
+    }
+    public Product toEntity(ProductResponse response) {
+        Product product = new Product();
+        product.setName(response.getName());
+        product.setDescription(response.getDescription());
+        product.setCost(response.getCost());
+        product.setPrice(response.getUnitPrice());
+        product.setQuantity(response.getQuantity());
+        product.setCategory(response.getCategory());
         return product;
     }
     public ProductError toDispatchErrorResponse(long clientId, List<ProductResponse> products, String errorMessage) {

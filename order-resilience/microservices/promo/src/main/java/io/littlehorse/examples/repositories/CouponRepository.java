@@ -11,13 +11,13 @@ public class CouponRepository implements PanacheRepository<Coupon> {
     public Coupon findByClientIdAndProductId(Long clientId, Long productId) {
         return find("clientId = ?1 and productId = ?2", clientId, productId).firstResult();
     }
-    public List<Coupon> listActiveByClientId(Long clientId) {
-        return find("clientId = ?1 and redeemed = false", clientId).list();
+    public List<Coupon> listByClientId(Long clientId) {
+        return find("clientId = ?1", clientId).list();
     }
     public List<Coupon> listByCouponCodes(List<String> couponCode) {
         if (couponCode == null || couponCode.isEmpty()) {
             return List.of();
         }
-        return find("couponCode in ?1 and redeemed = false", couponCode).list();
+        return find("code in ?1", couponCode).list();
     }
 }
