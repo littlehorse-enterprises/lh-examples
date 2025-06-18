@@ -1,131 +1,131 @@
 <app-top-bar></app-top-bar>
 
 <div class="orders-container">
-  <div class="header">
-    <h1>Order History</h1>
-    <button mat-raised-button color="primary" (click)="goToShop()">
-      <mat-icon>shopping_cart</mat-icon>
-      Continue Shopping
-    </button>
-  </div>
-
-  <!-- Loading state -->
-  <div class="loading-container" *ngIf="loading">
-    <mat-spinner></mat-spinner>
-    <p>Loading orders...</p>
-  </div>
-
-  <!-- Error state -->
-  <div class="error-container" *ngIf="error">
-    <mat-card>
-      <mat-card-content>
-        <p class="error-message">
-          <mat-icon>error_outline</mat-icon>
-          {{ errorMessage }}
-        </p>
-        <button mat-raised-button color="primary" (click)="loadOrders()">Try Again</button>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- No orders state -->
-  <div class="no-orders" *ngIf="!loading && !error && orders.length === 0">
-    <mat-icon class="empty-icon">receipt_long</mat-icon>
-    <p>No orders found</p>
-    <button mat-raised-button color="primary" (click)="goToShop()">Start Shopping</button>
-  </div>
-
-  <!-- Orders list -->
-  <div class="orders-list" *ngIf="!loading && !error && orders.length > 0">
-    <table mat-table [dataSource]="orders" class="orders-table">
-      <!-- Order ID Column -->
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef>Order ID</th>
-        <td mat-cell *matCellDef="let order">{{ order.id }}</td>
-      </ng-container>
-
-      <!-- Status Column -->
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let order">
-          <span class="status-badge" [ngClass]="getOrderStatusClass(order.status)">
-            {{ order.status }}
-          </span>
-        </td>
-      </ng-container>
-
-      <!-- Total Amount Column -->
-      <ng-container matColumnDef="totalAmount">
-        <th mat-header-cell *matHeaderCellDef>Total</th>
-        <td mat-cell *matCellDef="let order">${{ order.totalAmount.toFixed(2) }}</td>
-      </ng-container>
-
-      <!-- Date Column -->
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let order">{{ getOrderDate(order.createdAt) }}</td>
-      </ng-container>
-
-      <!-- Items Column -->
-      <ng-container matColumnDef="items">
-        <th mat-header-cell *matHeaderCellDef>Items</th>
-        <td mat-cell *matCellDef="let order">{{ getItemCount(order) }}</td>
-      </ng-container>
-
-      <!-- Actions Column -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let order">
-          <button mat-icon-button color="primary" (click)="toggleOrderDetails(order)">
-            <mat-icon>{{ expandedOrder === order ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-
-    <!-- Order details expansion panels -->
-    <div class="order-details" *ngIf="expandedOrder">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Order Details</mat-card-title>
-          <mat-card-subtitle>Order ID: {{ expandedOrder.id }}</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <table class="details-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Discount</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let line of expandedOrder.orderLines">
-                <td>{{ line.productName }}</td>
-                <td>{{ line.quantity }}</td>
-                <td>${{ line.unitPrice.toFixed(2) }}</td>
-                <td>
-                  <span *ngIf="line.discountAmount">-${{ line.discountAmount.toFixed(2) }}</span>
-                  <span *ngIf="!line.discountAmount">-</span>
-                </td>
-                <td>${{ line.lineTotal.toFixed(2) }}</td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="4" class="total-label">Total</td>
-                <td class="total-value">${{ expandedOrder.totalAmount.toFixed(2) }}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </mat-card-content>
-      </mat-card>
+    <div class="header">
+        <h1>Order History</h1>
+        <button mat-raised-button color="primary" (click)="goToShop()">
+            <mat-icon>shopping_cart</mat-icon>
+            Continue Shopping
+        </button>
     </div>
-  </div>
+
+    <!-- Loading state -->
+    <div class="loading-container" *ngIf="loading">
+        <mat-spinner></mat-spinner>
+        <p>Loading orders...</p>
+    </div>
+
+    <!-- Error state -->
+    <!-- <div class="error-container" *ngIf="error">
+        <mat-card>
+            <mat-card-content>
+                <p class="error-message">
+                    <mat-icon>error_outline</mat-icon>
+                    {{ errorMessage }}
+                </p>
+                <button mat-raised-button color="primary" (click)="loadOrders()">Try Again</button>
+            </mat-card-content>
+        </mat-card>
+    </div> -->
+
+    <!-- No orders state -->
+    <div class="no-orders" *ngIf="!loading && !error && orders().length === 0">
+        <mat-icon class="empty-icon">receipt_long</mat-icon>
+        <p>No orders found</p>
+        <button mat-raised-button color="primary" (click)="goToShop()">Start Shopping</button>
+    </div>
+
+    <!-- Orders list -->
+    <div class="orders-list" *ngIf="!loading && !error && orders().length > 0">
+        <table mat-table [dataSource]="orders()" class="orders-table">
+            <!-- Order ID Column -->
+            <ng-container matColumnDef="orderId">
+                <th mat-header-cell *matHeaderCellDef>Order ID</th>
+                <td mat-cell *matCellDef="let order">{{ order.orderId }}</td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let order">
+                    <span class="status-badge" [ngClass]="getOrderStatusClass(order.status)">
+                        {{ order.status }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <!-- Total Amount Column -->
+            <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let order">${{ order.total.toFixed(2) }}</td>
+            </ng-container>
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="creationDate">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let order">{{ getOrderDate(order.creationDate) }}</td>
+            </ng-container>
+
+            <!-- Items Column -->
+            <ng-container matColumnDef="items">
+                <th mat-header-cell *matHeaderCellDef>Items</th>
+                <td mat-cell *matCellDef="let order">{{ getItemCount(order) }}</td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let order">
+                    <button mat-icon-button color="primary" (click)="toggleOrderDetails(order)">
+                        <mat-icon>{{ expandedOrder === order ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Order details expansion panels -->
+        <div class="order-details" *ngIf="expandedOrder">
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Order Details</mat-card-title>
+                    <mat-card-subtitle>Order ID: {{ expandedOrder.orderId }}</mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Discount</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let line of expandedOrder.orderLines">
+                                <td>{{ line.product?.name }}</td>
+                                <td>{{ line.quantity }}</td>
+                                <td>${{ line.unitPrice | currency }}</td>
+                                <td>
+                                    <span *ngIf="line.discountPercentage">{{ line.discountPercentage }}%</span>
+                                    <span *ngIf="!line.discountPercentage">-</span>
+                                </td>
+                                <td>${{ line.quantity * line.unitPrice | currency }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="total-label">Total</td>
+                                <td class="total-value">${{ expandedOrder.total | currency }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
 </div>

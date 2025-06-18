@@ -1,8 +1,6 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
-import { ProductStockItem } from '../models/product-stock-item.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({

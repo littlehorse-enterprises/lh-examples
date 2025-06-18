@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -17,108 +17,99 @@ import { TopBarComponent } from '../shared/top-bar.component';
 import { OrderService } from '../shop/services/order.service';
 import { UserService } from '../shared/user.service';
 import { OrderResponse } from '../shop/models/order.model';
+import { ProductService } from '../shop/services/product.service';
+import { Product } from '../shop/models/product.model';
 
 @Component({
-  selector: 'app-orders',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatTabsModule,
-    MatTableModule,
-    MatSortModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatExpansionModule,
-    MatDividerModule,
-    MatBadgeModule,
-    MatSnackBarModule,
-    TopBarComponent
-  ],
-  templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.scss']
+    selector: 'app-orders',
+    standalone: true,
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatTabsModule,
+        MatTableModule,
+        MatSortModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatProgressSpinnerModule,
+        MatExpansionModule,
+        MatDividerModule,
+        MatBadgeModule,
+        MatSnackBarModule,
+        TopBarComponent
+    ],
+    templateUrl: './orders.component.html',
+    styleUrls: ['./orders.component.scss']
 })
-export class OrdersComponent implements OnInit {
-  orders: OrderResponse[] = [];
-  loading = false;
-  error = false;
-  errorMessage = '';
-  displayedColumns: string[] = ['id', 'status', 'totalAmount', 'createdAt', 'items', 'actions'];
-  expandedOrder: OrderResponse | null = null;
-  
-  constructor(
-    private orderService: OrderService,
-    private userService: UserService,
-    private router: Router
-  ) {}
-  
-  ngOnInit(): void {
-    this.loadOrders();
-  }
-  
-  loadOrders(): void {
-    const user = this.userService.getSelectedUser();
-    if (!user) {
-      this.error = true;
-      this.errorMessage = 'No user selected. Please select a user to view orders.';
-      return;
+export class OrdersComponent {
+    orders = computed(() => this.orderService.orders());
+    loading = false;
+    error = false;
+    errorMessage = '';
+    displayedColumns: string[] = ['orderId', 'status', 'total', 'creationDate', 'items', 'actions'];
+    expandedOrder: OrderResponse | null = null;
+
+    constructor(
+        public orderService: OrderService,
+        private userService: UserService,
+        private productService: ProductService,
+        private router: Router
+    ) {
+        effect(() => {
+            console.log('userService.user() changed:', this.userService.user());
+            const user = this.userService.user();
+            const products = this.productService.products();
+            if (user && products && products.length > 0) {
+                if (!this.orderService.orders() || this.orderService.orders().length === 0) {
+                    this.loadOrders(user.id, products);
+                }
+            }
+        });
     }
-    
-    this.loading = true;
-    this.error = false;
-    
-    this.orderService.getOrdersByClientId(user.id).subscribe({
-      next: (orders) => {
-        this.orders = orders;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error fetching orders:', err);
-        this.loading = false;
-        this.error = true;
-        this.errorMessage = 'Failed to load orders. Please try again later.';
-      }
-    });
-  }
-  
-  getOrderStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'status-completed';
-      case 'processing':
-        return 'status-processing';
-      case 'shipped':
-        return 'status-shipped';
-      case 'cancelled':
-        return 'status-cancelled';
-      case 'pending':
-        return 'status-pending';
-      default:
-        return '';
+
+
+
+    loadOrders(userId: number, products: Product[]): void {
+        this.orderService.loadOrders(userId, products);
     }
-  }
-  
-  getOrderDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  }
-  
-  getItemCount(order: OrderResponse): number {
-    return order.orderLines.reduce((sum, line) => sum + line.quantity, 0);
-  }
-  
-  toggleOrderDetails(order: OrderResponse): void {
-    if (this.expandedOrder === order) {
-      this.expandedOrder = null;
-    } else {
-      this.expandedOrder = order;
+
+    getOrderStatusClass(status: string): string {
+        switch (status.toLowerCase()) {
+            case 'completed':
+                return 'status-completed';
+            case 'processing':
+                return 'status-processing';
+            case 'shipped':
+                return 'status-shipped';
+            case 'cancelled':
+                return 'status-cancelled';
+            case 'pending':
+                return 'status-pending';
+            default:
+                return '';
+        }
     }
-  }
-  
-  goToShop(): void {
-    this.router.navigate(['/shop']);
-  }
+
+    getOrderDate(dateStr: string | Date): string {
+        const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    getItemCount(order: OrderResponse): number {
+        return order.orderLines.reduce((sum, line) => sum + line.quantity, 0);
+    }
+
+    toggleOrderDetails(order: OrderResponse): void {
+        if (this.expandedOrder === order) {
+            this.expandedOrder = null;
+        } else {
+            this.expandedOrder = order;
+        }
+    }
+
+    goToShop(): void {
+        this.router.navigate(['/shop']);
+    }
 }
