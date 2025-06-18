@@ -1,6 +1,6 @@
 import { computed, Injectable, Signal, signal, WritableSignal, effect } from '@angular/core';
 import { Product } from '../models/product.model';
-import { CartItem } from '../../models/cart-item.model';
+import { Cart, CartItem } from '../../models/cart-item.model';
 
 
 
@@ -10,7 +10,27 @@ import { CartItem } from '../../models/cart-item.model';
 export class ShopService {
     cartItems: WritableSignal<CartItem[]> = signal<CartItem[]>([]);
     itemCount: Signal<number> = computed(() => this.cartItems().reduce((count, item) => count + item.quantity, 0));
-
+    cart: Signal<Cart> = computed(() => {
+        const items = this.cartItems();
+        const subtotal = items.reduce((total, item) => {
+            const product = item.product;
+            return total + (product ? product.unitPrice * item.quantity : 0);
+        }, 0);
+        const discount = items.reduce((total, item) => {
+            if (item.discountPercentage) {
+                const product = item.product;
+                return total + (product ? product.unitPrice * item.quantity * (item.discountPercentage / 100) : 0);
+            }
+            return total;
+        }, 0);
+        const total = subtotal - discount;
+        return {
+            items: items,
+            subtotal: subtotal,
+            discount: discount,
+            total: total
+        };
+    });
     constructor() {
         effect(() => {
             console.log('Cart items changed:', this.cartItems());
@@ -33,7 +53,7 @@ export class ShopService {
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 )
-                : [...currentCart, { productId: product.productId, quantity: 1, product: product }];
+                : [...currentCart, { productId: product.productId, quantity: 1, product: product, discountPercentage: 0 }];
 
             this.cartItems.set(newCart);
         }
@@ -77,7 +97,7 @@ export class ShopService {
                 ? {
                     ...item,
                     discountCode: code,
-                    discountApplied: code.trim() !== ''
+                    discountPercentage: 0
                 }
                 : item
         );
@@ -90,7 +110,7 @@ export class ShopService {
                 ? {
                     ...item,
                     discountCode: '',
-                    discountApplied: false
+                    discountPercentage: 0
                 }
                 : item
         );
@@ -103,7 +123,7 @@ export class ShopService {
 
     getAppliedDiscountCodes(): string[] {
         return this.cartItems()
-            .filter(item => item.discountApplied && item.discountCode)
+            .filter(item => item.discountPercentage && item.discountCode)
             .map(item => item.discountCode!) // `!` porque ya filtramos los falsy
     }
 
@@ -116,7 +136,7 @@ export class ShopService {
 
     getDiscountAmount(products: Product[]): number {
         return this.cartItems().reduce((discount, item) => {
-            if (item.discountApplied) {
+            if (item.discountPercentage) {
                 const product = products.find(p => p.productId === item.productId);
                 if (product) {
                     discount += product.unitPrice * item.quantity * 0.1;

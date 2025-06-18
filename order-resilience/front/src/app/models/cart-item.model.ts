@@ -4,6 +4,13 @@ export interface CartItem {
     productId: number;
     quantity: number;
     product:Product;
+    discountPercentage: number;
     discountCode?: string;
-    discountApplied?: boolean;
+}
+
+export interface Cart {
+    items: CartItem[];
+    subtotal: number;
+    discount: number;
+    total: number;
 }

@@ -12,7 +12,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Product } from '../models/product.model';
 import { ShopService } from '../services/shop.service';
-import { CartItem } from '../../models/cart-item.model';
+import { Cart, CartItem } from '../../models/cart-item.model';
 
 export interface CartDialogData {
     products: Product[];
@@ -43,9 +43,7 @@ export interface CartDialogData {
 export class CartDialogComponent implements OnInit {
     shopService = inject(ShopService);
     cartItems: Signal<CartItem[]> = computed(() => this.shopService.cartItems());
-    subtotal: number = 0;
-    discount: number = 0;
-    total: number = 0;
+    cart: Signal<Cart> = computed(() => this.shopService.cart());
 
 
     constructor(
@@ -54,26 +52,22 @@ export class CartDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.calculateTotals();
 
     }
 
 
     increaseQuantity(item: CartItem): void {
         this.shopService.addToCart(item.product);
-        this.calculateTotals();
     }
 
     decreaseQuantity(item: CartItem): void {
         this.shopService.removeFromCart(item.product.productId);
-        this.calculateTotals();
     }
 
     removeItem(item: CartItem): void {
         // Remove all instances of this product from the cart
         this.shopService.deleteFromCart(item.product.productId);
 
-        this.calculateTotals();
 
         // Close dialog if cart is empty
         if (this.cartItems().length === 0) {
@@ -92,37 +86,11 @@ export class CartDialogComponent implements OnInit {
     }
 
     removeDiscount(item: CartItem): void {
-        item.discountApplied = false;
-        item.discountCode = '';
         this.shopService.clearDiscountCode(item.product.productId);
-        this.calculateTotals();
     }
 
-    calculateTotals(): void {
-        this.subtotal = 0;
-        this.discount = 0;
-
-        for (const item of this.cartItems()) {
-            const itemTotal = item.product.unitPrice * item.quantity;
-            this.subtotal += itemTotal;
-
-            if (item.discountApplied) {
-                // Apply a 10% discount for demonstration purposes
-                this.discount += itemTotal * 0.1;
-            }
-        }
-
-        this.total = this.subtotal - this.discount;
-    }
 
     checkout(): void {
-        // Ensure any pending discount codes are applied before proceeding
-        this.cartItems().forEach(item => {
-            if (item.discountCode && !item.discountApplied) {
-                this.applyDiscountCode(item);
-            }
-        });
-
         this.dialogRef.close('checkout');
     }
 

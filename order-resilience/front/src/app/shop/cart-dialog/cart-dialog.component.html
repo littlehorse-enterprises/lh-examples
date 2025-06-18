@@ -46,7 +46,7 @@
         <mat-divider></mat-divider>
         
         <div class="discount-section">
-          <div class="discount-input" *ngIf="!item.discountApplied">
+          <div class="discount-input" *ngIf="!item.discountPercentage">
             <mat-form-field appearance="outline">
               <mat-label>Discount code</mat-label>
               <input matInput [(ngModel)]="item.discountCode">
@@ -60,7 +60,7 @@
             </button>
           </div>
           
-          <div class="discount-applied" *ngIf="item.discountApplied">
+          <div class="discount-applied" *ngIf="item.discountPercentage">
             <div class="discount-info">
               <mat-icon color="accent">local_offer</mat-icon>
               <span>10% discount applied with code: {{ item.discountCode }}</span>
@@ -78,16 +78,16 @@
     <h3>Order Summary</h3>
     <div class="summary-row">
       <span>Subtotal:</span>
-      <span>${{ subtotal.toFixed(2) }}</span>
+      <span>${{ cart().subtotal }}</span>
     </div>
-    <div class="summary-row discount" *ngIf="discount > 0">
+    <div class="summary-row discount" *ngIf="cart().discount > 0">
       <span>Discount:</span>
-      <span>-${{ discount.toFixed(2) }}</span>
+      <span>-${{ cart().discount }}</span>
     </div>
     <mat-divider></mat-divider>
     <div class="summary-row total">
       <span>Total:</span>
-      <span>${{ total.toFixed(2) }}</span>
+      <span>${{ cart().total }}</span>
     </div>
   </div>
 </mat-dialog-content>
