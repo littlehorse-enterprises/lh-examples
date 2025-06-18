@@ -41,6 +41,17 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductStockItem addStock(ProductStockItem item) {
+        Product product = repository.findById(item.getProductId());
+        if (product == null) {
+            return null; // or throw an exception
+        }
+        product.setQuantity(product.getQuantity() + item.getQuantity());
+        repository.persist(product);
+        return item;
+    }
+
+    @Transactional
     public ProductResponse[] dispatch(int clientId, List<ProductStockItem> productItems) throws ProductNotFoundException, InsufficientStockException, JsonProcessingException {
         // Collect all product IDs to validate
         List<Long> productIds = productItems.stream()

@@ -31,14 +31,23 @@ public class ProductController {
         List<Product> products = productService.getAllProducts();
         return Response.ok(productMapper.toResponseList(products)).build();
     }
-    
+
 
     @POST
     @Path("/dispatch/client/{clientId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response reduceStock(@PathParam("clientId") int clientId, List<ProductStockItem> productItems) throws JsonProcessingException {
-            productService.dispatch(clientId,productItems);
-            return Response.ok().build();
+        productService.dispatch(clientId, productItems);
+        return Response.ok().build();
+
+    }
+
+    @POST
+    @Path("/stock")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addStock(ProductStockItem productItem) throws JsonProcessingException {
+        productService.addStock(productItem);
+        return Response.ok().build();
 
     }
 }
