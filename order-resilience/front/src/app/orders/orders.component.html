@@ -98,6 +98,7 @@
                     <table class="details-table">
                         <thead>
                             <tr>
+                                <th>Image</th>
                                 <th>Product</th>
                                 <th>Quantity</th>
                                 <th>Unit Price</th>
@@ -107,7 +108,12 @@
                         </thead>
                         <tbody>
                             <tr *ngFor="let line of expandedOrder.orderLines">
-                                <td>{{ line.product?.name }}</td>
+                                <td class="product-image">
+                                    <img [src]="'/assets/images/products/' + line.productId + '.png'" 
+                                         [alt]="line.product?.name || 'Product image'" 
+                                         class="product-thumbnail">
+                                </td>
+                                <td>{{ line.product?.name || 'Product #' + line.productId }}</td>
                                 <td>{{ line.quantity }}</td>
                                 <td>${{ line.unitPrice | currency }}</td>
                                 <td>

@@ -1,18 +1,6 @@
 <app-top-bar></app-top-bar>
 
 <div class="shop-container">
-  <div class="shop-header">
-    <div class="cart-summary" *ngIf="!loading && !error && shopService.itemCount() > 0">
-      <mat-chip-set>
-        <mat-chip highlighted>{{ shopService.itemCount() }} items</mat-chip>
-        <!-- <mat-chip color="accent">${{ getCartTotal().toFixed(2) }}</mat-chip> -->
-      </mat-chip-set>
-      <button mat-raised-button color="primary" (click)="checkout()" [disabled]="isProcessing">
-        {{ isProcessing ? 'Processing...' : 'Checkout' }}
-      </button>
-    </div>
-  </div>
-  
   <div class="order-messages">
     <mat-card *ngIf="orderSuccess" class="success-message">
       <mat-card-content>

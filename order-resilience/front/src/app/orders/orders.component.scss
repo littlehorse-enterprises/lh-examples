@@ -155,5 +155,18 @@
         font-size: 16px;
       }
     }
+    
+    .product-image {
+      width: 80px;
+      
+      .product-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 4px;
+      }
+    }
   }
 }

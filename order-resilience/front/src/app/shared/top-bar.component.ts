@@ -4,8 +4,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { Router } from '@angular/router';
 import { UserService } from '../shared/user.service';
 import { UserAccount } from '../account-select/user-account.model';
@@ -22,8 +23,9 @@ import { ProductService } from '../shop/services/product.service';
         MatIconModule,
         MatButtonModule,
         MatBadgeModule,
-        MatTooltipModule,
-        MatDialogModule
+        MatDialogModule,
+        MatMenuModule,
+        MatDividerModule,
     ],
     templateUrl: './top-bar.component.html',
     styleUrls: ['./top-bar.component.scss']
@@ -47,13 +49,9 @@ export class TopBarComponent implements OnInit {
     }
 
     viewCart(): void {
-        if (this.cartItemCount() === 0) {
-            // Don't open the dialog if the cart is empty
-            return;
-        }
 
         const dialogRef = this.dialog.open(CartDialogComponent, {
-            width: '800px',
+            width: '900px',
             data: {
                 products: this.productService.products(),
                 cartItems: this.shopService.getCart()
@@ -76,7 +74,10 @@ export class TopBarComponent implements OnInit {
         this.router.navigate(['/orders']);
     }
 
-    changeUser(): void {
+  
+
+    logout(): void {
+        this.userService.clearSelectedUser();
         this.router.navigate(['/']);
     }
 }

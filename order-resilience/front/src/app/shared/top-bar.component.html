@@ -1,35 +1,32 @@
 <mat-toolbar color="primary">
-  <span class="title">Little Horse Shopping</span>
+  <span class="title">LittleHorse Shopping</span>
   <span class="spacer"></span>
-  
+
   <div class="toolbar-icons">
-    <button mat-button color="primary" (click)="goToShop()" matTooltip="Shop">
-      <mat-icon>storefront</mat-icon>
+    <button mat-button (click)="goToShop()">
       Shop
     </button>
 
-    <button mat-button color="primary" (click)="goToOrders()" matTooltip="View Orders">
-      <mat-icon>receipt_long</mat-icon>
+    <button mat-button (click)="goToOrders()">
       Orders
     </button>
-    
-    <button mat-icon-button 
-            [matBadge]="cartItemCount()" 
-            matBadgeColor="accent"
-            (click)="viewCart()" 
-            matTooltip="View Cart">
+
+    <button mat-icon-button [matBadge]="cartItemCount()" [matBadgeHidden]="cartItemCount() === 0" matBadgeColor="accent"
+      (click)="viewCart()" >
       <mat-icon>shopping_basket</mat-icon>
     </button>
-    
-    <div *ngIf="selectedUser" class="user-info">
+
+    <div *ngIf="selectedUser" class="user-info" [matMenuTriggerFor]="userMenu">
       <span class="username">{{ selectedUser().name }}</span>
-      <img class="user-avatar" 
-           src="/assets/images/profiles/{{ selectedUser().id }}.png" 
-           [alt]="selectedUser().name">
+      <img class="user-avatar" src="/assets/images/profiles/{{ selectedUser().id }}.jpeg" [alt]="selectedUser().name">
+   <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>switch_account</mat-icon>
+        <span>Log out</span>
+      </button>
+    </mat-menu>
     </div>
+
     
-    <button mat-icon-button (click)="changeUser()" matTooltip="Change User">
-      <mat-icon>swap_horiz</mat-icon>
-    </button>
   </div>
 </mat-toolbar>
