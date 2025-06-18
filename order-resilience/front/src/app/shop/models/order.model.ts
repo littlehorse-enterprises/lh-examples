@@ -1,5 +1,5 @@
 export interface OrderRequest {
-  clientId: number;
+  clientId?: number;
   orderLines: OrderLineRequest[];
   discountCodes: string[];
 }

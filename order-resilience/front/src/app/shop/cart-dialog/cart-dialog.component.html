@@ -1,14 +1,14 @@
 <h2 mat-dialog-title>Your Shopping Cart</h2>
 
 <mat-dialog-content>
-  <div class="empty-cart" *ngIf="cartItems.length === 0">
+  <div class="empty-cart" *ngIf="cartItems().length === 0">
     <mat-icon class="empty-icon">shopping_basket</mat-icon>
     <p>Your cart is empty</p>
     <button mat-raised-button color="primary" (click)="close()">Continue Shopping</button>
   </div>
 
-  <div class="cart-items" *ngIf="cartItems.length > 0">
-    <div class="cart-item" *ngFor="let item of cartItems">
+  <div class="cart-items" *ngIf="cartItems().length > 0">
+    <div class="cart-item" *ngFor="let item of cartItems()">
       <div class="item-image">
         <img [src]="'/assets/images/products/' + item.product.productId + '.png'" [alt]="item.product.name">
       </div>
@@ -74,7 +74,7 @@
     </div>
   </div>
   
-  <div class="order-summary" *ngIf="cartItems.length > 0">
+  <div class="order-summary" *ngIf="cartItems().length > 0">
     <h3>Order Summary</h3>
     <div class="summary-row">
       <span>Subtotal:</span>
@@ -92,9 +92,9 @@
   </div>
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions >
   <button mat-button (click)="close()">Cancel</button>
-  <button mat-raised-button color="primary" [disabled]="cartItems.length === 0" (click)="checkout()">
+  <button mat-raised-button color="primary" [disabled]="cartItems().length === 0" (click)="checkout()">
     Proceed to Checkout
   </button>
 </mat-dialog-actions>

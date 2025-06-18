@@ -2,10 +2,10 @@
 
 <div class="shop-container">
   <div class="shop-header">
-    <div class="cart-summary" *ngIf="!loading && !error && getCartItemCount() > 0">
+    <div class="cart-summary" *ngIf="!loading && !error && shopService.itemCount() > 0">
       <mat-chip-set>
-        <mat-chip highlighted>{{ getCartItemCount() }} items</mat-chip>
-        <mat-chip color="accent">${{ getCartTotal().toFixed(2) }}</mat-chip>
+        <mat-chip highlighted>{{ shopService.itemCount() }} items</mat-chip>
+        <!-- <mat-chip color="accent">${{ getCartTotal().toFixed(2) }}</mat-chip> -->
       </mat-chip-set>
       <button mat-raised-button color="primary" (click)="checkout()" [disabled]="isProcessing">
         {{ isProcessing ? 'Processing...' : 'Checkout' }}
@@ -45,7 +45,7 @@
   </div>
 
   <div class="products-container" *ngIf="!loading && !error">
-    <mat-card class="product-card" *ngFor="let product of products">
+    <mat-card class="product-card" *ngFor="let product of productService.products()">
       <img mat-card-image src="/assets/images/products/{{product.productId}}.png" 
            [alt]="product.name">
       <mat-card-header>

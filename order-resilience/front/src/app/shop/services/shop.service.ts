@@ -1,146 +1,132 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { computed, Injectable, Signal, signal, WritableSignal, effect } from '@angular/core';
 import { Product } from '../models/product.model';
+import { CartItem } from '../../models/cart-item.model';
 
-export interface CartItem {
-  productId: number;
-  quantity: number;
-  discountCode?: string;
-  discountApplied?: boolean;
-}
+
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ShopService {
-  private cartItemsSubject: BehaviorSubject<Map<number, CartItem>> = new BehaviorSubject<Map<number, CartItem>>(new Map());
-  public cartItems$: Observable<Map<number, CartItem>> = this.cartItemsSubject.asObservable();
-  
-  constructor() {}
-  
-  public getCart(): Map<number, CartItem> {
-    return this.cartItemsSubject.value;
-  }
-  
-  public addToCart(product: Product): void {
-    const cart = new Map(this.cartItemsSubject.value);
-    const currentItem = cart.get(product.productId);
-    const currentQuantity = currentItem ? currentItem.quantity : 0;
-    
-    if (currentQuantity < product.quantity) {
-      if (currentItem) {
-        cart.set(product.productId, {
-          ...currentItem,
-          quantity: currentQuantity + 1
+    cartItems: WritableSignal<CartItem[]> = signal<CartItem[]>([]);
+    itemCount: Signal<number> = computed(() => this.cartItems().reduce((count, item) => count + item.quantity, 0));
+
+    constructor() {
+        effect(() => {
+            console.log('Cart items changed:', this.cartItems());
         });
-      } else {
-        cart.set(product.productId, {
-          productId: product.productId,
-          quantity: 1
-        });
-      }
-      this.cartItemsSubject.next(cart);
     }
-  }
-  
-  public removeFromCart(productId: number): void {
-    const cart = new Map(this.cartItemsSubject.value);
-    const currentItem = cart.get(productId);
-    
-    if (currentItem && currentItem.quantity > 0) {
-      if (currentItem.quantity === 1) {
-        cart.delete(productId);
-      } else {
-        cart.set(productId, {
-          ...currentItem,
-          quantity: currentItem.quantity - 1
-        });
-      }
-      this.cartItemsSubject.next(cart);
+
+    getCart(): CartItem[] {
+        return this.cartItems();
     }
-  }
-  
-  public getCartQuantity(productId: number): number {
-    const item = this.cartItemsSubject.value.get(productId);
-    return item ? item.quantity : 0;
-  }
-  
-  public setDiscountCode(productId: number, code: string): void {
-    const cart = new Map(this.cartItemsSubject.value);
-    const currentItem = cart.get(productId);
-    
-    if (currentItem) {
-      cart.set(productId, {
-        ...currentItem,
-        discountCode: code,
-        discountApplied: code.trim() !== ''
-      });
-      this.cartItemsSubject.next(cart);
-    }
-  }
-  
-  public clearDiscountCode(productId: number): void {
-    const cart = new Map(this.cartItemsSubject.value);
-    const currentItem = cart.get(productId);
-    
-    if (currentItem) {
-      cart.set(productId, {
-        ...currentItem,
-        discountCode: '',
-        discountApplied: false
-      });
-      this.cartItemsSubject.next(cart);
-    }
-  }
-  
-  public clearCart(): void {
-    this.cartItemsSubject.next(new Map());
-  }
-  
-  public getCartItemCount(): number {
-    let count = 0;
-    this.cartItemsSubject.value.forEach(item => {
-      count += item.quantity;
-    });
-    return count;
-  }
-  
-  public getAppliedDiscountCodes(): string[] {
-    const discountCodes: string[] = [];
-    this.cartItemsSubject.value.forEach(item => {
-      if (item.discountApplied && item.discountCode) {
-        discountCodes.push(item.discountCode);
-      }
-    });
-    return discountCodes;
-  }
-  
-  public getCartTotal(products: Product[]): number {
-    let total = 0;
-    this.cartItemsSubject.value.forEach((item) => {
-      const product = products.find(p => p.productId === item.productId);
-      if (product) {
-        total += product.unitPrice * item.quantity;
-      }
-    });
-    return total;
-  }
-  
-  public getDiscountAmount(products: Product[]): number {
-    let discount = 0;
-    this.cartItemsSubject.value.forEach((item) => {
-      if (item.discountApplied) {
-        const product = products.find(p => p.productId === item.productId);
-        if (product) {
-          // Apply a 10% discount for demonstration purposes
-          discount += (product.unitPrice * item.quantity) * 0.1;
+
+    addToCart(product: Product): void {
+        const currentCart = this.cartItems();
+        const currentItem = currentCart.find(item => item.productId === product.productId);
+        const currentQuantity = currentItem?.quantity ?? 0;
+
+        if (currentQuantity < product.quantity) {
+            const newCart = currentItem
+                ? currentCart.map(item =>
+                    item.productId === product.productId
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                )
+                : [...currentCart, { productId: product.productId, quantity: 1, product: product }];
+
+            this.cartItems.set(newCart);
         }
-      }
-    });
-    return discount;
-  }
-  
-  public getFinalTotal(products: Product[]): number {
-    return this.getCartTotal(products) - this.getDiscountAmount(products);
-  }
+    }
+
+    removeFromCart(productId: number): void {
+        const currentCart = this.cartItems();
+        const currentItem = currentCart.find(item => item.productId === productId);
+
+        if (!currentItem) return;
+
+        let newCart: CartItem[];
+
+        if (currentItem.quantity === 1) {
+            newCart = currentCart.filter(item => item.productId !== productId);
+        } else {
+            newCart = currentCart.map(item =>
+                item.productId === productId
+                    ? { ...item, quantity: item.quantity - 1 }
+                    : item
+            );
+        }
+
+        this.cartItems.set(newCart);
+    }
+    deleteFromCart(productId: number): void {
+        const newCart = this.cartItems().filter(item => item.productId !== productId);
+        this.cartItems.set(newCart);
+    }
+
+
+
+    getCartQuantity(productId: number): number {
+        const item = this.cartItems().find(item => item.productId === productId);
+        return item ? item.quantity : 0;
+    }
+
+    setDiscountCode(productId: number, code: string): void {
+        const newCart = this.cartItems().map(item =>
+            item.productId === productId
+                ? {
+                    ...item,
+                    discountCode: code,
+                    discountApplied: code.trim() !== ''
+                }
+                : item
+        );
+        this.cartItems.set(newCart);
+    }
+
+    clearDiscountCode(productId: number): void {
+        const newCart = this.cartItems().map(item =>
+            item.productId === productId
+                ? {
+                    ...item,
+                    discountCode: '',
+                    discountApplied: false
+                }
+                : item
+        );
+        this.cartItems.set(newCart);
+    }
+
+    clearCart(): void {
+        this.cartItems.set([]);
+    }
+
+    getAppliedDiscountCodes(): string[] {
+        return this.cartItems()
+            .filter(item => item.discountApplied && item.discountCode)
+            .map(item => item.discountCode!) // `!` porque ya filtramos los falsy
+    }
+
+    getCartTotal(products: Product[]): number {
+        return this.cartItems().reduce((total, item) => {
+            const product = products.find(p => p.productId === item.productId);
+            return product ? total + product.unitPrice * item.quantity : total;
+        }, 0);
+    }
+
+    getDiscountAmount(products: Product[]): number {
+        return this.cartItems().reduce((discount, item) => {
+            if (item.discountApplied) {
+                const product = products.find(p => p.productId === item.productId);
+                if (product) {
+                    discount += product.unitPrice * item.quantity * 0.1;
+                }
+            }
+            return discount;
+        }, 0);
+    }
+
+    getFinalTotal(products: Product[]): number {
+        return this.getCartTotal(products) - this.getDiscountAmount(products);
+    }
 }

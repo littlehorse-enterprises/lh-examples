@@ -1,41 +1,39 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { UserAccount } from '../account-select/user-account.model';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class UserService {
-  private selectedUserSubject: BehaviorSubject<UserAccount | null> = new BehaviorSubject<UserAccount | null>(null);
-  public selectedUser$: Observable<UserAccount | null> = this.selectedUserSubject.asObservable();
-  
-  constructor() {
-    this.loadUserFromStorage();
-  }
+    user: WritableSignal<UserAccount | null> = signal<UserAccount | null>(null);
 
-  private loadUserFromStorage(): void {
-    const userJson = sessionStorage.getItem('lh-selected-user');
-    if (userJson) {
-      try {
-        const user = JSON.parse(userJson);
-        this.selectedUserSubject.next(user);
-      } catch (e) {
-        console.error('Error parsing user from session storage', e);
-      }
+    constructor() {
+        this.loadUserFromStorage();
     }
-  }
 
-  public getSelectedUser(): UserAccount | null {
-    return this.selectedUserSubject.value;
-  }
+    private loadUserFromStorage(): void {
+        const userJson = localStorage.getItem('lh-selected-user');
+        if (userJson) {
+            try {
+                const user = JSON.parse(userJson);
+                this.user.set(user);
+            } catch (e) {
+                console.error('Error parsing user from local storage', e);
+            }
+        }
+    }
 
-  public setSelectedUser(user: UserAccount): void {
-    sessionStorage.setItem('lh-selected-user', JSON.stringify(user));
-    this.selectedUserSubject.next(user);
-  }
+    getSelectedUser(): UserAccount | null {
+        return this.user();
+    }
 
-  public clearSelectedUser(): void {
-    sessionStorage.removeItem('lh-selected-user');
-    this.selectedUserSubject.next(null);
-  }
+    setSelectedUser(user: UserAccount): void {
+        localStorage.setItem('lh-selected-user', JSON.stringify(user));
+        this.user.set(user);
+    }
+
+    clearSelectedUser(): void {
+        localStorage.removeItem('lh-selected-user');
+        this.user.set(null);
+    }
 }
