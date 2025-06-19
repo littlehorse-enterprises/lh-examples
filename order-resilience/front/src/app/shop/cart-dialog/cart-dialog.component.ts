@@ -124,12 +124,12 @@ export class CartDialogComponent implements OnInit {
         this.orderService.placeOrder(orderRequest).subscribe({
             next: (order) => {
                 console.log('Order placed successfully, ID:', order.orderId);
+                this.productService.loadProducts(); // Refresh products if needed
                 this.orderService.loadOrders(user?.id || 1, this.productService.products());
 
-
                 this.orderSuccess = true;
-                
-                this.snackBar.open('Order placed successfully!', 'View Orders', {
+
+                this.snackBar.open('Order placed successfully! ID: ' + order.orderId, 'View Orders', {
                     duration: 5000
                 }).onAction().subscribe(() => {
                     this.router.navigate(['/orders']);

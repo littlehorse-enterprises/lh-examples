@@ -17,7 +17,7 @@ public class CouponTasks {
     CouponService couponService;
 
     @LHTaskMethod(GET_COUPONS_BY_CODES)
-    public Coupon[]  getCouponsByCodes(int clientId, String[] couponCodes) {
+    public Coupon[] getCouponsByCodes(int clientId, String[] couponCodes) {
         return this.couponService.getCouponsByCodes(clientId, couponCodes);
     }
 
@@ -27,8 +27,8 @@ public class CouponTasks {
     }
 
     @LHTaskMethod(CREATE_COUPON)
-    public void generateCoupon(Long clientId, Long productId, String productName) {
-        this.couponService.generateCoupon(clientId, productId, productName);
+    public Coupon generateCoupon(Long clientId, Long productId, String productName) {
+        return this.couponService.generateCoupon(clientId, productId, productName);
     }
 
 }

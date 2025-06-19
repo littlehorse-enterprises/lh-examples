@@ -71,12 +71,14 @@ export class ShopComponent implements OnInit {
     return this.shopService.getCartQuantity(productId);
   }
 
-  // getCartTotal(): number {
-  //   // return this.shopService.getCartTotal(this.products);
-  // }
-
+  getCartTotal(): number {
+    return this.shopService.cart().total;
+  }
 
   isProductInCart(productId: number): boolean {
     return this.shopService.getCartQuantity(productId) > 0;
+  }
+  viewCart(): void {
+    this.shopService.viewCart();
   }
 }

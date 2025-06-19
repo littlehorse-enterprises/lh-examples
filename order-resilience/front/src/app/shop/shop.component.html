@@ -73,4 +73,26 @@
       </mat-card-actions>
     </mat-card>
   </div>
+  
+  <!-- Floating Cart Total -->
+  <div class="cart-total-container" *ngIf="shopService.itemCount() > 0">
+    <mat-card class="cart-total-card">
+      <mat-card-content>
+        <div class="cart-summary">
+          <div class="cart-item-count">
+            <mat-icon>shopping_cart</mat-icon>
+            <span>{{ shopService.itemCount() }} item(s)</span>
+          </div>
+          <div class="cart-amount">
+            <span class="total-label">Total:</span>
+            <span class="total-value">${{ shopService.cart().total.toFixed(2) }}</span>
+          </div>
+        </div>
+        <button mat-raised-button color="accent" class="checkout-button" (click)="viewCart()">
+          <mat-icon>payment</mat-icon>
+          Checkout
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

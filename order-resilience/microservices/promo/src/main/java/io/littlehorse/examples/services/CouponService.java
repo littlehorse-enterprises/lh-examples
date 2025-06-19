@@ -37,10 +37,11 @@ public class CouponService {
     }
 
     @Transactional
-    public void generateCoupon(Long clientId, Long productId, String productName) {
+    public Coupon generateCoupon(Long clientId, Long productId, String productName) {
         Coupon existingCoupon = couponRepository.findByClientIdAndProductId(clientId, productId);
         if (existingCoupon != null) {
-            throw new CouponAlreadyCreatedException("Coupon already exists for clientId: " + clientId + " and productId: " + productId);
+            System.out.println("Coupon already exists: " + existingCoupon.getCode());
+            return existingCoupon;
         }
         var code = "COUPON-" + clientId + "-" + productId + "-" + productName;
         var discountPercentage = (new Random().nextInt(7) + 1) * 10; // Random discount percentage between 10 and 70
@@ -52,7 +53,7 @@ public class CouponService {
                 .discountPercentage(discountPercentage) // Default discount percentage
                 .redeemed(false)
                 .build();
-        couponRepository.persist(coupon);
+        return coupon;
     }
 
     @Transactional

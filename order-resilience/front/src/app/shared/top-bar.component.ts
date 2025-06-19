@@ -33,7 +33,6 @@ import { ProductService } from '../services/product.service';
 export class TopBarComponent implements OnInit {
 
 
-    dialog = inject(MatDialog);
     shopService = inject(ShopService);
     productService = inject(ProductService);
     userService = inject(UserService);
@@ -49,22 +48,7 @@ export class TopBarComponent implements OnInit {
     }
 
     viewCart(): void {
-
-        const dialogRef = this.dialog.open(CartDialogComponent, {
-            width: '900px',
-            disableClose: true,
-            data: {
-                products: this.productService.products(),
-                cartItems: this.shopService.getCart()
-            }
-        });
-
-        dialogRef.afterClosed().subscribe(result => {
-            if (result === 'checkout') {
-                // Redirect to the shop page and trigger checkout
-                this.router.navigate(['/shop'], { queryParams: { checkout: true } });
-            }
-        });
+        this.shopService.viewCart()
     }
 
     goToShop(): void {
