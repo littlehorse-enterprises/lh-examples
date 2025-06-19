@@ -15,12 +15,12 @@
   display: flex;
   flex-direction: row;
   gap: 24px;
-  
+
   .left-column {
     flex: 1;
     max-width: 65%;
   }
-  
+
   .right-column {
     flex: 1;
     max-width: 35%;
@@ -36,13 +36,13 @@
 .quantity-controls {
   display: flex;
   align-items: center;
-  
+
   .quantity {
     min-width: 24px;
     text-align: center;
     font-weight: bold;
   }
-  
+
 }
 
 mat-divider {
@@ -51,17 +51,7 @@ mat-divider {
 
 .discount-section {
   margin-top: 16px;
-  
-  .discount-input {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    
-    mat-form-field {
-      width: 180px;
-    }
-  }
-  
+
   .discount-applied {
     display: flex;
     justify-content: space-between;
@@ -69,7 +59,7 @@ mat-divider {
     padding: 8px 16px;
     background-color: rgba(103, 58, 183, 0.1);
     border-radius: 4px;
-    
+
     .discount-info {
       display: flex;
       align-items: center;
@@ -84,17 +74,17 @@ mat-divider {
 
 .order-summary {
   margin-top: 16px;
-  
+
   .summary-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin: 15px 0;
     font-size: 16px;
-    
+
     &.discount {
       color: #ff4081;
     }
-    
+
     &.total {
       font-weight: bold;
       font-size: 18px;
@@ -105,7 +95,7 @@ mat-divider {
 
 .loading {
   width: 150px;
-  
+
   button {
     width: 100%;
   }
@@ -120,7 +110,7 @@ mat-divider {
 
 .cart-actions {
   margin-top: 16px;
-  
+
   mat-card-content {
     padding: 8px 16px;
   }
@@ -133,6 +123,7 @@ mat-divider {
   justify-content: center;
   padding: 32px;
   text-align: center;
+
   .empty-icon {
     font-size: 64px;
     height: 64px;
@@ -140,7 +131,7 @@ mat-divider {
     margin-bottom: 16px;
     opacity: 0.6;
   }
-  
+
 }
 
 // .shipping-info,
@@ -151,11 +142,11 @@ mat-divider {
 
 .form-row {
   margin-bottom: 16px;
-  
+
   &.two-fields {
     display: flex;
     gap: 16px;
-    
+
     mat-form-field {
       flex: 1;
     }
@@ -176,7 +167,7 @@ mat-divider {
 @media (max-width: 768px) {
   .two-column-layout {
     flex-direction: column;
-    
+
     .left-column,
     .right-column {
       max-width: 100%;
@@ -184,44 +175,77 @@ mat-divider {
   }
 }
 
-.details{
+.details {
   display: flex;
   align-items: center;
-  img{
+
+  img {
     width: 100px;
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
     margin: 10px;
   }
-  .product{
-    margin-left: 20px;
+  .discount-input {
+    display: flex;
+    align-items: center;
+    height: 100%;
     flex-grow: 1;
-    h3{
+
+    mat-form-field {
+      width: 180px;
+      margin-top: 20px;
+    }
+    .apply-discount-button{
+      margin-left: 10px;
+    }
+  }
+
+  .product {
+    margin-left: 20px;
+    flex-grow: .7;
+
+    h3 {
       font-size: 20px;
       font-weight: 500;
     }
-    .description{
+
+    .description {
       font-size: 14px;
       color: #666;
       margin-top: -18px;
     }
-    .quantity-controls{
+
+    .quantity-controls {
       margin-top: -5px;
     }
- 
+
   }
-     .total{
-      display: flex;
-      flex-direction: column;
-      width: 100px;
-      position: relative;
-      button{
-        margin-top: 20px;
-        position: absolute;
-        bottom: -50px;
-        color: #b3b3b3;
-      }
+
+  .total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex-grow: 1;
+
+    button {
+      margin-top: 20px;
+      position: absolute;
+      bottom: -50px;
+      color: #b3b3b3;
     }
-  
+  }
+
+}
+.order-actions{
+  height: 50px;
+  display: flex;
+  align-items: center;
+  .place-order{
+  height: 40px;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: 4px;
+}
 }

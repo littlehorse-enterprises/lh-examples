@@ -39,6 +39,21 @@
                   </button>
                 </div>
               </div>
+               <div class="discount-input center" *ngIf="!item.discountPercentage">
+                  <mat-form-field appearance="outline" class="discount-field">
+                    <mat-label>Discount code</mat-label>
+                    <input matInput [(ngModel)]="item.discountCode" placeholder="Enter code">
+                    <button *ngIf="item.discountCode" matSuffix mat-icon-button aria-label="Clear"
+                      (click)="item.discountCode=''">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                   
+                  </mat-form-field>
+                   <button [disabled]="!item.discountCode"  matMiniFab
+                     (click)="applyDiscountCode(item)" class="apply-discount-button">
+                      <mat-icon>check</mat-icon>
+                    </button>
+                </div>
               <div class="total">
                 <span class="item-price">${{ item.product.unitPrice | currency }}</span>
                 <button mat-icon-button color="warn" (click)="removeItem(item)" matTooltip="Remove item">
@@ -50,23 +65,10 @@
 
 
 
-              <mat-divider *ngIf="item.discountPercentage || item.discountCode"></mat-divider>
+              <mat-divider *ngIf="item.discountPercentage"></mat-divider>
 
               <div class="discount-section" *ngIf="true">
-                <div class="discount-input" *ngIf="!item.discountPercentage">
-                  <mat-form-field appearance="outline" class="discount-field">
-                    <mat-label>Discount code</mat-label>
-                    <input matInput [(ngModel)]="item.discountCode" placeholder="Enter code">
-                    <button *ngIf="item.discountCode" matSuffix mat-icon-button aria-label="Clear"
-                      (click)="item.discountCode=''">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </mat-form-field>
-                  <button mat-flat-button color="accent" [disabled]="!item.discountCode"
-                    (click)="applyDiscountCode(item)">
-                    Apply
-                  </button>
-                </div>
+               
 
                 <div class="discount-applied" *ngIf="item.discountPercentage">
                   <div class="discount-info">
@@ -131,10 +133,6 @@
             <span>Subtotal:</span>
             <span>${{ cart().subtotal | currency }}</span>
           </div>
-          <div class="summary-row">
-            <span>Shipping:</span>
-            <span>$0.00</span>
-          </div>
           <div class="summary-row discount" *ngIf="cart().discount > 0">
             <span>Discount:</span>
             <span>-${{ cart().discount | currency }}</span>
@@ -150,9 +148,9 @@
               @if (isProcessing) {
               <mat-progress-bar mode="indeterminate"></mat-progress-bar>
               } @else {
-              <button mat-raised-button color="primary" class="full-width" [disabled]="cartItems().length === 0"
+              <button  mat-raised-button color="primary" class="full-width place-order" [disabled]="cartItems().length === 0"
                 (click)="placeOrder()">
-                Pay ${{ cart().total | currency }}
+                Pay {{ cart().total | currency }}
               </button> }
             </div>
           </div>
