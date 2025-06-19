@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, Inject, OnInit, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +11,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
-import { Product } from '../../models/product.model';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 import { Cart, CartItem } from '../../models/cart-item.model';
 import { ShopService } from '../../services/shop.service';
 import { OrderLineRequest, OrderRequest } from '../../models/order.model';
@@ -30,6 +31,7 @@ import { TopBarComponent } from '../../shared/top-bar.component';
     imports: [
         CommonModule,
         FormsModule,
+        ReactiveFormsModule,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
@@ -41,13 +43,15 @@ import { TopBarComponent } from '../../shared/top-bar.component';
         MatTooltipModule,
         MatProgressBarModule,
         MatCardModule,
+        MatRadioModule,
+        MatSelectModule,
         TopBarComponent
     ],
-    templateUrl: './cart-dialog.component.html',
-    styleUrls: ['./cart-dialog.component.scss'],
+    templateUrl: './checkout.component.html',
+    styleUrls: ['./checkout.component.scss'],
 
 })
-export class CartDialogComponent implements OnInit {
+export class CheckoutComponent implements OnInit {
     shopService = inject(ShopService);
 
     cartItems: Signal<CartItem[]> = computed(() => this.shopService.cartItems());
@@ -88,7 +92,7 @@ export class CartDialogComponent implements OnInit {
     }
 
     applyDiscountCode(item: CartItem): void {
-
+        this.shopService.setDiscountCode(item.product.productId, item.discountCode || "");
     }
 
     removeDiscount(item: CartItem): void {
@@ -149,7 +153,9 @@ export class CartDialogComponent implements OnInit {
         });
     }
 
-    close(): void {
+    navigateToShopping(): void {
         this.router.navigate(['/shop']);
     }
+
+
 }

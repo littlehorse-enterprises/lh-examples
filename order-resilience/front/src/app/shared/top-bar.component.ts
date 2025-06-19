@@ -10,7 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { UserAccount } from '../models/user-account.model';
-import { CartDialogComponent } from '../shop/cart-dialog/cart-dialog.component';
+import { CheckoutComponent } from '../shop/checkout/checkout.component';
 import { CouponDialogComponent } from './coupon-dialog/coupon-dialog.component';
 import { UserService } from '../services/user.service';
 import { ShopService } from '../services/shop.service';

@@ -4,6 +4,8 @@ import { Product } from '../models/product.model';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ProductService } from './product.service';
+import { CouponService } from './coupon.service';
+import { MessageService } from './message.service';
 
 
 
@@ -13,7 +15,10 @@ import { ProductService } from './product.service';
 export class ShopService {
     dialog = inject(MatDialog);
     productService = inject(ProductService);
-    private router = inject(Router);
+    router = inject(Router);
+    couponService = inject(CouponService);
+    messageService: MessageService = inject(MessageService);
+
     cartItems: WritableSignal<CartItem[]> = signal<CartItem[]>([]);
     itemCount: Signal<number> = computed(() => this.cartItems().reduce((count, item) => count + item.quantity, 0));
 
@@ -99,12 +104,28 @@ export class ShopService {
     }
 
     setDiscountCode(productId: number, code: string): void {
+        if (!code) {
+            return;
+        }
+        const coupon = this.couponService.getCouponByCode(code);
+        if (!coupon) {
+            this.messageService.error(`Coupon with code ${code} does not exist.`);
+            return;
+        }
+        if (coupon.clientId && coupon.clientId !== 1) { // Assuming 1 is the default client ID
+            this.messageService.error(`Coupon with code ${code} is not valid for this client.`);
+            return;
+        }
+        if(coupon.productId && coupon.productId !== productId) {
+            this.messageService.error(`Coupon with code ${code} is not valid for product ID ${productId}.`);
+            return;
+        }
         const newCart = this.cartItems().map(item =>
             item.productId === productId
                 ? {
                     ...item,
                     discountCode: code,
-                    discountPercentage: 0
+                    discountPercentage: coupon.discountPercentage
                 }
                 : item
         );
@@ -131,7 +152,7 @@ export class ShopService {
     getAppliedDiscountCodes(): string[] {
         return this.cartItems()
             .filter(item => item.discountPercentage && item.discountCode)
-            .map(item => item.discountCode!) 
+            .map(item => item.discountCode!)
     }
 
     getCartTotal(products: Product[]): number {
