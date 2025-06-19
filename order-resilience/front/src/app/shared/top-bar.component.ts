@@ -78,6 +78,7 @@ export class TopBarComponent implements OnInit {
   
 
     logout(): void {
+        this.shopService.clearCart();
         this.userService.clearSelectedUser();
         this.router.navigate(['/']);
     }

@@ -3,6 +3,7 @@ export const environment = {
   apiUrls: {
     orders: 'http://localhost:8080/api/orders',
     customers: 'http://localhost:8081/api/customers',
-    products: 'http://localhost:8082/api/products'
+    products: 'http://localhost:8082/api/products',
+    coupons: 'http://localhost:8083/api/coupons',
   }
 };

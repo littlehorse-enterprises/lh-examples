@@ -19,6 +19,7 @@ import { OrderResponse } from '../models/order.model';
 import { Product } from '../models/product.model';
 import { UserService } from '../services/user.service';
 import { ProductService } from '../services/product.service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
     selector: 'app-orders',
@@ -41,15 +42,24 @@ import { ProductService } from '../services/product.service';
         TopBarComponent
     ],
     templateUrl: './orders.component.html',
-    styleUrls: ['./orders.component.scss']
+    styleUrls: ['./orders.component.scss'],
+    animations: [
+        trigger('detailExpand', [
+            state('collapsed', style({ height: '0px', minHeight: '0' })),
+            state('expanded', style({ height: '*' })),
+            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        ]),
+    ],
 })
 export class OrdersComponent {
     orders = computed(() => this.orderService.orders());
     loading = false;
     error = false;
     errorMessage = '';
-    displayedColumns: string[] = ['orderId', 'status', 'total', 'creationDate', 'items', 'actions'];
+    displayedColumns: string[] = ['orderId', 'status', 'total', 'creationDate', 'items'];
+    columnsToDisplayWithExpand = [...this.displayedColumns, 'expand'];
     expandedOrder: OrderResponse | null = null;
+    expandedElement: OrderResponse | null = null;
 
     constructor(
         public orderService: OrderService,
@@ -68,9 +78,12 @@ export class OrdersComponent {
                 }
             }
         });
+        this.orderService.orders$.subscribe({
+            next: (orders) => {
+                this.expandedElement = orders.length > 0 ? orders[0] : null;
+            }
+        });
     }
-
-
 
     loadOrders(userId: number, products: Product[]): void {
         this.orderService.loadOrders(userId, products);
@@ -103,11 +116,15 @@ export class OrdersComponent {
     }
 
     toggleOrderDetails(order: OrderResponse): void {
-        if (this.expandedOrder === order) {
-            this.expandedOrder = null;
-        } else {
-            this.expandedOrder = order;
-        }
+        this.expandedOrder = this.expandedOrder === order ? null : order;
+    }
+
+    toggle(element: OrderResponse): void {
+        this.expandedElement = this.expandedElement === element ? null : element;
+    }
+
+    isExpanded(element: OrderResponse): boolean {
+        return this.expandedElement === element;
     }
 
     goToShop(): void {

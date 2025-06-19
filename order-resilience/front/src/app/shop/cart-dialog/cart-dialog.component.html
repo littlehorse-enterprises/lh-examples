@@ -98,7 +98,7 @@
     @if (isProcessing) {
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     } @else {
-    <button mat-raised-button color="primary" [disabled]="cartItems().length === 0" (click)="checkout()">
+    <button mat-raised-button color="primary" [disabled]="cartItems().length === 0" (click)="placeOrder()">
       Place order
     </button> }
 
