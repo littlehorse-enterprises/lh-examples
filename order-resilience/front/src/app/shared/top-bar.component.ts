@@ -7,15 +7,14 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { UserAccount } from '../models/user-account.model';
-import { CheckoutComponent } from '../shop/checkout/checkout.component';
 import { CouponDialogComponent } from './coupon-dialog/coupon-dialog.component';
 import { UserService } from '../services/user.service';
 import { ShopService } from '../services/shop.service';
 import { ProductService } from '../services/product.service';
 import { CouponService } from '../services/coupon.service';
+import { MessageService } from '../services/message.service';
 
 @Component({
     selector: 'app-top-bar',
@@ -29,7 +28,6 @@ import { CouponService } from '../services/coupon.service';
         MatDialogModule,
         MatMenuModule,
         MatDividerModule,
-        MatSnackBarModule,
     ],
     templateUrl: './top-bar.component.html',
     styleUrls: ['./top-bar.component.scss']
@@ -47,7 +45,7 @@ export class TopBarComponent implements OnInit {
     constructor(
         private router: Router,
         private dialog: MatDialog,
-        private snackBar: MatSnackBar
+        private messageService: MessageService
     ) { }
 
     ngOnInit(): void {

@@ -11,8 +11,7 @@ export class MessageService {
     this.snackBar.open(message, 'Cerrar', {
       duration,
       panelClass: ['success-snackbar'],
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom'
+   
     });
   }
 
@@ -20,8 +19,7 @@ export class MessageService {
     this.snackBar.open(message, 'Cerrar', {
       duration,
       panelClass: ['error-snackbar'],
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom'
+   
     });
   }
 
@@ -29,8 +27,7 @@ export class MessageService {
     this.snackBar.open(message, 'Cerrar', {
       duration,
       panelClass: ['info-snackbar'],
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom'
+   
     });
   }
 
@@ -38,8 +35,7 @@ export class MessageService {
     this.snackBar.open(message, 'Cerrar', {
       duration,
       panelClass: ['warning-snackbar'],
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom'
+   
     });
   }
 }

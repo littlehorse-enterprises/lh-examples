@@ -9,7 +9,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TopBarComponent } from '../shared/top-bar.component';
 import { ProductService } from '../services/product.service';
 import { ShopService } from '../services/shop.service';
@@ -28,7 +27,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     MatProgressSpinnerModule,
     MatChipsModule,
     MatDividerModule,
-    MatSnackBarModule,
     MatProgressBarModule,
     TopBarComponent
   ],

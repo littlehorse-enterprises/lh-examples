@@ -12,7 +12,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TopBarComponent } from '../shared/top-bar.component';
 import { OrderService } from '../services/order.service';
 import { OrderResponse } from '../models/order.model';
@@ -38,7 +37,6 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
         MatExpansionModule,
         MatDividerModule,
         MatBadgeModule,
-        MatSnackBarModule,
         TopBarComponent
     ],
     templateUrl: './orders.component.html',

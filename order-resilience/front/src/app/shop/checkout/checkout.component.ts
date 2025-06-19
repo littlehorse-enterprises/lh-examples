@@ -18,11 +18,13 @@ import { ShopService } from '../../services/shop.service';
 import { OrderLineRequest, OrderRequest } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { UserService } from '../../services/user.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProductService } from '../../services/product.service';
 import { TopBarComponent } from '../../shared/top-bar.component';
+import { MessageService } from '../../services/message.service';
+// Import StockException if it exists in your project
+import { StockException } from '../../models/exception.model';
 
 
 @Component({
@@ -69,7 +71,7 @@ export class CheckoutComponent implements OnInit {
         private orderService: OrderService,
         private userService: UserService,
         private productService: ProductService,
-        private snackBar: MatSnackBar,
+        private messageService: MessageService,
         private router: Router
     ) {
     }
@@ -131,11 +133,7 @@ export class CheckoutComponent implements OnInit {
 
                 this.orderSuccess = true;
 
-                this.snackBar.open('Order placed successfully! ID: ' + order.orderId, 'View Orders', {
-                    duration: 5000
-                }).onAction().subscribe(() => {
-                    this.router.navigate(['/orders']);
-                });
+                this.messageService.success('Order placed successfully! with ID: ' + order.orderId);
 
                 setTimeout(() => {
                     this.shopService.clearCart();
@@ -143,12 +141,18 @@ export class CheckoutComponent implements OnInit {
                     this.router.navigate(['/orders']);
                 }, 500);
             },
-            error: (err) => {
-                console.error('Error placing order:', err);
+            error: (error) => {
+                console.error('Error placing order:', error);
+                if (error.error) {
+                    if (error.error.message) {
+                        this.messageService.error(error.error.message);
+                    } else {
+                        this.messageService.error(error.error);
+                    }
+                } else {
+                    this.messageService.error('Failed to place order. Please try again.');
+                }
                 this.isProcessing = false;
-                this.snackBar.open('Failed to place order. Please try again.', 'Close', {
-                    duration: 5000
-                });
             }
         });
     }

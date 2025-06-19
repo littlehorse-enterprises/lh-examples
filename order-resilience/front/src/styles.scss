@@ -16,7 +16,11 @@ html {
   @include mat.theme((color: mat.$violet-palette,
       typography: Roboto,
       density: 0));
+  @include mat.snack-bar-overrides((button-color: rgb(200, 200, 198),
+      supporting-text-color: white,
+    ));
 }
+
 /* Dark mode specific overrides */
 .mat-mdc-raised-button.mat-primary {
   background-color: var(--mat-sys-primary);
@@ -31,19 +35,17 @@ html {
 
 // Snackbar styles
 .success-snackbar {
-  --mdc-snackbar-container-color: #4caf50;
+  --mat-sys-inverse-surface: #4caf50;
 }
 
 .error-snackbar {
-  --mdc-snackbar-container-color: #f44336;
+  --mat-sys-inverse-surface: #f44336b6;
 }
 
 .info-snackbar {
-  --mdc-snackbar-container-color: #2196f3;
+  --mat-sys-inverse-surface: #2196f3;
 }
 
 .warning-snackbar {
-  --mdc-snackbar-container-color: #ff9800;
-  --mat-sys-inverse-primary: white;
-  --mat-sys-inverse-surface: #f5f5f5;
+  --mat-sys-inverse-surface: #ff9800;
 }
