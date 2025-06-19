@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, Inject, OnInit, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -134,7 +134,7 @@ export class CartDialogComponent implements OnInit {
                 }).onAction().subscribe(() => {
                     this.router.navigate(['/orders']);
                 });
-                
+
                 setTimeout(() => {
                     this.shopService.clearCart();
                     this.dialogRef.close();

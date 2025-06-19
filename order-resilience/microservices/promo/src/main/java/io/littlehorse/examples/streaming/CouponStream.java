@@ -46,7 +46,6 @@ public class CouponStream {
                     long clientId = Long.parseLong(record.key().split(":")[0]); // Example logic to derive clientId
                     long productId = Long.parseLong(record.key().split(":")[1]);
                     String productName = record.key().split(":")[2];
-                    System.out.println("Creating coupon for clientId: " + clientId + ", productId: " + productId + ", productName: " + productName);
                     couponService.runGenerateCouponWorkflow(clientId,productId,productName);
                 }
             }

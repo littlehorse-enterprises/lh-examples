@@ -35,6 +35,45 @@
   margin-right: 10px;
 }
 
+.notification-button {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #f44336;
+    animation: pulse 1.5s infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:has(.mat-badge-active) {
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+}
+
 .username {
   margin-left: 10px;
   max-width: 120px;

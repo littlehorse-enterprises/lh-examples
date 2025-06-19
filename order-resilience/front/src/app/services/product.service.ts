@@ -12,7 +12,6 @@ export class ProductService {
   products: WritableSignal<Product[]> = signal<Product[]>([]);
 
   constructor(private http: HttpClient) { 
-    this.loadProducts();
   }
 
 

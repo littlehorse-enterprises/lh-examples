@@ -52,6 +52,7 @@ export class ShopComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.productService.loadProducts();
 
   }
 

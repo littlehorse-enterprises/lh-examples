@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Your Coupons</h2>
+<mat-dialog-content class="coupon-dialog-content">
+  <div *ngIf="data.coupons.length === 0" class="no-coupons">
+    <mat-icon class="no-coupon-icon">local_offer</mat-icon>
+    <p>No coupons available</p>
+  </div>
+  
+  <mat-list *ngIf="data.coupons.length > 0">
+    <mat-list-item *ngFor="let coupon of data.coupons" class="coupon-item">
+      <div class="coupon-content">
+        <div class="coupon-header">
+          <mat-icon class="discount-icon">local_offer</mat-icon>
+          <div class="coupon-discount">{{ coupon.discountPercentage }}% OFF</div>
+          <div class="coupon-status" *ngIf="coupon.redeemed">USED</div>
+        </div>
+        
+        <div class="coupon-description">{{ coupon.description }}</div>
+        
+        <div class="coupon-code-container">
+          <div class="coupon-code">{{ coupon.code }}</div>
+          <button mat-icon-button matTooltip="Copy code" (click)="copyCouponCode(coupon.code)">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-list-item>
+  </mat-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="closeDialog()">Close</button>
+</mat-dialog-actions>

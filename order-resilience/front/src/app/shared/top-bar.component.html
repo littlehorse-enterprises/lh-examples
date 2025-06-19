@@ -15,6 +15,14 @@
       (click)="viewCart()" class="cart-button">
       <mat-icon>shopping_basket</mat-icon>
     </button>
+    
+    <button mat-icon-button [matBadge]="couponService.couponCount()" 
+      [matBadgeHidden]="couponService.couponCount() === 0" 
+      matBadgeColor="warn"
+      (click)="showCouponsDialog()" 
+      class="notification-button">
+      <mat-icon>notifications</mat-icon>
+    </button>
 
     <div *ngIf="selectedUser" class="user-info" [matMenuTriggerFor]="userMenu">
       <span class="username">{{ selectedUser().name }}</span>
@@ -26,7 +34,6 @@
       </button>
     </mat-menu>
     </div>
-
     
   </div>
 </mat-toolbar>

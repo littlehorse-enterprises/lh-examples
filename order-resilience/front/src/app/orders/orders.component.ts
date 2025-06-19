@@ -51,7 +51,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
         ]),
     ],
 })
-export class OrdersComponent {
+export class OrdersComponent implements OnInit {
     orders = computed(() => this.orderService.orders());
     loading = false;
     error = false;
@@ -84,6 +84,12 @@ export class OrdersComponent {
             }
         });
     }
+    ngOnInit(): void {
+        if (!this.productService.products() || this.productService.products().length === 0) {
+            this.productService.loadProducts();
+        }
+    }
+
 
     loadOrders(userId: number, products: Product[]): void {
         this.orderService.loadOrders(userId, products);
