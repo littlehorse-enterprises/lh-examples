@@ -1,6 +1,6 @@
 import { computed, Injectable, Signal, signal, WritableSignal, effect } from '@angular/core';
+import { Cart, CartItem } from '../models/cart-item.model';
 import { Product } from '../models/product.model';
-import { Cart, CartItem } from '../../models/cart-item.model';
 
 
 

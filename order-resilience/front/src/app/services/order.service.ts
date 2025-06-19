@@ -2,9 +2,7 @@ import { Inject, Injectable, signal, WritableSignal, ɵunwrapWritableSignal } fr
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OrderRequest, OrderResponse } from '../models/order.model';
-import { environment } from '../../../environments/environment';
-import { UserService } from '../../shared/user.service';
-import { ProductService } from './product.service';
+import { environment } from '../../environments/environment';
 import { Product } from '../models/product.model';
 
 @Injectable({
@@ -12,8 +10,9 @@ import { Product } from '../models/product.model';
 })
 export class OrderService {
 
-    private baseUrl = environment.apiUrls.orders || '/api/orders';
     orders: WritableSignal<OrderResponse[]> = signal<OrderResponse[]>([]);
+
+    private baseUrl = environment.apiUrls.orders || '/api/orders';
 
     constructor(private http: HttpClient) { }
 
@@ -25,8 +24,6 @@ export class OrderService {
         return this.http.get<OrderResponse[]>(`${this.baseUrl}/client/${clientId}`);
     }
     loadOrders(clientId: number, products: Product[]): void {
-        // await this.productService.loadProducts(); // Ensure products are loaded before fetching orders
-        // const user = this.userService.user();
         this.getOrdersByClientId(clientId).subscribe({
             next: (data) => {
                 data.forEach(order => {

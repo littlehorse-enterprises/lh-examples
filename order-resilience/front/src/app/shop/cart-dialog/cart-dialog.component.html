@@ -12,46 +12,46 @@
       <div class="item-image">
         <img [src]="'/assets/images/products/' + item.product.productId + '.png'" [alt]="item.product.name">
       </div>
-      
+
       <div class="item-details">
         <div class="item-header">
           <h3>{{ item.product.name }}</h3>
           <span class="item-category">{{ item.product.category }}</span>
         </div>
-        
+
         <p class="item-description">{{ item.product.description }}</p>
-        
+
         <div class="item-price">
           <span class="price">${{ item.product.unitPrice.toFixed(2) }}</span>
           <span class="item-total">${{ (item.product.unitPrice * item.quantity).toFixed(2) }}</span>
         </div>
-        
+
         <div class="item-controls">
           <div class="quantity-controls">
             <button mat-icon-button color="primary" (click)="decreaseQuantity(item)" [disabled]="item.quantity <= 1">
               <mat-icon>remove</mat-icon>
             </button>
             <span class="quantity">{{ item.quantity }}</span>
-            <button mat-icon-button color="primary" (click)="increaseQuantity(item)" 
-                   [disabled]="item.quantity >= item.product.quantity">
+            <button mat-icon-button color="primary" (click)="increaseQuantity(item)"
+              [disabled]="item.quantity >= item.product.quantity">
               <mat-icon>add</mat-icon>
             </button>
           </div>
-          
+
           <button mat-icon-button color="warn" (click)="removeItem(item)" matTooltip="Remove item">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
-        
+
         <mat-divider></mat-divider>
-        
+
         <div class="discount-section">
           <div class="discount-input" *ngIf="!item.discountPercentage">
             <mat-form-field appearance="outline">
               <mat-label>Discount code</mat-label>
               <input matInput [(ngModel)]="item.discountCode">
               <button *ngIf="item.discountCode" matSuffix mat-icon-button aria-label="Clear"
-                     (click)="item.discountCode=''">
+                (click)="item.discountCode=''">
                 <mat-icon>close</mat-icon>
               </button>
             </mat-form-field>
@@ -59,7 +59,7 @@
               Apply
             </button>
           </div>
-          
+
           <div class="discount-applied" *ngIf="item.discountPercentage">
             <div class="discount-info">
               <mat-icon color="accent">local_offer</mat-icon>
@@ -73,7 +73,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="order-summary" *ngIf="cartItems().length > 0">
     <h3>Order Summary</h3>
     <div class="summary-row">
@@ -92,9 +92,15 @@
   </div>
 </mat-dialog-content>
 
-<mat-dialog-actions >
-  <button mat-button (click)="close()">Cancel</button>
-  <button mat-raised-button color="primary" [disabled]="cartItems().length === 0" (click)="checkout()">
-    Proceed to Checkout
-  </button>
+<mat-dialog-actions>
+  <button mat-button (click)="close()" [disabled]="isProcessing">Cancel</button>
+  <div class="loading center">
+    @if (isProcessing) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    } @else {
+    <button mat-raised-button color="primary" [disabled]="cartItems().length === 0" (click)="checkout()">
+      Place order
+    </button> }
+
+  </div>
 </mat-dialog-actions>

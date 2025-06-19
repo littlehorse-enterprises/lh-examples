@@ -46,8 +46,7 @@ public class ProductController {
     @Path("/stock")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addStock(ProductStockItem productItem) throws JsonProcessingException {
-        productService.addStock(productItem);
-        return Response.ok().build();
-
+        var productResponse = productService.addStock(productItem);
+        return Response.ok(productResponse).build();
     }
 }

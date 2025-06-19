@@ -1,5 +1,5 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
-import { UserAccount } from '../account-select/user-account.model';
+import { UserAccount } from '../models/user-account.model';
 
 @Injectable({
     providedIn: 'root'

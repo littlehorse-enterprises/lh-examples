@@ -14,11 +14,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TopBarComponent } from '../shared/top-bar.component';
-import { OrderService } from '../shop/services/order.service';
-import { UserService } from '../shared/user.service';
-import { OrderResponse } from '../shop/models/order.model';
-import { ProductService } from '../shop/services/product.service';
-import { Product } from '../shop/models/product.model';
+import { OrderService } from '../services/order.service';
+import { OrderResponse } from '../models/order.model';
+import { Product } from '../models/product.model';
+import { UserService } from '../services/user.service';
+import { ProductService } from '../services/product.service';
 
 @Component({
     selector: 'app-orders',
@@ -57,10 +57,11 @@ export class OrdersComponent {
         private productService: ProductService,
         private router: Router
     ) {
+        // productService.loadProducts();
         effect(() => {
-            console.log('userService.user() changed:', this.userService.user());
             const user = this.userService.user();
             const products = this.productService.products();
+            console.log('userService.user() changed:', this.userService.user());
             if (user && products && products.length > 0) {
                 if (!this.orderService.orders() || this.orderService.orders().length === 0) {
                     this.loadOrders(user.id, products);

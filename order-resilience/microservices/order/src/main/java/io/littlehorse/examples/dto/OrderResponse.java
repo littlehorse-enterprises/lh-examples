@@ -1,5 +1,8 @@
 package io.littlehorse.examples.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.littlehorse.examples.deserializer.CustomDateDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +21,8 @@ public class OrderResponse {
     private String status = "PENDING";
     private List<OrderLineResponse> orderLines;
     private List<String> discountCodes;
+
+    @JsonDeserialize(using = CustomDateDeserializer.class)
     private Date creationDate;
 
     @Data

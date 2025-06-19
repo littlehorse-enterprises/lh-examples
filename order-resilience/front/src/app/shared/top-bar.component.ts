@@ -8,11 +8,11 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { Router } from '@angular/router';
-import { UserService } from '../shared/user.service';
-import { UserAccount } from '../account-select/user-account.model';
+import { UserAccount } from '../models/user-account.model';
 import { CartDialogComponent } from '../shop/cart-dialog/cart-dialog.component';
-import { ShopService } from '../shop/services/shop.service';
-import { ProductService } from '../shop/services/product.service';
+import { UserService } from '../services/user.service';
+import { ShopService } from '../services/shop.service';
+import { ProductService } from '../services/product.service';
 
 @Component({
     selector: 'app-top-bar',
@@ -52,6 +52,7 @@ export class TopBarComponent implements OnInit {
 
         const dialogRef = this.dialog.open(CartDialogComponent, {
             width: '900px',
+            disableClose: true,
             data: {
                 products: this.productService.products(),
                 cartItems: this.shopService.getCart()

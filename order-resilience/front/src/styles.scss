@@ -12,3 +12,10 @@ html {
     density: 0
   ));
 }
+
+.center{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}

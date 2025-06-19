@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AccountService } from './account.service';
-import { UserAccount } from './user-account.model';
+import { UserAccount } from '../models/user-account.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { UserService } from '../shared/user.service';
+import { AccountService } from '../services/account.service';
+import { UserService } from '../services/user.service';
 
 @Component({
     selector: 'app-account-select',

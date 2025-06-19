@@ -41,14 +41,14 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductStockItem addStock(ProductStockItem item) {
+    public ProductResponse addStock(ProductStockItem item) {
         Product product = repository.findById(item.getProductId());
         if (product == null) {
             return null; // or throw an exception
         }
         product.setQuantity(product.getQuantity() + item.getQuantity());
         repository.persist(product);
-        return item;
+        return productMapper.toResponse(product);
     }
 
     @Transactional

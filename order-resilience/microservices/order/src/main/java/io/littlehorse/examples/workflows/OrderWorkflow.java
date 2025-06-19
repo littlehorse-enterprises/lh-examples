@@ -34,7 +34,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         var customerResponse = wf.execute(VALIDATE_CUSTOMER, order.jsonPath("$.clientId"));
         wf.handleException(customerResponse, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELED", content);
+            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
             shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
         });
@@ -45,7 +45,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         var coupons = wf.execute(GET_COUPONS_BY_CODES, clientId, order.jsonPath("$.discountCodes"));
         wf.handleException(coupons, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELED", content);
+            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
             shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
         });
@@ -56,7 +56,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         var productsWithDiscounts = wf.execute(APPLY_DISCOUNTS, clientId, order.jsonPath("$.orderLines"), coupons);
         wf.handleException(productsWithDiscounts, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELED", content);
+            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
             shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
         });
@@ -67,7 +67,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         var productNode = wf.execute(REDUCE_STOCK, clientId, order.jsonPath("$.orderLines"));
         wf.handleException(productNode, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELED", content);
+            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
             shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
         });
@@ -78,7 +78,7 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         var redeemedCoupons = wf.execute(REDEEM_COUPONS, clientId, order.jsonPath("$.discountCodes"));
         wf.handleException(redeemedCoupons, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
-            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELED", content);
+            var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
             shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
         });
