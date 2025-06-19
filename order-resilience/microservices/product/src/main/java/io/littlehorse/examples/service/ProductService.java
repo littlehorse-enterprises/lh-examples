@@ -88,10 +88,13 @@ public class ProductService {
 
         // Throw exception if any products have insufficient stock
         if (!insufficientStockProducts.isEmpty()) {
+            var productNames = insufficientStockProducts.stream()
+                    .map(ProductResponse::getName)
+                    .collect(Collectors.joining(", "));
             ProductError productError = ProductError.builder()
                     .clientId(clientId)
                     .products(insufficientStockProducts)
-                    .message("Insufficient stock for products")
+                    .message("Insufficient stock for products: " + productNames)
                     .build();
             throw new InsufficientStockException(objectMapper.writeValueAsString(productError));
         }

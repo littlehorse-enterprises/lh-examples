@@ -1,8 +1,8 @@
 import { computed, Injectable, Signal, signal, WritableSignal, effect, inject } from '@angular/core';
 import { Cart, CartItem } from '../models/cart-item.model';
 import { Product } from '../models/product.model';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { CartDialogComponent } from '../shop/cart-dialog/cart-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { ProductService } from './product.service';
 
 
@@ -13,6 +13,7 @@ import { ProductService } from './product.service';
 export class ShopService {
     dialog = inject(MatDialog);
     productService = inject(ProductService);
+    private router = inject(Router);
     cartItems: WritableSignal<CartItem[]> = signal<CartItem[]>([]);
     itemCount: Signal<number> = computed(() => this.cartItems().reduce((count, item) => count + item.quantity, 0));
 
@@ -130,7 +131,7 @@ export class ShopService {
     getAppliedDiscountCodes(): string[] {
         return this.cartItems()
             .filter(item => item.discountPercentage && item.discountCode)
-            .map(item => item.discountCode!) // `!` porque ya filtramos los falsy
+            .map(item => item.discountCode!) 
     }
 
     getCartTotal(products: Product[]): number {
@@ -155,14 +156,7 @@ export class ShopService {
     getFinalTotal(products: Product[]): number {
         return this.getCartTotal(products) - this.getDiscountAmount(products);
     }
-    viewCart(): MatDialogRef<CartDialogComponent> {
-        return this.dialog.open(CartDialogComponent, {
-            width: '900px',
-            disableClose: true,
-            data: {
-                products: this.productService.products(),
-                cartItems: this.getCart()
-            }
-        });
+    viewCart(): void {
+        this.router.navigate(['/checkout']);
     }
 }

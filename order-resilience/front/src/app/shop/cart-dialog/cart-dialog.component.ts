@@ -10,6 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
 import { Product } from '../../models/product.model';
 import { Cart, CartItem } from '../../models/cart-item.model';
 import { ShopService } from '../../services/shop.service';
@@ -20,11 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProductService } from '../../services/product.service';
-
-export interface CartDialogData {
-    products: Product[];
-    cartItems: CartItem[];
-}
+import { TopBarComponent } from '../../shared/top-bar.component';
 
 
 @Component({
@@ -42,7 +39,9 @@ export interface CartDialogData {
         MatListModule,
         MatExpansionModule,
         MatTooltipModule,
-        MatProgressBarModule
+        MatProgressBarModule,
+        MatCardModule,
+        TopBarComponent
     ],
     templateUrl: './cart-dialog.component.html',
     styleUrls: ['./cart-dialog.component.scss'],
@@ -63,7 +62,6 @@ export class CartDialogComponent implements OnInit {
 
 
     constructor(
-        public dialogRef: MatDialogRef<CartDialogComponent>,
         private orderService: OrderService,
         private userService: UserService,
         private productService: ProductService,
@@ -137,7 +135,7 @@ export class CartDialogComponent implements OnInit {
 
                 setTimeout(() => {
                     this.shopService.clearCart();
-                    this.dialogRef.close();
+                    // this.dialogRef.close();
                     this.router.navigate(['/orders']);
                 }, 500);
             },
@@ -152,6 +150,6 @@ export class CartDialogComponent implements OnInit {
     }
 
     close(): void {
-        this.dialogRef.close();
+        this.router.navigate(['/shop']);
     }
 }
