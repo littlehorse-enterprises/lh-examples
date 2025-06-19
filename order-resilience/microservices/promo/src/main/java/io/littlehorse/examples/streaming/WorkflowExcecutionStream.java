@@ -33,7 +33,9 @@ public class WorkflowExcecutionStream {
     ObjectMapper mapper;
 
     @PostConstruct
-    public void start() {
+    public void start() throws InterruptedException {
+        // Wait for the output topic creation
+        Thread.sleep(5000);
         System.out.println("✅ Starting Kafka Streams app...");
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "coupon-stream-app");

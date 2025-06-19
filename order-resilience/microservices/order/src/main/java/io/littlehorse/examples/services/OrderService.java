@@ -19,10 +19,8 @@ import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.*;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 
-import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
 
@@ -37,26 +35,16 @@ public class OrderService {
 
     private static final Logger LOG = Logger.getLogger(OrderService.class);
 
-
     OrderService(OrderRepository orderRepository, OrderMapper orderMapper, LittleHorseFutureStub littleHorseFutureStub) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.futureStub = littleHorseFutureStub;
     }
 
-    void onStart(@Observes StartupEvent ev) {
-        LOG.info("Enabling output topic");
-        this.futureStub.putTenant(PutTenantRequest.newBuilder().setId("default").setOutputTopicConfig(OutputTopicConfig.newBuilder()).build());
-    }
-
     @Transactional
     public Order createOrder(OrderRequest request) {
         Order order = orderMapper.toEntity(request);
-        // Ensure status is set
-        if (order.getStatus() == null) {
-            order.setStatus("PENDING");
-        }
-
+        order.setStatus("PENDING");
         orderRepository.persist(order);
         return order;
     }
@@ -81,15 +69,12 @@ public class OrderService {
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, String newStatus, String message) {
         Order order = orderRepository.findById(orderId);
-
         if (order == null) {
             return null;
         }
-
         order.setStatus(newStatus);
         order.setMessage(message);
         orderRepository.persist(order);
-
         return orderMapper.toResponse(order);
     }
 
@@ -99,7 +84,6 @@ public class OrderService {
         if (order == null) {
             return null;
         }
-        // Apply discounts to order
         double total = 0.0;
         for (var orderLine : order.getOrderLines()) {
             var productPrice = Arrays.stream(productPrices)

@@ -30,13 +30,14 @@ public class CouponStream {
     String topicName = WorkflowExcecutionStream.OUTPUT_TOPIC_NAME;
 
     @PostConstruct
-    public void init() {
+    public void init() throws InterruptedException {
+        // Wait for the output topic creation
+        Thread.sleep(5000);
         System.out.println("Starting Kafka Consumer...");
         Properties props = getProperties();
 
         consumer = new KafkaConsumer<>(props);
         consumer.subscribe(List.of(topicName));
-
         consumerThread = new Thread(() -> {
             while (running) {
                 ConsumerRecords<String, Long> records = consumer.poll(Duration.ofMillis(500));

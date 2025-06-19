@@ -152,10 +152,7 @@ export class CartDialogComponent implements OnInit {
                 });
                 this.dialogRef.close();
 
-                // Redirect to orders page after a brief delay
-                setTimeout(() => {
-                    this.router.navigate(['/orders']);
-                }, 2000);
+                this.router.navigate(['/orders']);
             },
             error: (err) => {
                 console.error('Error placing order:', err);

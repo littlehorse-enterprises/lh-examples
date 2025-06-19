@@ -5,18 +5,21 @@ import io.littlehorse.examples.exception.CouponAlreadyRedeemedException;
 import io.littlehorse.examples.model.Coupon;
 import io.littlehorse.examples.workflows.CouponWorkflow;
 import io.littlehorse.sdk.common.LHLibUtil;
+import io.littlehorse.sdk.common.proto.OutputTopicConfig;
+import io.littlehorse.sdk.common.proto.PutTenantRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import io.littlehorse.examples.repositories.CouponRepository;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import jakarta.annotation.PostConstruct;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+
+import java.util.*;
 
 @ApplicationScoped
+@Startup
 public class CouponService {
     CouponRepository couponRepository;
 
@@ -27,6 +30,12 @@ public class CouponService {
         this.blockingStub = blockingStub;
     }
 
+    @PostConstruct
+    void enableOutputTopic() {
+        System.out.println("Enabling output topic for default tenant");
+        this.blockingStub.putTenant(PutTenantRequest.newBuilder().setId("default").setOutputTopicConfig(OutputTopicConfig.newBuilder()).build());
+    }
+
     @Transactional
     public void generateCoupon(Long clientId, Long productId, String productName) {
         Coupon existingCoupon = couponRepository.findByClientIdAndProductId(clientId, productId);
@@ -34,12 +43,13 @@ public class CouponService {
             throw new CouponAlreadyCreatedException("Coupon already exists for clientId: " + clientId + " and productId: " + productId);
         }
         var code = "COUPON-" + clientId + "-" + productId + "-" + productName;
+        var discountPercentage = (new Random().nextInt(7) + 1) * 10; // Random discount percentage between 10 and 70
         Coupon coupon = Coupon.builder()
                 .clientId(clientId)
                 .productId(productId)
                 .code(code.toUpperCase())
-                .description("Coupon for " + productName + " with a discount of 20% , you can use it in the next order :)")
-                .discountPercentage(20) // Default discount percentage
+                .description("Coupon for " + productName + " with a discount of " + discountPercentage + "% , you can use it in the next order :)")
+                .discountPercentage(discountPercentage) // Default discount percentage
                 .redeemed(false)
                 .build();
         couponRepository.persist(coupon);

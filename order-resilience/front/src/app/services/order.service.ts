@@ -26,7 +26,8 @@ export class OrderService {
     loadOrders(clientId: number, products: Product[]): void {
         this.getOrdersByClientId(clientId).subscribe({
             next: (data) => {
-                data.forEach(order => {
+                data.sort((a, b) => b.orderId - a.orderId).forEach(order => {
+
                     order.orderLines.forEach(line => {
                         const product = products.find(p => p.productId === line.productId);
                         if (product) {
