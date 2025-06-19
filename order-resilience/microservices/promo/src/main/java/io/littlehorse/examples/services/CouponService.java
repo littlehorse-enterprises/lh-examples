@@ -54,6 +54,7 @@ public class CouponService {
                 .discountPercentage(discountPercentage) // Default discount percentage
                 .redeemed(false)
                 .build();
+        couponRepository.persist(coupon);
         return coupon;
     }
 
