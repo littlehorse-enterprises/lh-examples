@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ProductService } from './product.service';
 import { CouponService } from './coupon.service';
 import { MessageService } from './message.service';
+import { UserService } from './user.service';
 
 
 
@@ -18,6 +19,7 @@ export class ShopService {
     router = inject(Router);
     couponService = inject(CouponService);
     messageService: MessageService = inject(MessageService);
+    userService = inject(UserService);
 
     cartItems: WritableSignal<CartItem[]> = signal<CartItem[]>([]);
     itemCount: Signal<number> = computed(() => this.cartItems().reduce((count, item) => count + item.quantity, 0));
@@ -112,11 +114,11 @@ export class ShopService {
             this.messageService.error(`Coupon with code ${code} does not exist.`);
             return;
         }
-        if (coupon.clientId && coupon.clientId !== 1) { // Assuming 1 is the default client ID
+        if (coupon.clientId && coupon.clientId !== this.userService.user()?.id) { 
             this.messageService.error(`Coupon with code ${code} is not valid for this client.`);
             return;
         }
-        if(coupon.productId && coupon.productId !== productId) {
+        if (coupon.productId && coupon.productId !== productId) {
             this.messageService.error(`Coupon with code ${code} is not valid for product ID ${productId}.`);
             return;
         }

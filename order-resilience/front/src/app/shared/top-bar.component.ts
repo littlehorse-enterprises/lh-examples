@@ -7,7 +7,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { UserAccount } from '../models/user-account.model';
 import { CouponDialogComponent } from './coupon-dialog/coupon-dialog.component';
 import { UserService } from '../services/user.service';
@@ -28,6 +28,7 @@ import { MessageService } from '../services/message.service';
         MatDialogModule,
         MatMenuModule,
         MatDividerModule,
+        RouterModule
     ],
     templateUrl: './top-bar.component.html',
     styleUrls: ['./top-bar.component.scss']

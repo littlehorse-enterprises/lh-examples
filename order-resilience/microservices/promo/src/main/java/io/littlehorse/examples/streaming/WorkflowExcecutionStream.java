@@ -44,7 +44,6 @@ public class WorkflowExcecutionStream {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.Integer().getClass().getName());
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10000); // 4 seconds
 
-
         StreamsBuilder builder = new StreamsBuilder();
 
         KStream<String, OutputTopicRecord> stream = builder.stream(

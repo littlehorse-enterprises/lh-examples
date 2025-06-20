@@ -30,12 +30,17 @@ export class CouponService {
         this.getCouponsByClientId(clientId).subscribe({
             next: (data) => {
                 // Compare with stored coupons to avoid duplicates
+                if (data.length === 0) {
+                    this.coupons.set([]);
+                    this.storeCoupons([]);
+                    return;
+                }
                 const storedCoupons = this.getStoredCoupons();
                 const newCoupons = data.filter(coupon => !storedCoupons.some(stored => stored.code === coupon.code));
                 if (newCoupons.length > 0) {
                     this.coupons.set(newCoupons);
-                    this.storeCoupons(data);
                 }
+                this.storeCoupons(data);
             },
             error: (error) => {
                 console.error('Error loading coupons', error);

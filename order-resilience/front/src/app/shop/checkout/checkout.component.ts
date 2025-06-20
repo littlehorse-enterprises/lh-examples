@@ -133,13 +133,13 @@ export class CheckoutComponent implements OnInit {
 
                 this.orderSuccess = true;
 
-                this.messageService.success('Order placed successfully! with ID: ' + order.orderId);
-
+                
                 setTimeout(() => {
+                    this.messageService.success('Order placed successfully! with ID: ' + order.orderId);
                     this.shopService.clearCart();
                     // this.dialogRef.close();
                     this.router.navigate(['/orders']);
-                }, 500);
+                }, 1000);
             },
             error: (error) => {
                 console.error('Error placing order:', error);

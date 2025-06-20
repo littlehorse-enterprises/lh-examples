@@ -16,7 +16,7 @@ html {
   @include mat.theme((color: mat.$violet-palette,
       typography: Roboto,
       density: 0));
-  @include mat.snack-bar-overrides((button-color: rgb(200, 200, 198),
+  @include mat.snack-bar-overrides((button-color: rgb(255, 255, 255),
       supporting-text-color: white,
     ));
 }

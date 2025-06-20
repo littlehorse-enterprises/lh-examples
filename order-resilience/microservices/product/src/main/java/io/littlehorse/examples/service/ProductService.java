@@ -1,9 +1,6 @@
 package io.littlehorse.examples.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,25 +73,27 @@ public class ProductService {
             Product product = productMap.get(productId);
 
             if (product.getQuantity() < requestedQuantity) {
-                ProductResponse productResponse = ProductResponse.builder()
-                        .productId(productId)
-                        .requestedQuantity(requestedQuantity)
-                        .availableStock(product.getQuantity())
-                        .name(product.getName())
-                        .build();
+                ProductResponse productResponse = productMapper.toResponse(product);
+                productResponse.setAvailableStock(product.getQuantity());
+                productResponse.setRequestedQuantity(requestedQuantity);
                 insufficientStockProducts.add(productResponse);
             }
         }
 
         // Throw exception if any products have insufficient stock
         if (!insufficientStockProducts.isEmpty()) {
-            var productNames = insufficientStockProducts.stream()
-                    .map(ProductResponse::getName)
-                    .collect(Collectors.joining(", "));
+            var errors = insufficientStockProducts.stream()
+                    .map(product -> {
+                        if (product.getCategory().equalsIgnoreCase("food")){
+                            return "Sorry, no engredients for preparing ( " + product.getName() + " ), but you can order it later :)";
+                        } else
+                            return "No stock for ( " + product.getName() + " )";
+                    })
+                    .collect(Collectors.joining("; "));
             ProductError productError = ProductError.builder()
                     .clientId(clientId)
                     .products(insufficientStockProducts)
-                    .message("Insufficient stock for products: " + productNames)
+                    .message(errors)
                     .build();
             throw new InsufficientStockException(objectMapper.writeValueAsString(productError));
         }

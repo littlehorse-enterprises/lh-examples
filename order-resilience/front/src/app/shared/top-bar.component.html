@@ -3,23 +3,20 @@
   <span class="spacer"></span>
 
   <div class="toolbar-icons">
-    <button mat-button (click)="goToShop()">
+    <button mat-button routerLink="/shop" routerLinkActive="active-link">
       Shop
     </button>
-
-    <button mat-button (click)="goToOrders()">
-      Orders
+    <button mat-button routerLink="/orders" routerLinkActive="active-link">
+      My Orders
     </button>
 
-    <button mat-icon-button [matBadge]="cartItemCount()" [matBadgeHidden]="cartItemCount() === 0" matBadgeColor="accent"
-      (click)="viewCart()" class="cart-button">
-      <mat-icon>shopping_basket</mat-icon>
+    <button mat-button [matBadge]="cartItemCount()" [matBadgeHidden]="cartItemCount() === 0" matBadgeColor="accent"
+      routerLink="/checkout" routerLinkActive="active-link">
+      Checkout
     </button>
-    
-    <button mat-icon-button [matBadge]="couponService.couponCount()" 
-      [matBadgeHidden]="couponService.couponCount() === 0" 
-      matBadgeColor="warn"
-      (click)="showCouponsDialog()" 
+
+    <button mat-icon-button [matBadge]="couponService.couponCount()"
+      [matBadgeHidden]="couponService.couponCount() === 0" matBadgeColor="warn" (click)="showCouponsDialog()"
       class="notification-button">
       <mat-icon>notifications</mat-icon>
     </button>
@@ -27,13 +24,13 @@
     <div *ngIf="selectedUser" class="user-info" [matMenuTriggerFor]="userMenu">
       <span class="username">{{ selectedUser().name }}</span>
       <img class="user-avatar" src="/assets/images/profiles/{{ selectedUser().id }}.jpeg" [alt]="selectedUser().name">
-   <mat-menu #userMenu="matMenu">
-      <button mat-menu-item (click)="logout()">
-        <mat-icon>switch_account</mat-icon>
-        <span>Log out</span>
-      </button>
-    </mat-menu>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>switch_account</mat-icon>
+          <span>Log out</span>
+        </button>
+      </mat-menu>
     </div>
-    
+
   </div>
 </mat-toolbar>

@@ -4,6 +4,7 @@ import io.littlehorse.examples.model.Coupon;
 import io.littlehorse.examples.services.CouponService;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.sdk.worker.WorkerContext;
 import jakarta.inject.Inject;
 
 @LHTask
@@ -17,7 +18,8 @@ public class CouponTasks {
     CouponService couponService;
 
     @LHTaskMethod(GET_COUPONS_BY_CODES)
-    public Coupon[] getCouponsByCodes(int clientId, String[] couponCodes) {
+    public Coupon[] getCouponsByCodes(int clientId, String[] couponCodes, WorkerContext workerContext) {
+        workerContext.
         return this.couponService.getCouponsByCodes(clientId, couponCodes);
     }
 

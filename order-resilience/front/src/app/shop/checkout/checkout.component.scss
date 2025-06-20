@@ -178,6 +178,7 @@ mat-divider {
 .details {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 
   img {
     width: 100px;
@@ -189,8 +190,7 @@ mat-divider {
   .discount-input {
     display: flex;
     align-items: center;
-    height: 100%;
-    flex-grow: 1;
+    width: 200px;
 
     mat-form-field {
       width: 180px;
@@ -202,8 +202,8 @@ mat-divider {
   }
 
   .product {
-    margin-left: 20px;
-    flex-grow: .7;
+    margin-left: 10px;
+    width: 230px;
 
     h3 {
       font-size: 20px;
@@ -217,7 +217,7 @@ mat-divider {
     }
 
     .quantity-controls {
-      margin-top: -5px;
+      margin-top: -8px;
     }
 
   }
@@ -248,4 +248,8 @@ mat-divider {
   font-size: 20px;
   letter-spacing: 4px;
 }
+}
+
+.cart-item{
+  margin-bottom: 10px;
 }
