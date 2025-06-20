@@ -1,0 +1,39 @@
+services:
+  yugabytedb:
+    image: yugabytedb/yugabyte:latest
+    container_name: order-resilience-yugabytedb
+    ports:
+      - "5433:5433"  # YSQL
+      - "7000:7000"  # Admin UI
+    environment:
+      - TZ=UTC
+    command: bin/yugabyted start --daemon=false --ui=true
+    volumes:
+      - yugabyte-data:/home/yugabyte/yb_data
+    networks:
+      - order-resilience
+
+  db-init:
+    image: yugabytedb/yugabyte:latest
+    depends_on:
+      - yugabytedb
+    entrypoint: >
+      bash -c "
+        echo 'Waiting for YugabyteDB to be ready...';
+        until ysqlsh -h yugabytedb -p 5433 -c 'SELECT 1'; do
+          sleep 2;
+        done;
+        echo 'Creating databases...';
+        ysqlsh -h yugabytedb -p 5433 -c \"CREATE DATABASE customerdb;\";
+        ysqlsh -h yugabytedb -p 5433 -c \"CREATE DATABASE coupondb;\";
+        ysqlsh -h yugabytedb -p 5433 -c \"CREATE DATABASE productdb;\";
+        ysqlsh -h yugabytedb -p 5433 -c \"CREATE DATABASE orderdb;\";
+      "
+    networks:
+      - order-resilience
+
+networks:
+  order-resilience:
+
+volumes:
+  yugabyte-data:

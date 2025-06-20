@@ -19,7 +19,6 @@ public class CouponTasks {
 
     @LHTaskMethod(GET_COUPONS_BY_CODES)
     public Coupon[] getCouponsByCodes(int clientId, String[] couponCodes, WorkerContext workerContext) {
-        workerContext.
         return this.couponService.getCouponsByCodes(clientId, couponCodes);
     }
 
