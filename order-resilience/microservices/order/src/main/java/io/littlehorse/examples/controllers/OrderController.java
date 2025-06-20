@@ -1,5 +1,6 @@
 package io.littlehorse.examples.controllers;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +18,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
 
 @Path("/api/orders")
 @Produces(MediaType.APPLICATION_JSON)
@@ -28,12 +30,18 @@ public class OrderController {
     @Inject
     ObjectMapper objectMapper;
 
+    private static final Logger LOG = Logger.getLogger(OrderController.class);
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Uni<Response> placeOrder(OrderRequest request) throws JsonProcessingException {
+        var startDate = new Date();
+        LOG.infof("Starting wfRun (order-workflow) for client %d at %s", request.getClientId(), startDate);
         return orderService.runOrderWorkflow(request)
                 .onItem().transform(result -> {
-                    System.out.println("Result " + result);
+                    var endDate = new Date();
+                    LOG.infof("Completed wfRun (order-workflow) for client %d at %s, took %d seconds",
+                            request.getClientId(), endDate, (endDate.getTime() - startDate.getTime()) / 1000);
                     OrderResponse orderResponse = null;
                     try {
                         orderResponse = objectMapper.readValue((String) result, OrderResponse.class);
@@ -48,10 +56,14 @@ public class OrderController {
                                 .build();
                     }
                 })
-                .onFailure().recoverWithItem(failure ->
-                        Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                                .entity("Failed to place order: " + failure.getMessage())
-                                .build()
+                .onFailure().recoverWithItem(failure -> {
+                            var endDate = new Date();
+                            LOG.errorf("Failed wfRun (order-workflow) for client %d at %s, took %d seconds: %s",
+                                    request.getClientId(), endDate, (endDate.getTime() - startDate.getTime()) / 1000, failure.getMessage());
+                            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                                    .entity("Failed to place order: " + failure.getMessage())
+                                    .build();
+                        }
                 );
     }
 

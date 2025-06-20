@@ -17,8 +17,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest'
     implementation "org.apache.kafka:kafka-clients:${kafkaVersion}"
     implementation("org.apache.kafka:kafka-streams:${kafkaVersion}")
-    implementation "io.littlehorse:littlehorse-quarkus:0.13.2"
-    implementation "io.littlehorse:littlehorse-client:0.14.0"
+    implementation "io.littlehorse:littlehorse-quarkus:0.14.0"
     compileOnly 'org.projectlombok:lombok:1.18.38'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.38'

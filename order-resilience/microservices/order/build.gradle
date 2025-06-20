@@ -18,8 +18,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest'
     implementation 'io.quarkus:quarkus-hibernate-orm-panache'
 
-    implementation "io.littlehorse:littlehorse-quarkus:0.13.2"
-    implementation "io.littlehorse:littlehorse-client:0.14.0"
+    implementation "io.littlehorse:littlehorse-quarkus:0.14.0"
 
     compileOnly 'org.projectlombok:lombok:1.18.38'
 
