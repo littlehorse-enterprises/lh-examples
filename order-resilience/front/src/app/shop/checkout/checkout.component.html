@@ -27,7 +27,7 @@
               <div class="product">
                 <h3>{{ item.product.name }} </h3>
                 <p class="description">{{ item.product.description }}, ID: {{item.product.productId}}</p>
-                <div class="quantity-controls">
+                <div class="quantity-controls center">
                   <button mat-icon-button color="primary" (click)="decreaseQuantity(item)"
                     [disabled]="item.quantity <= 1">
                     <mat-icon>remove</mat-icon>
@@ -37,8 +37,8 @@
                     [disabled]="item.quantity >= item.product.quantity">
                     <mat-icon>add</mat-icon>
                   </button>
-                  <span class="description center"> out of {{ item.product.quantity }}</span>
                   
+                  <!-- <div class="description"> out of {{ item.product.quantity }}</div> -->
                 </div>
               </div>
                <div class="discount-input center" *ngIf="!item.discountPercentage">

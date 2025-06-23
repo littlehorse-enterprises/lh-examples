@@ -15,7 +15,6 @@ import org.apache.kafka.common.serialization.Serdes;
 import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
 
 @ApplicationScoped
 @Startup
@@ -33,7 +32,7 @@ public class CouponStream {
     public void init() throws InterruptedException {
         // Wait for the output topic creation
         Thread.sleep(5000);
-        System.out.println("Starting Kafka Consumer...");
+        System.out.println("Starting CouponStream consumer for topic: " + topicName);
         Properties props = getProperties();
 
         consumer = new KafkaConsumer<>(props);

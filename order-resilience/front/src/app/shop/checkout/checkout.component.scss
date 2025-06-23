@@ -42,6 +42,9 @@
     text-align: center;
     font-weight: bold;
   }
+  .description{
+    margin-top: 0  !important;
+  }
 
 }
 
@@ -186,6 +189,7 @@ mat-divider {
     object-fit: cover;
     border-radius: 8px;
     margin: 10px;
+    margin-top: 25px;
   }
   .discount-input {
     display: flex;
@@ -202,8 +206,8 @@ mat-divider {
   }
 
   .product {
-    margin-left: 10px;
-    width: 230px;
+    margin: 0 10px;
+    width: 250px;
 
     h3 {
       font-size: 20px;

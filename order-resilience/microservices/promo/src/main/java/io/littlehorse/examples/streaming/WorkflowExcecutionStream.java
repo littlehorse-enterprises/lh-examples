@@ -98,7 +98,7 @@ public class WorkflowExcecutionStream {
 
     @PreDestroy
     public void stop() {
-        System.out.println("🛑 Shutting down Kafka Streams app...");
+        System.out.println("Shutting down Kafka Streams app...");
         if (streams != null) {
             streams.close();
         }
