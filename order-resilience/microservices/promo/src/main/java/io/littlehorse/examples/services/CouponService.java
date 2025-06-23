@@ -45,7 +45,7 @@ public class CouponService {
         }
         var code = "COUPON-" + clientId + "-" + productId + "-" + productName;
         System.out.println("Generating coupon for client " + clientId);
-        var discountPercentage = (new Random().nextInt(7) + 1) * 10; // Random discount percentage between 10 and 70
+        var discountPercentage = (new Random().nextInt(4) + 1) * 10; // Random discount percentage between 10 and 40
         Coupon coupon = Coupon.builder()
                 .clientId(clientId)
                 .productId(productId)
