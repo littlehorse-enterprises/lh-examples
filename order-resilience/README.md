@@ -227,44 +227,47 @@ The system shows:
 2. The discount amount is displayed in red in the Order Summary section
 3. The final total is recalculated to reflect the discount
 
-## Complete System Flow Summary
+## Order Workflow Architecture
 
-The Order Resilience Demo showcases a comprehensive e-commerce system with robust resilience patterns:
+The order processing is powered by [LittleHorse](https://github.com/littlehorse-enterprises/littlehorse), an open-source workflow orchestration engine that ensures resilience and reliability. When an order is placed, the system runs through a well-defined workflow that coordinates multiple microservices:
 
-1. **Initial Setup Flow**
-   - LittleHorse server is started with the required branch
-   - Microservices (Order, Customer, Product, Promo) are launched
-   - Frontend application becomes available
+### Workflow Steps
 
-2. **User Interaction Flow**
-   - User selects an account (Chewbacca, Darth Vader, or R2D2)
-   - User browses products and adds items to cart
-   - User proceeds to checkout and enters payment information
-   - User submits the order
+1. **Order Placement** - The order is initially saved with a pending status
+2. **Customer Validation** - Verifies that the customer account is valid
+3. **Coupon Validation** - If discount codes are provided, verifies their validity
+4. **Discount Application** - Applies valid discounts to the order items
+5. **Stock Reduction** - Reduces product inventory for ordered items
+6. **Coupon Redemption** - Marks used coupons as redeemed
+7. **Order Finalization** - Completes the order with final pricing
 
-3. **Order Processing Flow**
-   - Order service coordinates with other microservices
-   - Customer validation is performed
-   - Product inventory is checked and updated
-   - Promotional codes are validated if applied
-   - Order status is tracked throughout the process
+Each step includes error handling and compensation mechanisms to ensure the system can recover gracefully from failures.
 
-4. **Resilience Pattern Demonstration**
-   - **Service Failure Handling**: If a service is unavailable, appropriate error messages are displayed
-   - **Retry Mechanism**: System attempts to process orders multiple times
-   - **Circuit Breaker**: After multiple failures, the system stops attempting the same operation
-   - **Compensating Transactions**: Coupons are generated to compensate for service failures
+### LittleHorse Integration
 
-5. **Coupon Lifecycle**
-   - Coupon is automatically generated after 3 failed attempts for the same item
-   - User is notified of the available coupon
-   - User can apply the coupon during checkout for a discount
-   - Once an order with a coupon is successfully processed, the coupon is invalidated and cannot be used again
-   - This one-time use policy ensures proper compensation while preventing abuse
+The application extensively leverages LittleHorse's features:
 
-6. **Order Completion**
-   - Successful orders are recorded in the order history
-   - All transactions are stored in the database
-   - User can view detailed information about past orders
+- **Workflow Definition**: Using the `@LHWorkflow` annotation to define the order process workflow
+- **Task Execution**: Distributed task execution across microservices
+- **Error Handling**: Comprehensive exception handling with compensation logic
+- **Output Topic Feature**: Streams workflow execution events to enable reactive patterns
 
-This comprehensive flow demonstrates how a well-designed microservices architecture can handle failures gracefully, maintain data consistency, and provide a seamless user experience even when individual components experience issues.
+### Microservice Responsibilities
+
+- **Order Service**: Coordinates the overall order process and maintains order state
+- **Customer Service**: Validates customer accounts and permissions
+- **Product Service**: Manages product inventory and handles stock reduction
+- **Promo Service**: Manages coupon validation and redemption
+
+### Automatic Coupon Generation System
+
+A key feature of this demo is the automatic coupon generation system that leverages LittleHorse's Output Topic feature:
+
+1. **Workflow Execution Stream**: A Kafka Streams application (`WorkflowExcecutionStream.java`) monitors LittleHorse's execution output topic (`my-cluster_default_execution`)
+2. **Failure Detection**: The stream detects task failures related to out-of-stock products
+3. **Failure Counting**: It counts failures per customer-product combination using a stateful Kafka Streams operation
+4. **Threshold Triggering**: After 3 failures for the same product, it publishes to a dedicated topic (`coupon-granted-topic`)
+5. **Coupon Generation**: A consumer service (`CouponStream.java`) listens to this topic and triggers the coupon generation workflow
+
+This streaming architecture demonstrates how to build reactive compensation mechanisms on top of workflow orchestration.
+
