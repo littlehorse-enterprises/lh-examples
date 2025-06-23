@@ -194,7 +194,6 @@ One of the key resilience features is the automatic coupon generation system:
 - This coupon can be applied during checkout in the discount code field for the affected item
 - This compensates users for the inconvenience while allowing the system time to recover
 
-This pattern demonstrates how the system can maintain a positive user experience even during service disruptions, implementing the Circuit Breaker and Compensating Transaction patterns.
 
 ### Coupon Notification and Usage
 
