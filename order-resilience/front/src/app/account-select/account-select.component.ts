@@ -23,7 +23,7 @@ export class AccountSelectComponent {
     ngOnInit() {
         this.accountService.getAccounts().subscribe(users => {
             // Add default profile images if they don't have one
-            this.accounts = users.map(user => {
+            this.accounts = users.sort((a,b)=>a.id-b.id).map(user => {
                 if (!user.profileImage) {
                     return {
                         ...user,

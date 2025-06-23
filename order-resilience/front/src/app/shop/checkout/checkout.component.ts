@@ -139,7 +139,7 @@ export class CheckoutComponent implements OnInit {
                     this.shopService.clearCart();
                     // this.dialogRef.close();
                     this.router.navigate(['/orders']);
-                }, 1000);
+                }, 500);
             },
             error: (error) => {
                 console.error('Error placing order:', error);

@@ -18,7 +18,8 @@ export class ProductService {
   loadProducts(): void {
     this.http.get<Product[]>(this.apiUrl).subscribe({
       next: (data) => {
-        this.products.set(data);
+        
+        this.products.set(data.sort((a, b) => a.productId - b.productId));
       },
       error: (error) => {
         console.error('Error loading products', error);

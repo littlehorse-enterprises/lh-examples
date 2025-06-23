@@ -1,57 +1,90 @@
 #!/bin/bash
 
-# Check if build_all.sh has been run
-if [ ! -d "microservices/customer/build/quarkus-app" ] || [ ! -d "front/dist" ]; then
-  echo "Building apps"
-  echo "Please run './build_all.sh' first to build all the components."
-  
-  read -p "Do you want to run build_all.sh now? (y/n) " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    ./build_all.sh
-  else
-    echo "Exiting. Please run './build_all.sh' before starting the demo."
-    exit 1
-  fi
+# Order Resilience Demo Startup Script
+
+echo "📋 Starting Order Resilience Demo..."
+echo "======================================"
+
+# Save current directory
+BASE_DIR=$(pwd)
+
+# 1. Kill any potentially running services using the kill_services.sh script
+echo "🛑 Killing any existing services..."
+$BASE_DIR/kill_services.sh
+
+echo "✅ Services stopped successfully!"
+echo "======================================"
+
+# 2. Build all components using build_all.sh
+echo "🔨 Building all components..."
+$BASE_DIR/build_all.sh
+
+echo "✅ All components built successfully!"
+echo "======================================"
+
+# 2. Start the database using docker-compose
+echo "🗄️  Starting YugabyteDB database..."
+docker-compose up -d yugabytedb db-init
+
+# Wait for database to be ready
+echo "⏳ Waiting for database to initialize (15 seconds)..."
+sleep 15
+
+# 3. Start microservices from built JARs
+
+# Start Customer Service (dependency for Order)
+echo "🚀 Starting Customer Service on port 8081..."
+cd "$BASE_DIR/microservices/customer"
+java -jar build/quarkus-app/quarkus-run.jar > "$BASE_DIR/customer.log" 2>&1 &
+echo "  📝 Logs available at $BASE_DIR/customer.log"
+
+# Start Product Service (dependency for Order)
+echo "🚀 Starting Product Service on port 8082..."
+cd "$BASE_DIR/microservices/product"
+java -jar build/quarkus-app/quarkus-run.jar > "$BASE_DIR/product.log" 2>&1 &
+echo "  📝 Logs available at $BASE_DIR/product.log"
+
+# Start Promo Service (dependency for Order)
+echo "🚀 Starting Promo Service on port 8083..."
+cd "$BASE_DIR/microservices/promo"
+java -jar build/quarkus-app/quarkus-run.jar > "$BASE_DIR/promo.log" 2>&1 &
+echo "  📝 Logs available at $BASE_DIR/promo.log"
+
+# Give the dependency services time to start
+echo "⏳ Waiting for services to initialize (10 seconds)..."
+sleep 10
+
+# Start Order Service (depends on all others)
+echo "🚀 Starting Order Service on port 8080..."
+cd "$BASE_DIR/microservices/order"
+java -jar build/quarkus-app/quarkus-run.jar > "$BASE_DIR/order.log" 2>&1 &
+echo "  📝 Logs available at $BASE_DIR/order.log"
+
+# 4. Start Frontend
+echo "🖥️  Starting Frontend on port 4200..."
+cd "$BASE_DIR/front"
+# Install dependencies if needed
+if [ ! -d "node_modules" ]; then
+  echo "  📦 Installing frontend dependencies..."
+  npm install
 fi
+# Start Angular app
+echo "  🚀 Running ng serve..."
+ng serve > "$BASE_DIR/frontend.log" 2>&1 &
+echo "  📝 Logs available at $BASE_DIR/frontend.log"
 
-# Function to kill processes on a specific port
-kill_process_on_port() {
-  local port=$1
-  local pid=$(lsof -ti:$port)
-  if [ -n "$pid" ]; then
-    echo "Killing process on port $port (PID: $pid)"
-    kill -9 $pid
-  else
-    echo "No process found running on port $port"
-  fi
-}
+# Return to base directory
+cd "$BASE_DIR"
 
-# Kill existing processes on the ports we'll use
-echo "Cleaning up existing processes..."
-kill_process_on_port 5433  # YugabyteDB
-kill_process_on_port 8080  # order service
-kill_process_on_port 8081  # customer service
-kill_process_on_port 8082  # product service
-kill_process_on_port 8083  # promo service
-kill_process_on_port 4200  # frontend
-
-# Clean up any existing Docker containers
-echo "Stopping any existing Docker containers..."
-docker-compose down
-
-# Start the services using Docker Compose
-docker-compose up 
-
-echo "Order Resilience Demo is starting..."
-echo "You can access the application at http://localhost:4200"
-echo "API endpoints are available at:"
-echo "- Orders:    http://localhost:8080"
-echo "- Customer:  http://localhost:8081"
-echo "- Products:  http://localhost:8082"
-echo "- Promos:    http://localhost:8083"
-echo "- YugabytDB: http://localhost:7000"
-
+echo "======================================"
+echo "🎉 All services started successfully!"
+echo "📊 Service URLs:"
+echo "   - Order Service:    http://localhost:8080"
+echo "   - Customer Service: http://localhost:8081"
+echo "   - Product Service:  http://localhost:8082"
+echo "   - Promo Service:    http://localhost:8083"
+echo "   - Frontend:         http://localhost:4200"
+echo "   - YugabyteDB Admin: http://localhost:7000"
 echo ""
-echo "To view logs from all services: docker-compose logs -f"
-echo "To stop the demo: ./kill_services.sh"
+echo "💡 Use './kill_services.sh' to stop all services when done"
+echo "======================================"
