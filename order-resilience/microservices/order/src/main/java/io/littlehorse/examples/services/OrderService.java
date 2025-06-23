@@ -1,5 +1,6 @@
 package io.littlehorse.examples.services;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -121,7 +122,7 @@ public class OrderService {
 
         return Uni.createFrom()
                 .future(futureStub.runWf(request))
-                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)))
+                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)).ifNoItem().after(Duration.ofSeconds(10)).fail())
                 .map(wfEvent -> wfEvent.getContent().getJsonObj());
     }
 

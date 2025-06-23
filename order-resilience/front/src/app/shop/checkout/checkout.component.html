@@ -25,8 +25,8 @@
               <img [src]="'/assets/images/products/' + item.product.productId + '.png'" [alt]="item.product.name">
 
               <div class="product">
-                <h3>{{ item.product.name }}</h3>
-                <p class="description">{{ item.product.description }}</p>
+                <h3>{{ item.product.name }} </h3>
+                <p class="description">{{ item.product.description }}, ID: {{item.product.productId}}</p>
                 <div class="quantity-controls">
                   <button mat-icon-button color="primary" (click)="decreaseQuantity(item)"
                     [disabled]="item.quantity <= 1">
@@ -37,6 +37,8 @@
                     [disabled]="item.quantity >= item.product.quantity">
                     <mat-icon>add</mat-icon>
                   </button>
+                  <span class="description center"> out of {{ item.product.quantity }}</span>
+                  
                 </div>
               </div>
                <div class="discount-input center" *ngIf="!item.discountPercentage">
