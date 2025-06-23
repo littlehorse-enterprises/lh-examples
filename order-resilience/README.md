@@ -192,7 +192,7 @@ One of the key resilience features is the automatic coupon generation system:
 - If an order for the same item fails 3 times due to stock issues or missing ingredients, the system will automatically generate a coupon for that specific item
 - The user will receive a notification about the coupon
 - This coupon can be applied during checkout in the discount code field for the affected item
-- This compensates users for the inconvenience while allowing the system time to recover
+- This compensates users for the inconvenience with discounts
 
 
 ### Coupon Notification and Usage
