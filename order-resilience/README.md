@@ -44,8 +44,6 @@ This demo depends on the [LittleHorse repository](https://github.com/littlehorse
 
 ## Running the Demo
 
-### Option 1: Automated Setup (Recommended)
-
 Use the provided script to build and start all services:
 
 ```bash
