@@ -9,7 +9,7 @@ lazy val root = project
     scalaVersion := scala3Version,
 
     libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test,
-    libraryDependencies += "io.littlehorse" % "littlehorse-client" % "0.11.2",
+    libraryDependencies += "io.littlehorse" % "littlehorse-client" % "0.14.0",
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.4.11",
       "org.slf4j" % "slf4j-api" % "2.0.9"
