@@ -241,7 +241,7 @@ The order processing is powered by [LittleHorse](https://github.com/littlehorse-
 6. **Coupon Redemption** - Marks used coupons as redeemed
 7. **Order Finalization** - Completes the order with final pricing
 
-Each step includes error handling and compensation mechanisms to ensure the system can recover gracefully from failures.
+Each step includes error handling.
 
 ### LittleHorse Integration
 
@@ -249,7 +249,7 @@ The application extensively leverages LittleHorse's features:
 
 - **Workflow Definition**: Using the `@LHWorkflow` annotation to define the order process workflow
 - **Task Execution**: Distributed task execution across microservices
-- **Error Handling**: Comprehensive exception handling with compensation logic
+- **Error Handling**: Comprehensive exception handling
 - **Output Topic Feature**: Streams workflow execution events to enable reactive patterns
 
 ### Microservice Responsibilities
@@ -268,6 +268,4 @@ A key feature of this demo is the automatic coupon generation system that levera
 3. **Failure Counting**: It counts failures per customer-product combination using a stateful Kafka Streams operation
 4. **Threshold Triggering**: After 3 failures for the same product, it publishes to a dedicated topic (`coupon-granted-topic`)
 5. **Coupon Generation**: A consumer service (`CouponStream.java`) listens to this topic and triggers the coupon generation workflow
-
-This streaming architecture demonstrates how to build reactive compensation mechanisms on top of workflow orchestration.
 
