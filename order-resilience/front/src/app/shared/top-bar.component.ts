@@ -50,7 +50,6 @@ export class TopBarComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.couponService.getCouponsEverySecond();
     }
     
     showCouponsDialog(): void {
