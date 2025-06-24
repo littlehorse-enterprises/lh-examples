@@ -24,7 +24,7 @@ echo "======================================"
 
 # 2. Start the database using docker-compose
 echo "🗄️  Starting YugabyteDB database..."
-docker-compose up -d yugabytedb db-init
+docker compose up -d 
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to initialize (15 seconds)..."

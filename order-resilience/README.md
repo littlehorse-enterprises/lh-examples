@@ -17,8 +17,33 @@ The application consists of the following components:
 
 - Java 17 or higher
 - Docker and Docker Compose
-- Node.js (v14+) and npm
+- Node.js v24.2.0 (required for the frontend)
 - Angular CLI (`npm install -g @angular/cli`)
+
+### Node.js Setup
+
+The frontend requires Node.js v24.2.0. You can install and manage Node.js versions using the `n` version manager:
+
+1. Install `n` via Homebrew if you don't have it already:
+   ```bash
+   brew install n
+   ```
+
+2. Install and use Node.js v24.2.0:
+   ```bash
+   n 24.2.0
+   ```
+
+3. Verify the correct Node.js version:
+   ```bash
+   node --version
+   # Should output: v24.2.0
+   ```
+
+4. If you already have Node.js installed but are using a different version, you can switch to v24.2.0:
+   ```bash
+   n use 24.2.0
+   ```
 
 ## LittleHorse Dependency
 
