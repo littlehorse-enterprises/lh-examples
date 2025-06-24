@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Order Resilience Demo Startup Script
-
-echo "📋 Starting Order Resilience Demo..."
+echo "📋 Starting Order Resilience Demo..., waiting for the db"
 echo "======================================"
+sleep 10
+
 
 # Save current directory
 BASE_DIR=$(pwd)
@@ -22,13 +23,6 @@ $BASE_DIR/build_all.sh
 echo "✅ All components built successfully!"
 echo "======================================"
 
-# 2. Start the database using docker-compose
-echo "🗄️  Starting YugabyteDB database..."
-docker compose up -d 
-
-# Wait for database to be ready
-echo "⏳ Waiting for database to initialize (15 seconds)..."
-sleep 15
 
 # 3. Start microservices from built JARs
 
@@ -84,7 +78,6 @@ echo "   - Customer Service: http://localhost:8081"
 echo "   - Product Service:  http://localhost:8082"
 echo "   - Promo Service:    http://localhost:8083"
 echo "   - Frontend:         http://localhost:4200"
-echo "   - YugabyteDB Admin: http://localhost:7000"
 echo ""
 echo "💡 Use './kill_services.sh' to stop all services when done"
 echo "======================================"

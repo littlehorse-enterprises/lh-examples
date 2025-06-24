@@ -122,7 +122,7 @@ public class OrderService {
 
         return Uni.createFrom()
                 .future(futureStub.runWf(request))
-                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)).ifNoItem().after(Duration.ofSeconds(10)).fail())
+                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)).ifNoItem().after(Duration.ofSeconds(20)).fail())
                 .map(wfEvent -> wfEvent.getContent().getJsonObj());
     }
 

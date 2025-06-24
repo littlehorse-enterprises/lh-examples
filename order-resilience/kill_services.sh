@@ -2,9 +2,6 @@
 
 echo "Shutting down Order Resilience Demo services..."
 
-# Stop all services using docker-compose
-docker-compose down
-
 # Just in case any processes are still running on these ports
 function kill_process_on_port() {
   local port=$1
@@ -22,7 +19,7 @@ kill_process_on_port 8081 "Customer service"
 kill_process_on_port 8082 "Product service"
 kill_process_on_port 8083 "Promo service"
 kill_process_on_port 4200 "Frontend"
-kill_process_on_port 5433 "YugabyteDB"
-kill_process_on_port 7000 "YugabyteDB Admin"
 
-echo "All services have been terminated."
+echo "All services have been terminated. run:"
+echo "docker compose down"
+echo "to stop the yugabyte db container"

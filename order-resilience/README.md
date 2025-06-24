@@ -47,13 +47,12 @@ The frontend requires Node.js v24.2.0. You can install and manage Node.js versio
 
 ## LittleHorse Dependency
 
-This demo depends on the [LittleHorse repository](https://github.com/littlehorse-enterprises/littlehorse) using the `input-variables-and-output-topic` branch. Before running the demo, you need to:
+This demo depends on the [LittleHorse repository](https://github.com/littlehorse-enterprises/littlehorse) using the `master` branch. Before running the demo, you need to:
 
 1. Clone and checkout the required branch:
    ```bash
    git clone https://github.com/littlehorse-enterprises/littlehorse
    cd littlehorse
-   git checkout input-variables-and-output-topic
    ```
 
 2. Start the Kafka cluster:
@@ -69,10 +68,12 @@ This demo depends on the [LittleHorse repository](https://github.com/littlehorse
 
 ## Running the Demo
 
-Use the provided script to build and start all services:
+Run the comands below to start the demo
 
 ```bash
-# In a new terminal, start all services (database, microservices, and frontend)
+#Start yugabyte db
+docker compose up -d
+# In a new terminal, start all services (microservices, and frontend)
 ./start_demo.sh
 ```
 
@@ -83,6 +84,7 @@ Once you're done with the demo, you can shut down all services with:
 ```bash
 # Stop all services
 ./kill_services.sh
+docker compose down
 ```
 
 ## API Usage Examples
