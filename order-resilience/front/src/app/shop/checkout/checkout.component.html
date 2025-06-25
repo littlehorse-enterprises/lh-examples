@@ -57,7 +57,7 @@
                     </button>
                 </div>
               <div class="total">
-                <span class="item-price">${{ item.product.unitPrice | currency }}</span>
+                <span class="item-price">{{ item.product.unitPrice | currency }}</span>
                 <button mat-icon-button color="warn" (click)="removeItem(item)" matTooltip="Remove item">
                   <mat-icon>delete</mat-icon>
                 </button>
@@ -133,16 +133,16 @@
         <mat-card-content>
           <div class="summary-row">
             <span>Subtotal:</span>
-            <span>${{ cart().subtotal | currency }}</span>
+            <span>{{ cart().subtotal | currency }}</span>
           </div>
           <div class="summary-row discount" *ngIf="cart().discount > 0">
             <span>Discount:</span>
-            <span>-${{ cart().discount | currency }}</span>
+            <span>-{{ cart().discount | currency }}</span>
           </div>
           <mat-divider></mat-divider>
           <div class="summary-row total">
             <span>Total:</span>
-            <span>${{ cart().total | currency }}</span>
+            <span>{{ cart().total | currency }}</span>
           </div>
 
           <div class="order-actions">
