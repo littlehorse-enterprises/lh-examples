@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Order Resilience Demo Startup Script
-echo "📋 Starting Order Resilience Demo..., waiting for the db"
+echo "📋 Starting Order Resilience Demo..."
 echo "======================================"
-sleep 10
 
 
 # Save current directory
@@ -15,6 +14,12 @@ $BASE_DIR/kill_services.sh
 
 echo "✅ Services stopped successfully!"
 echo "======================================"
+
+echo "Starting yugabyte db container..."
+echo "======================================"
+docker compose up -d
+
+
 
 # 2. Build all components using build_all.sh
 echo "🔨 Building all components..."
@@ -73,10 +78,10 @@ cd "$BASE_DIR"
 echo "======================================"
 echo "🎉 All services started successfully!"
 echo "📊 Service URLs:"
-echo "   - Order Service:    http://localhost:8080"
-echo "   - Customer Service: http://localhost:8081"
-echo "   - Product Service:  http://localhost:8082"
-echo "   - Promo Service:    http://localhost:8083"
+echo "   - Order Service:    http://localhost:4210"
+echo "   - Customer Service: http://localhost:4211"
+echo "   - Product Service:  http://localhost:4212"
+echo "   - Promo Service:    http://localhost:4213"
 echo "   - Frontend:         http://localhost:4200"
 echo ""
 echo "💡 Use './kill_services.sh' to stop all services when done"

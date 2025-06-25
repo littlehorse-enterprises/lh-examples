@@ -71,9 +71,7 @@ This demo depends on the [LittleHorse repository](https://github.com/littlehorse
 Run the comands below to start the demo
 
 ```bash
-#Start yugabyte db
-docker compose up -d
-# In a new terminal, start all services (microservices, and frontend)
+# In a new terminal, start all services (db, microservices, and frontend)
 ./start_demo.sh
 ```
 
@@ -94,7 +92,7 @@ docker compose down
 To increase the stock for a specific product, use the following curl command:
 
 ```bash
-curl --location 'localhost:8082/api/products/stock' \
+curl --location 'localhost:4212/api/products/stock' \
 --header 'Content-Type: application/json' \
 --data '{
    "productId": 3,

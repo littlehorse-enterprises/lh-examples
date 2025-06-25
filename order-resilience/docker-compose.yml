@@ -3,8 +3,8 @@ services:
     image: yugabytedb/yugabyte:latest
     container_name: order-resilience-yugabytedb
     ports:
-      - "5433:5433"  # YSQL
-      - "7000:7001"  # Admin UI
+      - "4233:5433"  # YSQL
+      - "4270:7000"  # Admin UI
     environment:
       - TZ=UTC
     command: bin/yugabyted start --daemon=false --ui=true
