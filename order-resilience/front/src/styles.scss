@@ -1,0 +1,51 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+html {
+  color-scheme: light dark;
+  @include mat.theme((color: mat.$violet-palette,
+      typography: Roboto,
+      density: 0));
+  @include mat.snack-bar-overrides((button-color: rgb(255, 255, 255),
+      supporting-text-color: white,
+    ));
+}
+
+/* Dark mode specific overrides */
+.mat-mdc-raised-button.mat-primary {
+  background-color: var(--mat-sys-primary);
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+// Snackbar styles
+.success-snackbar {
+  --mat-sys-inverse-surface: #4caf50;
+}
+
+.error-snackbar {
+  --mat-sys-inverse-surface: #f44336b6;
+}
+
+.info-snackbar {
+  --mat-sys-inverse-surface: #2196f3;
+}
+
+.warning-snackbar {
+  --mat-sys-inverse-surface: #ff9800;
+}

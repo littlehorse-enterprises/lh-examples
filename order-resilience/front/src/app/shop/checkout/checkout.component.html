@@ -1,0 +1,163 @@
+<app-top-bar></app-top-bar>
+<div class="cart-container">
+  <div>
+    <div class="cart-header">
+      <button mat-icon-button class="back-button" (click)="navigateToShopping()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h2 class="cart-title">Your Shopping Cart</h2>
+    </div>
+
+    <div class="empty-cart" *ngIf="cartItems().length === 0">
+      <mat-icon class="empty-icon">shopping_basket</mat-icon>
+      <p>Your cart is empty</p>
+      <button mat-raised-button color="primary" (click)="navigateToShopping()">Continue Shopping</button>
+    </div>
+  </div>
+
+  <div class="two-column-layout" *ngIf="cartItems().length > 0">
+    <!-- Left Column: Cart Items -->
+    <div class="left-column">
+      <div class="cart-items">
+        <mat-card class="cart-item" *ngFor="let item of cartItems()">
+          <div class="cart-item-row">
+            <div class="details">
+              <img [src]="'/assets/images/products/' + item.product.productId + '.png'" [alt]="item.product.name">
+
+              <div class="product">
+                <h3>{{ item.product.name }} </h3>
+                <p class="description">{{ item.product.description }}, ID: {{item.product.productId}}</p>
+                <div class="quantity-controls center">
+                  <button mat-icon-button color="primary" (click)="decreaseQuantity(item)"
+                    [disabled]="item.quantity <= 1">
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <span class="quantity">{{ item.quantity }}</span>
+                  <button mat-icon-button color="primary" (click)="increaseQuantity(item)"
+                    [disabled]="item.quantity >= item.product.quantity">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                  
+                  <!-- <div class="description"> out of {{ item.product.quantity }}</div> -->
+                </div>
+              </div>
+               <div class="discount-input center" *ngIf="!item.discountPercentage">
+                  <mat-form-field appearance="outline" class="discount-field">
+                    <mat-label>Discount code</mat-label>
+                    <input matInput [(ngModel)]="item.discountCode" placeholder="Enter code">
+                    <button *ngIf="item.discountCode" matSuffix mat-icon-button aria-label="Clear"
+                      (click)="item.discountCode=''">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                   
+                  </mat-form-field>
+                   <button [disabled]="!item.discountCode"  matMiniFab
+                     (click)="applyDiscountCode(item)" class="apply-discount-button">
+                      <mat-icon>check</mat-icon>
+                    </button>
+                </div>
+              <div class="total">
+                <span class="item-price">{{ item.product.unitPrice | currency }}</span>
+                <button mat-icon-button color="warn" (click)="removeItem(item)" matTooltip="Remove item">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div class="item-details">
+
+
+
+              <mat-divider *ngIf="item.discountPercentage"></mat-divider>
+
+              <div class="discount-section" *ngIf="true">
+               
+
+                <div class="discount-applied" *ngIf="item.discountPercentage">
+                  <div class="discount-info">
+                    <mat-icon color="accent">local_offer</mat-icon>
+                    <span>10% discount applied with code: {{ item.discountCode }}</span>
+                  </div>
+                  <button mat-icon-button color="warn" (click)="removeDiscount(item)" matTooltip="Remove discount">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="right-column">
+      <mat-card class="payment-info">
+        <mat-card-header>
+          <mat-card-title>Payment Method</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="payment-methods">
+            <mat-radio-group class="payment-radio-group">
+              <mat-radio-button value="credit" checked>Credit Card</mat-radio-button>
+              <mat-radio-button value="paypal">PayPal</mat-radio-button>
+              <mat-radio-button value="bank">Bank Transfer</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div class="credit-card-fields">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Card Number</mat-label>
+                <input matInput placeholder="1234 5678 9012 3456">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row two-fields">
+              <mat-form-field appearance="outline">
+                <mat-label>Expiry Date</mat-label>
+                <input matInput placeholder="MM/YY">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>CVV</mat-label>
+                <input matInput placeholder="123">
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Order Summary -->
+      <mat-card class="order-summary">
+        <mat-card-header>
+          <mat-card-title>Order Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span>{{ cart().subtotal | currency }}</span>
+          </div>
+          <div class="summary-row discount" *ngIf="cart().discount > 0">
+            <span>Discount:</span>
+            <span>-{{ cart().discount | currency }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="summary-row total">
+            <span>Total:</span>
+            <span>{{ cart().total | currency }}</span>
+          </div>
+
+          <div class="order-actions">
+            <div class="loading full-width">
+              @if (isProcessing) {
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              } @else {
+              <button  mat-raised-button color="primary" class="full-width place-order" [disabled]="cartItems().length === 0"
+                (click)="placeOrder()">
+                Pay {{ cart().total | currency }}
+              </button> }
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

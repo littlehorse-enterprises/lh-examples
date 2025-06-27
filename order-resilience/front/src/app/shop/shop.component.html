@@ -1,0 +1,98 @@
+<app-top-bar></app-top-bar>
+
+<div class="shop-container">
+  <div class="order-messages">
+    <mat-card *ngIf="orderSuccess" class="success-message">
+      <mat-card-content>
+        <p><mat-icon>check_circle</mat-icon> Order placed successfully!</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="orderError" class="error-message">
+      <mat-card-content>
+        <p><mat-icon>error</mat-icon> Failed to place order. Please try again.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading products...</p>
+  </div>
+
+  <div class="error-container" *ngIf="error">
+    <mat-card>
+      <mat-card-content>
+        <p class="error-message">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </p>
+        <button mat-raised-button color="primary" (click)="loadProducts()">Try Again</button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="products-container" *ngIf="!loading && !error">
+    <mat-card class="product-card" *ngFor="let product of productService.products()">
+      <img mat-card-image src="/assets/images/products/{{product.productId}}.png" 
+           [alt]="product.name">
+      <mat-card-header>
+        <mat-card-title>{{ product.name }}</mat-card-title>
+        <mat-card-subtitle>{{ product.category }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="description">{{ product.description }}</p>
+        <mat-divider></mat-divider>
+        <div class="price-stock-container">
+          <p class="price">${{ product.unitPrice.toFixed(2) }}</p>
+          <p class="inventory" 
+             [class.low-stock]="product.quantity < 5 && product.quantity > 0"
+             [class.out-of-stock]="product.quantity <= 0">
+            {{ product.quantity > 0 ? product.quantity + ' in stock' : 'Out of stock' }}
+          </p>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <div class="cart-controls" *ngIf="getCartQuantity(product.productId) > 0">
+          <button mat-icon-button color="primary" (click)="removeFromCart(product.productId)">
+            <mat-icon>remove</mat-icon>
+          </button>
+          <span class="quantity">{{ getCartQuantity(product.productId) }}</span>
+          <button mat-icon-button color="primary" (click)="addToCart(product)" 
+                  [disabled]="getCartQuantity(product.productId) >= product.quantity">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        
+        <button mat-raised-button color="primary" 
+                *ngIf="getCartQuantity(product.productId) === 0"
+                [disabled]="product.quantity <= 0"
+                (click)="addToCart(product)">
+          {{ product.quantity > 0 ? 'Add to Cart' : 'Out of Stock' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+  
+  <!-- Floating Cart Total -->
+  <div class="cart-total-container" *ngIf="shopService.itemCount() > 0">
+    <mat-card class="cart-total-card">
+      <mat-card-content>
+        <div class="cart-summary">
+          <div class="cart-item-count">
+            <mat-icon>shopping_cart</mat-icon>
+            <span>{{ shopService.itemCount() }} item(s)</span>
+          </div>
+          <div class="cart-amount">
+            <span class="total-label">Total:</span>
+            <span class="total-value">${{ shopService.cart().total.toFixed(2) }}</span>
+          </div>
+        </div>
+        <button mat-raised-button color="accent" class="checkout-button" (click)="viewCart()">
+          <mat-icon>payment</mat-icon>
+          Checkout
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

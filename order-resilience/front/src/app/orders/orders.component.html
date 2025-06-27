@@ -1,0 +1,145 @@
+<app-top-bar></app-top-bar>
+
+<div class="orders-container">
+    <div class="header">
+        <h1>Order History</h1>
+        <button mat-raised-button color="primary" (click)="goToShop()">
+            <mat-icon>shopping_cart</mat-icon>
+            Continue Shopping
+        </button>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-container" *ngIf="loading">
+        <mat-spinner></mat-spinner>
+        <p>Loading orders...</p>
+    </div>
+
+    <!-- Error state -->
+    <!-- <div class="error-container" *ngIf="error">
+        <mat-card>
+            <mat-card-content>
+                <p class="error-message">
+                    <mat-icon>error_outline</mat-icon>
+                    {{ errorMessage }}
+                </p>
+                <button mat-raised-button color="primary" (click)="loadOrders()">Try Again</button>
+            </mat-card-content>
+        </mat-card>
+    </div> -->
+
+    <!-- No orders state -->
+    <div class="no-orders" *ngIf="!loading && !error && orders().length === 0">
+        <mat-icon class="empty-icon">receipt_long</mat-icon>
+        <p>No orders found</p>
+        <button mat-raised-button color="primary" (click)="goToShop()">Start Shopping</button>
+    </div>
+
+    <!-- Orders list with expandable rows -->
+    <div class="orders-list" *ngIf="!loading && !error && orders().length > 0">
+        <table mat-table [dataSource]="orders()" multiTemplateDataRows class="mat-elevation-z8">
+            
+            <!-- Order ID Column -->
+            <ng-container matColumnDef="orderId">
+                <th mat-header-cell *matHeaderCellDef>Order ID</th>
+                <td mat-cell *matCellDef="let order">{{ order.orderId }}</td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let order">
+                    <span class="status-badge" [ngClass]="getOrderStatusClass(order.status)">
+                        {{ order.status }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <!-- Total Amount Column -->
+            <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let order">${{ order.total |currency }}</td>
+            </ng-container>
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="creationDate">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let order">{{ getOrderDate(order.creationDate) }}</td>
+            </ng-container>
+
+            <!-- Items Column -->
+            <ng-container matColumnDef="items">
+                <th mat-header-cell *matHeaderCellDef>Items</th>
+                <td mat-cell *matCellDef="let order">{{ getItemCount(order) }}</td>
+            </ng-container>
+
+            <!-- Expand Column -->
+            <ng-container matColumnDef="expand">
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+                <td mat-cell *matCellDef="let order">
+                    <button 
+                        mat-icon-button 
+                        aria-label="expand row"
+                        (click)="toggle(order); $event.stopPropagation()"
+                        class="expand-button"
+                        [class.expanded]="isExpanded(order)">
+                        <mat-icon>keyboard_arrow_down</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+            <ng-container matColumnDef="expandedDetail">
+                <td mat-cell *matCellDef="let order" [attr.colspan]="columnsToDisplayWithExpand.length">
+                    <div class="order-detail-wrapper" [@detailExpand]="isExpanded(order) ? 'expanded' : 'collapsed'">
+                        <div class="order-detail-content">
+                            <table class="details-table">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Discount</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let line of order.orderLines">
+                                        <td class="product-image">
+                                            <img [src]="'/assets/images/products/' + line.productId + '.png'" 
+                                                [alt]="line.product?.name || 'Product image'" 
+                                                class="product-thumbnail">
+                                        </td>
+                                        <td>{{ line.product?.name || 'Product #' + line.productId }}</td>
+                                        <td>{{ line.quantity }}</td>
+                                        <td>${{ line.unitPrice | currency }}</td>
+                                        <td>
+                                            <span *ngIf="line.discountPercentage">{{ line.discountPercentage }}%</span>
+                                            <span *ngIf="!line.discountPercentage">-</span>
+                                        </td>
+                                        <td>{{ line.quantity * line.unitPrice | currency }}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" class="total-label">Total</td>
+                                        <td class="total-value">{{ order.total | currency }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+            <tr mat-row *matRowDef="let order; columns: columnsToDisplayWithExpand;"
+                class="order-row"
+                [class.expanded-row]="isExpanded(order)"
+                (click)="toggle(order)">
+            </tr>
+            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+        </table>
+    </div>
+</div>
