@@ -36,7 +36,7 @@ public class CouponTasks {
         var startTime = new Date();
         LOG.infof("LHinfo wfRunId %s, nodeRunId %s, taskRunId %s ", workerContext.getWfRunId(), workerContext.getNodeRunId(), workerContext.getTaskRunId());
         LOG.infof("Redeeming coupons for %d at %s ", clientId, startTime);
-        var response = this.couponService.getCouponsByCodes(clientId, couponCodes);
+        var response = this.couponService.redeemCoupons(clientId, couponCodes);
         var endTime = new Date();
         LOG.infof("Redeemed coupons for %d at %s , took %d ms", clientId, endTime, endTime.getTime() - startTime.getTime());
         return response;

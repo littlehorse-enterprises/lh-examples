@@ -1,6 +1,8 @@
 package io.littlehorse.examples.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +16,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Coupon {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    Long couponId;
     Long clientId;
-    @Id
     Long productId;
     private String code;
     private String description;

@@ -23,7 +23,6 @@ public class OrderWorkflow implements LHWorkflowDefinition {
     @Override
     public void define(WorkflowThread wf) {
         var order = wf.declareJsonObj(ORDER_VARIABLE).required();
-        var shouldExit = wf.declareStr("exit").withDefault("");
         var orderId = wf.declareInt("order-id").withDefault(-1);
         var clientId = wf.declareInt("client-id").withDefault(-1);
 
@@ -35,57 +34,41 @@ public class OrderWorkflow implements LHWorkflowDefinition {
         wf.handleException(customerResponse, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
-            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
-        });
-        wf.doIf(shouldExit.isNotEqualTo(""), handler -> {
-            handler.fail("customer-validation-failure", "Something happened validating the customer.");
+            handler.fail(orderCanceled, "customer-validation-failure", "Something happened validating the customer.");
         });
 
         var coupons = wf.execute(GET_COUPONS_BY_CODES, clientId, order.jsonPath("$.discountCodes"));
         wf.handleException(coupons, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
-            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
-        });
-        wf.doIf(shouldExit.isNotEqualTo(""), handler -> {
-            handler.fail("coupon-validation-failure", "Something happened validating the coupons.");
+            handler.fail(orderCanceled, "coupon-retrieval-failure", "Something happened retrieving the coupons.");
         });
 
         var productsWithDiscounts = wf.execute(APPLY_DISCOUNTS, clientId, order.jsonPath("$.orderLines"), coupons);
         wf.handleException(productsWithDiscounts, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
-            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
-        });
-        wf.doIf(shouldExit.isNotEqualTo(""), handler -> {
-            handler.fail("discount-application-failure", "Something happened applying the discounts.");
+            handler.fail(orderCanceled, "discount-application-failure", "Something happened applying the discounts.");
         });
 
         var productNode = wf.execute(REDUCE_STOCK, clientId, order.jsonPath("$.orderLines"));
         wf.handleException(productNode, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
-            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
-        });
-        wf.doIf(shouldExit.isNotEqualTo(""), handler -> {
-            handler.fail("customer-failure", "Failed to dispatch the order");
+            handler.fail(orderCanceled, "stock-reduction-failure", "Something happened reducing the stock.");
         });
 
         var redeemedCoupons = wf.execute(REDEEM_COUPONS, clientId, order.jsonPath("$.discountCodes"));
         wf.handleException(redeemedCoupons, handler -> {
             var content = handler.declareStr(WorkflowThread.HANDLER_INPUT_VAR);
             var orderCanceled = handler.execute(OrderTask.UPDATE_ORDER_STATUS, orderId, "CANCELLED", content);
-            shouldExit.assign(content);
             handler.throwEvent(ORDER_WORKFLOW, orderCanceled);
+            handler.fail(orderCanceled, "coupon-redeem-failure", "Something happened redeeming the coupons.");
         });
-        wf.doIf(shouldExit.isNotEqualTo(""), handler -> {
-            handler.fail("coupon-redeem-failure", "Something happened redeeming the coupons.");
-        });
-
         var completedOrder = wf.execute(OrderTask.FINALIZE_ORDER_TASK, orderId, productsWithDiscounts);
         wf.throwEvent(ORDER_WORKFLOW, completedOrder);
     }

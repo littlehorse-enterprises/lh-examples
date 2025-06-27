@@ -64,8 +64,6 @@ public class CouponService {
             return new Coupon[0]; // No coupons to redeem
         }
         var coupons = getCouponsByCodes(clientId, codes);
-
-
         // Mark all coupons as redeemed
         for (Coupon coupon : coupons) {
             coupon.setRedeemed(true);

@@ -59,7 +59,6 @@ public class CouponStream {
                             long clientId = Long.parseLong(parts[0]);
                             long productId = Long.parseLong(parts[1]);
                             String productName = parts[2];
-
                             couponService.runGenerateCouponWorkflow(clientId, productId, productName);
                         } catch (Exception e) {
                             log.error("Failed to process record key: {}", record.key(), e);

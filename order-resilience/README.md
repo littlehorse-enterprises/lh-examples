@@ -6,12 +6,12 @@ This demo showcases a microservices-based e-commerce application with resilience
 
 The application consists of the following components:
 
-- **Order Service** (Port 8080): Handles order processing and coordinates with other services
-- **Customer Service** (Port 8081): Manages customer data and accounts
-- **Product Service** (Port 8082): Manages product catalog and inventory
-- **Promo Service** (Port 8083): Handles promotional offers and coupon codes
+- **Order Service** (Port 4210): Handles order processing and coordinates with other services
+- **Customer Service** (Port 4211): Manages customer data and accounts
+- **Product Service** (Port 4212): Manages product catalog and inventory
+- **Promo Service** (Port 4213): Handles promotional offers and coupon codes
 - **Frontend** (Port 4200): Angular-based user interface
-- **Database** (Port 5433): YugabyteDB (PostgreSQL-compatible distributed database)
+- **Database** (Port 4233): YugabyteDB (PostgreSQL-compatible distributed database)
 
 ## Prerequisites
 
@@ -45,6 +45,11 @@ The frontend requires Node.js v24.2.0. You can install and manage Node.js versio
    n use 24.2.0
    ```
 
+5. Install Angular CLI globally:
+   ```bash
+   npm install -g @angular/cli
+   ```
+
 ## LittleHorse Dependency
 
 This demo depends on the [LittleHorse repository](https://github.com/littlehorse-enterprises/littlehorse) using the `master` branch. Before running the demo, you need to:
@@ -68,7 +73,9 @@ This demo depends on the [LittleHorse repository](https://github.com/littlehorse
 
 ## Running the Demo
 
-Run the comands below to start the demo
+### Quick Start (All Services)
+
+Run the commands below to start the demo
 
 ```bash
 # In a new terminal, start all services (db, microservices, and frontend)
@@ -84,6 +91,55 @@ Once you're done with the demo, you can shut down all services with:
 ./kill_services.sh
 docker compose down
 ```
+
+### Development Mode (Individual Services)
+
+For development purposes, you may want to start services individually. Follow this order:
+
+1. **Start the database first:**
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Build all components:**
+   ```bash
+   ./build_all.sh
+   ```
+
+3. **Start the dependency microservices (these register tasks with LittleHorse):**
+   
+   Customer Service:
+   ```bash
+   cd microservices/customer
+   java -jar build/quarkus-app/quarkus-run.jar
+   ```
+   
+   Product Service (in a new terminal):
+   ```bash
+   cd microservices/product
+   java -jar build/quarkus-app/quarkus-run.jar
+   ```
+   
+   Promo Service (in a new terminal):
+   ```bash
+   cd microservices/promo
+   java -jar build/quarkus-app/quarkus-run.jar
+   ```
+
+4. **Wait 10 seconds for services to initialize, then start Order Service:**
+   ```bash
+   cd microservices/order
+   java -jar build/quarkus-app/quarkus-run.jar
+   ```
+
+5. **Start the frontend (in a new terminal):**
+   ```bash
+   cd front
+   npm install  # if node_modules doesn't exist
+   ng serve
+   ```
+
+> **Note:** The order is important because Customer, Product, and Promo services register their tasks with LittleHorse first, and the Order service depends on these registered tasks.
 
 ## API Usage Examples
 
