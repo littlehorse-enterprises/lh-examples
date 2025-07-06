@@ -15,22 +15,24 @@ namespace Quickstart
 		{
 			void MyEntryPoint(WorkflowThread wf)
 			{
-				var firstName = wf.DeclareStr("first-name").Searchable().Required();
-				var lastName = wf.DeclareStr("last-name").Searchable().Required();
+				var fullName = wf.DeclareStr("full-name").Searchable().Required();
+				var email = wf.DeclareStr("email").Searchable().Required();
 				var ssn = wf.DeclareInt("ssn").Masked().Required();
 
 				var identityVerified = wf.DeclareBool("identity-verified").Searchable();
 
-				wf.Execute(VerifyIdentityTask, firstName, lastName, ssn).WithRetries(3);
+				wf.Execute(VerifyIdentityTask, fullName, email, ssn).WithRetries(3);
 
-				var identityVerificationResult = wf.WaitForEvent(IdentityVerifiedEvent).WithTimeout(60 * 60 * 24 * 3);
+				var identityVerificationResult = wf.WaitForEvent(IdentityVerifiedEvent)
+						.WithTimeout(60 * 60 * 24 * 3)
+						.WithCorrelationId(email);
 
 				wf.HandleError(
 					identityVerificationResult,
 					LHErrorType.Timeout,
 					handler =>
 					{
-						handler.Execute(NotifyCustomerNotVerifiedTask, firstName, lastName);
+						handler.Execute(NotifyCustomerNotVerifiedTask, fullName, email);
 						handler.Fail("customer-not-verified", "Unable to verify customer identity in time.");
 					}
 				);
@@ -39,8 +41,8 @@ namespace Quickstart
 
 				wf.DoIf(
 					wf.Condition(identityVerified, Comparator.Equals, true),
-					ifThread => ifThread.Execute(NotifyCustomerVerifiedTask, firstName, lastName),
-					elseThread => elseThread.Execute(NotifyCustomerNotVerifiedTask, firstName, lastName)
+					ifThread => ifThread.Execute(NotifyCustomerVerifiedTask, fullName, email),
+					elseThread => elseThread.Execute(NotifyCustomerNotVerifiedTask, fullName, email)
 				);
 			}
 

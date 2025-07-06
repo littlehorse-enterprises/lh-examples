@@ -1,7 +1,6 @@
 package io.littlehorse.quickstart;
 
 import io.littlehorse.sdk.common.config.LHConfig;
-import io.littlehorse.sdk.common.proto.PutExternalEventDefRequest;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 
 public class Main {
@@ -15,14 +14,7 @@ public class Main {
      * Server.
      */
     private static void registerMetadata() {
-        // We must register the `ExternalEventDef` for `identity-verified` before we can
-        // use it in a `WfSpec`.
-        config.getBlockingStub()
-                .putExternalEventDef(PutExternalEventDefRequest.newBuilder()
-                        .setName("identity-verified")
-                        .build());
-
-        // We must also register the TaskDefs before we can use them in a `WfSpec`.
+        // We must register the TaskDefs before we can use them in a `WfSpec`.
         LHTaskWorker verifyIdentityWorker = new LHTaskWorker(tasks, "verify-identity", config);
         verifyIdentityWorker.registerTaskDef();
 
@@ -38,7 +30,8 @@ public class Main {
         notifyCustomerVerifiedWorker.close();
         notifyCustomerNotVerifiedWorker.close();
 
-        // After registering the other metadata, we can finally register the WfSpec
+        // After registering the metadata, we can finally register the WfSpec. Note that this call
+        // automatically registers the ExternalEventDef.
         QuickstartWorkflow quickstart = new QuickstartWorkflow();
         quickstart.getWorkflow().registerWfSpec(config.getBlockingStub());
     }

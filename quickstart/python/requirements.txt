@@ -1,2 +1,2 @@
 typing_extensions>=4.12.2
-littlehorse-client==0.14.0
+littlehorse-client==0.14.1
