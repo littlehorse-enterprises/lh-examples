@@ -35,6 +35,9 @@ func registerMetadata() {
 	(*client).PutExternalEventDef(context.Background(),
 		&lhproto.PutExternalEventDefRequest{
 			Name: IDENTITY_VERIFIED_EVENT,
+			CorrelatedEventConfig: &lhproto.CorrelatedEventConfig{
+				DeleteAfterFirstCorrelation: true,
+			},
 		},
 	)
 

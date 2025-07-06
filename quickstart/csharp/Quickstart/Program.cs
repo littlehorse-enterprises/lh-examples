@@ -8,14 +8,15 @@ public abstract class Program
     private static readonly KnowYourCustomerTasks tasks = new KnowYourCustomerTasks();
     private static readonly LHConfig config = new LHConfig();
 
-    private static void RegisterMetadata()
+    private static async Task RegisterMetadata()
     {
         var client = config.GetGrpcClientInstance();
 
         Console.WriteLine("Registering ExternalEventDef");
         client.PutExternalEventDef(new PutExternalEventDefRequest
         {
-            Name = QuickstartWorkflow.IdentityVerifiedEvent
+            Name = QuickstartWorkflow.IdentityVerifiedEvent,
+            CorrelatedEventConfig = new CorrelatedEventConfig{},
         });
 
         Console.WriteLine("Registering TaskDefs");
@@ -23,16 +24,16 @@ public abstract class Program
         var notifyCustomerVerifiedWorker = new LHTaskWorker<KnowYourCustomerTasks>(tasks, QuickstartWorkflow.NotifyCustomerVerifiedTask, config);
         var notifyCustomerNotVerifiedWorker = new LHTaskWorker<KnowYourCustomerTasks>(tasks, QuickstartWorkflow.NotifyCustomerNotVerifiedTask, config);
 
-        verifyIdentityWorker.RegisterTaskDef();
-        notifyCustomerVerifiedWorker.RegisterTaskDef();
-        notifyCustomerNotVerifiedWorker.RegisterTaskDef();
+        await verifyIdentityWorker.RegisterTaskDef();
+        await notifyCustomerVerifiedWorker.RegisterTaskDef();
+        await notifyCustomerNotVerifiedWorker.RegisterTaskDef();
 
         Console.WriteLine("Registering WfSpec");
         var workflow = QuickstartWorkflow.GetWorkflow();
-        workflow.RegisterWfSpec(client);
+        await workflow.RegisterWfSpec(client);
     }
 
-    private static void StartTaskWorkers()
+    private static async Task StartTaskWorkers()
     {
         var verifyIdentityWorker = new LHTaskWorker<KnowYourCustomerTasks>(tasks, QuickstartWorkflow.VerifyIdentityTask, config);
         var notifyCustomerVerifiedWorker = new LHTaskWorker<KnowYourCustomerTasks>(tasks, QuickstartWorkflow.NotifyCustomerVerifiedTask, config);
@@ -53,7 +54,7 @@ public abstract class Program
         notifyCustomerNotVerifiedWorker.Close();
     }
 
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         if (args.Length != 1 || (args[0] != "register" && args[0] != "workers"))
         {
@@ -63,11 +64,11 @@ public abstract class Program
 
         if (args[0] == "register")
         {
-            RegisterMetadata();
+            await RegisterMetadata();
         }
         else
         {
-            StartTaskWorkers();
+            await StartTaskWorkers();
         }
     }
 }

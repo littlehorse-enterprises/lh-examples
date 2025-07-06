@@ -7,7 +7,7 @@ namespace Quickstart
         private static readonly Random random = new Random();
 
         [LHTaskMethod("verify-identity")]
-        public string VerifyIdentity(string firstName, string lastName, int ssn)
+        public async Task<string> VerifyIdentity(string firstName, string lastName, int ssn)
         {
             if (random.NextDouble() < 0.25)
             {
@@ -17,14 +17,14 @@ namespace Quickstart
         }
 
         [LHTaskMethod("notify-customer-not-verified")]
-        public string NotifyCustomerNotVerified(string firstName, string lastName)
+        public async Task<string> NotifyCustomerNotVerified(string firstName, string lastName)
         {
             return "Notification sent to customer " + firstName + " " + lastName
                 + " that their identity has not been verified";
         }
 
         [LHTaskMethod("notify-customer-verified")]
-        public string NotifyCustomerVerified(string firstName, string lastName)
+        public async Task<string> NotifyCustomerVerified(string firstName, string lastName)
         {
             return "Notification sent to customer " + firstName + " " + lastName
                 + " that their identity has been verified";
