@@ -9,7 +9,7 @@ public class ITOrderWorkflow {
 
     // There's a user `my-user` created automatically with the demo Pony ID image
     // image. We'll just assign our task to that user. The Pony ID demo image
-    // 
+    //
     public static final String USER_ID = "someemailaddress@somedomain.com";
 
     public void wfLogic(WorkflowThread wf) {
@@ -20,12 +20,10 @@ public class ITOrderWorkflow {
         NodeOutput result = wf.assignUserTask("approve-it-rental", USER_ID, null);
         isApproved.assign(result.jsonPath("$.isApproved"));
 
-        wf.doIfElse(
-                isApproved.isEqualTo(false),
-                ifHandler -> {
+        wf.doIf(isApproved.isEqualTo(false), ifHandler -> {
                     ifHandler.execute("decline-order", item, employee);
-                },
-                elseHandler -> {
+                })
+                .doElse(elseHandler -> {
                     elseHandler.execute("ship-item", item);
                 });
     }
