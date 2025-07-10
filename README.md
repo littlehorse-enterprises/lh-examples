@@ -4,14 +4,6 @@
 <img alt="LittleHorse Logo" src="https://littlehorse.io/img/logo.jpg" width="60%">
 </p>
 
-- [LittleHorse Examples](#littlehorse-examples)
-  - [Getting Started](#getting-started)
-    - [Installing LittleHorse](#installing-littlehorse)
-  - [Repository Inventory](#repository-inventory)
-    - [Quickstarts](#quickstarts)
-    - [Demo's](#demos)
-    - [Archives](#archives)
-
 
 Welcome to LittleHorse! LittleHorse is a platform for integration, microservice orchestration, and agents all based on the open-source [LittleHorse Kernel](https://littlehorse.io/docs/server). LittleHorse allows you to:
 
@@ -20,6 +12,13 @@ Welcome to LittleHorse! LittleHorse is a platform for integration, microservice 
 * **Secure** your applications and authorize your users to complete User Tasks with [Pony ID](https://littlehorse.io/docs/user-tasks-bridge).
 <!-- * **Deploy** workflows (`WfSpec`s) and Task Workers with the [LittleHorse Runtime](./08-runtime/08-runtime.mdx) based on [Quarkus](https://quarkus.io). -->
 
+- [LittleHorse Examples](#littlehorse-examples)
+  - [Getting Started](#getting-started)
+    - [Installing LittleHorse](#installing-littlehorse)
+  - [Repository Inventory](#repository-inventory)
+    - [Quickstarts](#quickstarts)
+    - [Demo's](#demos)
+    - [Archives](#archives)
 
 ## Getting Started
 
