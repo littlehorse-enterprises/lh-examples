@@ -16,7 +16,7 @@ public class KnowYourCustomerTasks {
             throw new RuntimeException("The external identity verification API is down");
         }
 
-        return "Successfully called external API to request verification for " + firstName + " " + lastName;
+        return "Successfully called external API to request verification for " + fullName + " at " + email;
     }
 
     @LHTaskMethod("notify-customer-verified")
