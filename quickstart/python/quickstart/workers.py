@@ -9,16 +9,16 @@ from littlehorse.worker import LHTaskWorker, LHType, WorkerContext
 
 logging.basicConfig(level=logging.INFO)
 
-async def verify_identity(first_name: str, last_name: str, ssn: Annotated[int, LHType(name="ssn", masked=True)], ctx: WorkerContext) -> str:
+async def verify_identity(full_name: str, email: str, ssn: Annotated[int, LHType(name="ssn", masked=True)], ctx: WorkerContext) -> str:
     if random.random() < 0.25:
         raise RuntimeError("The external identity verification API is down")
-    return f"Successfully called external API to request verification for {first_name} {last_name}"
+    return f"Successfully called external API to request verification for {full_name} at {email}"
 
-async def notify_customer_verified(first_name: str, last_name: str, ctx: WorkerContext) -> str:
-    return f"Notification sent to customer {first_name} {last_name} that their identity has been verified"
+async def notify_customer_verified(full_name: str, email: str, ctx: WorkerContext) -> str:
+    return f"Notification sent to customer {full_name} at {email} that their identity has been verified"
 
-async def notify_customer_not_verified(first_name: str, last_name: str, ctx: WorkerContext) -> str:
-    return f"Notification sent to customer {first_name} {last_name} that their identity has not been verified"
+async def notify_customer_not_verified(full_name: str, email: str, ctx: WorkerContext) -> str:
+    return f"Notification sent to customer {full_name} at {email} that their identity has not been verified"
 
 async def main() -> None:
     logging.info("Starting Task Worker!")

@@ -9,24 +9,24 @@ public class KnowYourCustomerTasks {
     private final Random random = new Random();
 
     @LHTaskMethod("verify-identity")
-    public String verifyIdentity(String firstName, String lastName, @LHType(masked = true) int ssn) {
+    public String verifyIdentity(String fullName, String email, @LHType(masked = true) int ssn) {
 
         if (random.nextDouble() < 0.25) {
             // Simulate an external API failure, throwing 500 status code for example
             throw new RuntimeException("The external identity verification API is down");
         }
 
-        return "Successfully called external API to request verification for " + firstName + " " + lastName;
+        return "Successfully called external API to request verification for " + fullName + " at " + email;
     }
 
     @LHTaskMethod("notify-customer-verified")
-    public String notifyCustomerVerified(String firstName, String lastName) {
-        return "Notification sent to customer " + firstName + " " + lastName + " that their identity has been verified";
+    public String notifyCustomerVerified(String fullName, String email) {
+        return "Notification sent to customer " + fullName + " at " + email + " that their identity has been verified";
     }
 
     @LHTaskMethod("notify-customer-not-verified")
-    public String notifyCustomerNotVerified(String firstName, String lastName) {
-        return "Notification sent to customer " + firstName + " " + lastName
+    public String notifyCustomerNotVerified(String fullName, String email) {
+        return "Notification sent to customer " + fullName + " at " + email
                 + " that their identity has not been verified";
     }
 }
