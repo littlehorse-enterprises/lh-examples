@@ -8,4 +8,4 @@ pluginManagement {
         id "${quarkusPluginId}" version "${quarkusPluginVersion}"
     }
 }
-rootProject.name='lh-quickstart-quarkus'
+rootProject.name='lh-runtime-quickstart'

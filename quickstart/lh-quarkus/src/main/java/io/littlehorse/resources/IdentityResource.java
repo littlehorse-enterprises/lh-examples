@@ -1,52 +1,95 @@
 package io.littlehorse.resources;
 
-import io.littlehorse.model.IdentityVerificationStatusResponse;
+import io.littlehorse.model.IdentityVerificationStatus;
+import io.littlehorse.model.SearchBookmark;
+import io.littlehorse.model.SearchIdentityVerificationStatusResponse;
+import io.littlehorse.model.ValidateIdentityRequest;
+import io.littlehorse.model.ValidateIdentityResponse;
 import io.littlehorse.model.VerifyIdentityRequest;
 import io.littlehorse.model.VerifyIdentityResponse;
-import io.littlehorse.sdk.common.proto.Variable;
+import io.littlehorse.sdk.common.proto.CorrelatedEvent;
+import io.littlehorse.sdk.common.proto.WfRunId;
+import io.littlehorse.sdk.common.proto.WfRunIdList;
 import io.littlehorse.services.IdentityService;
-import io.littlehorse.services.VariablesService;
-import io.littlehorse.workflows.QuickstartWorkflow;
+import io.littlehorse.services.WorkflowsService;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-@Path("/identity")
+@Path("/identity-verification")
 @Produces(MediaType.APPLICATION_JSON)
 public class IdentityResource {
 
     private final IdentityService identityService;
-    private final VariablesService variablesService;
+    private final WorkflowsService workflowsService;
 
-    public IdentityResource(IdentityService identityService, VariablesService variablesService) {
+    public IdentityResource(IdentityService identityService, WorkflowsService workflowsService) {
         this.identityService = identityService;
-        this.variablesService = variablesService;
+        this.workflowsService = workflowsService;
     }
 
     @GET
-    @Path("/{wfRunId}")
-    public Response get(@PathParam("wfRunId") String wfRunId) {
-        Variable fullName = variablesService.get(QuickstartWorkflow.FULL_NAME, wfRunId);
-        Variable email = variablesService.get(QuickstartWorkflow.EMAIL, wfRunId);
-        Variable status = variablesService.get(QuickstartWorkflow.APPROVAL_STATUS, wfRunId);
+    @Path("/status/search")
+    public Response search(
+            @QueryParam("status") String status,
+            @QueryParam("email") String email,
+            @QueryParam("bookmark") String bookmark) {
+        SearchBookmark oldBookmark = null;
 
-        IdentityVerificationStatusResponse response =
-                IdentityVerificationStatusResponse.fromProto(fullName, email, status);
+        if (Objects.nonNull(bookmark)) {
+            oldBookmark = SearchBookmark.fromString(bookmark);
+        }
+
+        WfRunIdList wfRunIdList = workflowsService.search(status, email, oldBookmark);
+
+        SearchBookmark newBookmark = SearchBookmark.fromProto(wfRunIdList.getBookmark());
+        List<IdentityVerificationStatus> statusList = new ArrayList<>();
+
+        for (WfRunId wfRunId : wfRunIdList.getResultsList()) {
+            statusList.add(identityService.getStatus(wfRunId.getId()));
+        }
+
+        SearchIdentityVerificationStatusResponse response =
+                new SearchIdentityVerificationStatusResponse(statusList, newBookmark);
+
+        return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/status/{wfRunId}")
+    public Response getStatus(@PathParam("wfRunId") String wfRunId) {
+        IdentityVerificationStatus response = identityService.getStatus(wfRunId);
 
         return Response.ok(response).build();
     }
 
     @POST
     @Path("/verify")
-    public Response verify(@Valid VerifyIdentityRequest request) {
-        String wfRunId =
-                identityService.startIdentityVerification(request.getFullName(), request.getEmail(), request.getSsn());
+    public Response verify(@Valid ValidateIdentityRequest request) {
+        CorrelatedEvent correlatedEvent = identityService.validate(request.getEmail(), request.getIsValid());
 
-        return Response.ok(new VerifyIdentityResponse(wfRunId)).build();
+        ValidateIdentityResponse response = ValidateIdentityResponse.fromCorrelatedEvent(correlatedEvent);
+
+        return Response.ok(response).build();
+    }
+
+    @POST
+    @Path("/start")
+    public Response start(@Valid VerifyIdentityRequest request) {
+        WfRunId wfRunId =
+                identityService.startVerification(request.getFullName(), request.getEmail(), request.getSsn());
+
+        VerifyIdentityResponse response = VerifyIdentityResponse.fromWfRunIdProto(wfRunId);
+
+        return Response.ok(response).build();
     }
 }

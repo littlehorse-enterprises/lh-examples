@@ -9,9 +9,6 @@ import org.junit.jupiter.api.Test;
 class GreetingResourceTest {
     @Test
     void testVerifyIdentityEndpoint() {
-        given().when()
-                .get("/identity/verify")
-                .then()
-                .statusCode(200);
+        given().when().get("/identity/verify").then().statusCode(200);
     }
 }

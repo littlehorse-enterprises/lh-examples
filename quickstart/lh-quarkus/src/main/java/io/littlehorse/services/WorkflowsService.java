@@ -1,12 +1,12 @@
 package io.littlehorse.services;
 
-import com.google.protobuf.ByteString;
+import io.littlehorse.model.SearchBookmark;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.SearchWfRunRequest;
 import io.littlehorse.sdk.common.proto.VariableMatch;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunIdList;
-import io.littlehorse.workflows.QuickstartWorkflow;
+import io.littlehorse.workflows.IdentityVerificationWorkflow;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Objects;
 
@@ -18,28 +18,30 @@ public class WorkflowsService {
         this.blockingStub = blockingStub;
     }
 
-    public WfRunIdList search(String status, String email, ByteString bookmark) {
+    public WfRunIdList search(String status, String email, SearchBookmark bookmark) {
         SearchWfRunRequest.Builder request = SearchWfRunRequest.newBuilder()
-                .setWfSpecName(QuickstartWorkflow.QUICKSTART_WORKFLOW)
+                .setWfSpecName(IdentityVerificationWorkflow.QUICKSTART_WORKFLOW)
                 .setLimit(10);
 
         if (Objects.nonNull(bookmark)) {
-            request.setBookmark(bookmark);
+            request.setBookmark(bookmark.toByteString());
         }
 
         if (Objects.nonNull(status)) {
             request.addVariableFilters(VariableMatch.newBuilder()
-                            .setVarName(QuickstartWorkflow.APPROVAL_STATUS)
+                            .setVarName(IdentityVerificationWorkflow.APPROVAL_STATUS)
                             .setValue(VariableValue.newBuilder().setStr(status)))
                     .build();
         }
         if (Objects.nonNull(email)) {
             request.addVariableFilters(VariableMatch.newBuilder()
-                            .setVarName(QuickstartWorkflow.EMAIL)
+                            .setVarName(IdentityVerificationWorkflow.EMAIL)
                             .setValue(VariableValue.newBuilder().setStr(email)))
                     .build();
         }
 
-        return blockingStub.searchWfRun(request.build());
+        WfRunIdList wfRunIdList = blockingStub.searchWfRun(request.build());
+
+        return wfRunIdList;
     }
 }
