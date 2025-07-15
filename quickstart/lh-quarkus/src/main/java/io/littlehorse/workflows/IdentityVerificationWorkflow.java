@@ -7,9 +7,9 @@ import io.littlehorse.sdk.wfsdk.NodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
-@LHWorkflow(IdentityVerificationWorkflow.QUICKSTART_WORKFLOW)
+@LHWorkflow(IdentityVerificationWorkflow.IDENTITY_VERIFICATION_WORKFLOW)
 public class IdentityVerificationWorkflow implements LHWorkflowDefinition {
-    public static final String QUICKSTART_WORKFLOW = "quickstart";
+    public static final String IDENTITY_VERIFICATION_WORKFLOW = "identity-verification";
 
     public static final String IDENTITY_VERIFIED_EVENT = "identity-verified";
     public static final String VERIFY_IDENTITY_TASK = "verify-identity";

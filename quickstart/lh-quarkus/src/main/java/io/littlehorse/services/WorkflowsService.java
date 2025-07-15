@@ -20,7 +20,7 @@ public class WorkflowsService {
 
     public WfRunIdList search(String status, String email, SearchBookmark bookmark) {
         SearchWfRunRequest.Builder request = SearchWfRunRequest.newBuilder()
-                .setWfSpecName(IdentityVerificationWorkflow.QUICKSTART_WORKFLOW)
+                .setWfSpecName(IdentityVerificationWorkflow.IDENTITY_VERIFICATION_WORKFLOW)
                 .setLimit(10);
 
         if (Objects.nonNull(bookmark)) {

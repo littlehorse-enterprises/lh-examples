@@ -26,7 +26,7 @@ public class IdentityService {
 
     public WfRunId startVerification(String fullName, String email, int ssn) {
         RunWfRequest request = RunWfRequest.newBuilder()
-                .setWfSpecName(IdentityVerificationWorkflow.QUICKSTART_WORKFLOW)
+                .setWfSpecName(IdentityVerificationWorkflow.IDENTITY_VERIFICATION_WORKFLOW)
                 .putVariables(IdentityVerificationWorkflow.FULL_NAME, LHLibUtil.objToVarVal(fullName))
                 .putVariables(IdentityVerificationWorkflow.EMAIL, LHLibUtil.objToVarVal(email))
                 .putVariables(IdentityVerificationWorkflow.SSN, LHLibUtil.objToVarVal(ssn))
@@ -51,6 +51,6 @@ public class IdentityService {
         String email = variablesService.getStringVariable(IdentityVerificationWorkflow.EMAIL, wfRunId);
         String status = variablesService.getStringVariable(IdentityVerificationWorkflow.APPROVAL_STATUS, wfRunId);
 
-        return new IdentityVerificationStatus(fullName, email, status);
+        return new IdentityVerificationStatus(fullName, email, status, wfRunId);
     }
 }
