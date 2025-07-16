@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id("com.diffplug.spotless") version "7.1.0"
+}
+
+group 'io.littlehorse.quickstart'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-hibernate-validator'
+
+    implementation 'jakarta.validation:jakarta.validation-api:3.1.1'
+
+    implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+spotless {
+    java {
+        target('**/*.java')
+        palantirJavaFormat()
+    }
+}
