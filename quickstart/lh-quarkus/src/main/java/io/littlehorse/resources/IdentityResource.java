@@ -21,8 +21,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Path("/identity-verification")
@@ -50,16 +48,7 @@ public class IdentityResource {
         }
 
         WfRunIdList wfRunIdList = workflowsService.search(status, email, oldBookmark);
-
-        SearchBookmark newBookmark = SearchBookmark.fromProto(wfRunIdList.getBookmark());
-        List<IdentityVerificationStatus> statusList = new ArrayList<>();
-
-        for (WfRunId wfRunId : wfRunIdList.getResultsList()) {
-            statusList.add(identityService.getStatus(wfRunId.getId()));
-        }
-
-        SearchIdentityVerificationStatusResponse response =
-                new SearchIdentityVerificationStatusResponse(statusList, newBookmark);
+        SearchIdentityVerificationStatusResponse response = identityService.getStatuses(wfRunIdList);
 
         return Response.ok(response).build();
     }

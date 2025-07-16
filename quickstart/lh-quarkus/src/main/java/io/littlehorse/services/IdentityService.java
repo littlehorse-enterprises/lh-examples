@@ -1,6 +1,8 @@
 package io.littlehorse.services;
 
 import io.littlehorse.model.IdentityVerificationStatus;
+import io.littlehorse.model.SearchBookmark;
+import io.littlehorse.model.SearchIdentityVerificationStatusResponse;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.CorrelatedEvent;
 import io.littlehorse.sdk.common.proto.ExternalEventDefId;
@@ -9,9 +11,12 @@ import io.littlehorse.sdk.common.proto.PutCorrelatedEventRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunId;
+import io.littlehorse.sdk.common.proto.WfRunIdList;
 import io.littlehorse.workflows.IdentityVerificationWorkflow;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 @ApplicationScoped
 public class IdentityService {
@@ -44,6 +49,18 @@ public class IdentityService {
                 .build();
 
         return blockingStub.putCorrelatedEvent(request);
+    }
+
+    public SearchIdentityVerificationStatusResponse getStatuses(WfRunIdList wfRunIdList) {
+        SearchBookmark newBookmark = SearchBookmark.fromProto(wfRunIdList.getBookmark());
+
+        List<IdentityVerificationStatus> statusList = new ArrayList<>();
+
+        for (WfRunId wfRunId : wfRunIdList.getResultsList()) {
+            statusList.add(getStatus(wfRunId.getId()));
+        }
+
+        return new SearchIdentityVerificationStatusResponse(statusList, newBookmark);
     }
 
     public IdentityVerificationStatus getStatus(String wfRunId) {
