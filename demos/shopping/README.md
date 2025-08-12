@@ -12,6 +12,9 @@ The application consists of the following components:
 - **Promo Service** (Port 4213): Handles promotional offers and coupon codes
 - **Frontend** (Port 4200): Angular-based user interface
 - **Database** (Port 4233): YugabyteDB (PostgreSQL-compatible distributed database)
+- **LittleHorse Server** (Port 2023): Workflow orchestration engine
+- **Kafka Broker** (Port 9092): Message streaming platform (embedded in LittleHorse)
+- **LittleHorse Dashboard** (Port 8080): Web UI for monitoring workflows
 
 ## Prerequisites
 
@@ -52,37 +55,55 @@ The frontend requires Node.js v24.2.0. You can install and manage Node.js versio
 
 ## LittleHorse Dependency
 
-This demo depends on the [LittleHorse repository](https://github.com/littlehorse-enterprises/littlehorse) using the `master` branch. Before running the demo, you need to:
+This demo uses the standalone LittleHorse Docker image which includes an embedded Kafka cluster, eliminating the need for external dependencies. The configuration uses standard ports:
 
-1. Clone and checkout the required branch:
-   ```bash
-   git clone https://github.com/littlehorse-enterprises/littlehorse
-   cd littlehorse
-   ```
+- **LittleHorse Server**: Port 2023
+- **Kafka Broker**: Port 9092  
+- **LittleHorse Dashboard**: Port 8080
 
-2. Start the Kafka cluster:
-   ```bash
-   # Start the Kafka cluster using compose
-   ./local-dev/setup.sh
-   ```
-
-3. Start the LittleHorse server with the required fixes in the branch:
-   ```bash
-   ./local-dev/do-server.sh
-   ```
+The standalone image will automatically start when you run the demo. If you have any services already running on these ports, the startup script will detect them and ask you to stop them first.
 
 ## Running the Demo
 
 ### Quick Start (All Services)
 
-Run the commands below to start the demo
+Run the commands below to start the demo with the embedded LittleHorse standalone server:
 
 ```bash
-# In a new terminal, start all services (db, microservices, and frontend)
+# In a new terminal, start all services (db, LittleHorse, microservices, and frontend)
 ./start_demo.sh
 ```
 
-After starting the services, you can access the frontend at: http://localhost:4200
+### Alternative: External LittleHorse Server Mode
+
+If you prefer to run your own LittleHorse server (e.g., for development), you can use the `--no-server` flag:
+
+```bash
+# Start only database and microservices (no LittleHorse container)
+./start_demo.sh --no-server
+```
+
+**Prerequisites for `--no-server` mode:**
+- You must have a LittleHorse server running on `localhost:2023`
+- You must have Kafka running on `localhost:9092`
+- Example: Run LittleHorse locally with `./local-dev/do-server.sh` from the LittleHorse repository
+
+### Script Options
+
+```bash
+# Show help
+./start_demo.sh --help
+
+# Start with embedded LittleHorse (default)
+./start_demo.sh
+
+# Start without LittleHorse container (use external server)
+./start_demo.sh --no-server
+```
+
+After starting the services, you can access:
+- **Frontend**: http://localhost:4200
+- **LittleHorse Dashboard**: http://localhost:8080
 
 Once you're done with the demo, you can shut down all services with:
 

@@ -1,4 +1,27 @@
 services:
+  # LittleHorse standalone server with embedded Kafka
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
+    container_name: order-resilience-littlehorse
+    pull_policy: always
+    ports:
+      - "2023:2023"   # LittleHorse server
+      - "9092:9092"   # Kafka broker
+      - "8080:8080"   # LittleHorse dashboard
+    environment:
+      - LHS_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      - LHS_SHOULD_CREATE_TOPICS=true
+    networks:
+      - order-resilience
+    healthcheck:
+      test: curl -f localhost:1822/liveness
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - lh_data:/var/lib/lh/data
+
   yugabytedb:
     image: yugabytedb/yugabyte:latest
     container_name: order-resilience-yugabytedb
@@ -16,7 +39,8 @@ services:
   db-init:
     image: yugabytedb/yugabyte:latest
     depends_on:
-      - yugabytedb
+      yugabytedb:
+        condition: service_started
     entrypoint: >
       bash -c "
         echo 'Waiting for YugabyteDB to be ready...';
@@ -37,3 +61,4 @@ networks:
 
 volumes:
   yugabyte-data:
+  lh_data:

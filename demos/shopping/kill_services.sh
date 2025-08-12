@@ -20,5 +20,6 @@ kill_process_on_port 4211 "Customer service"
 kill_process_on_port 4212 "Product service"
 kill_process_on_port 4213 "Promo service"
 kill_process_on_port 4200 "Frontend"
+docker compose down
 
 echo "All services and db have been terminated."
