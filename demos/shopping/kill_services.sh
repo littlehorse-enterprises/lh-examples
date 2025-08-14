@@ -23,3 +23,9 @@ kill_process_on_port 4200 "Frontend"
 docker compose down
 
 echo "All services and db have been terminated."
+
+
+rm ./customer.log
+rm ./product.log
+rm ./order.log
+rm ./promo.log

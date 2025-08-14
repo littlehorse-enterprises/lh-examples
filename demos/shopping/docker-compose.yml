@@ -11,6 +11,8 @@ services:
     environment:
       - LHS_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
       - LHS_SHOULD_CREATE_TOPICS=true
+      - LHS_CLUSTER_ID=my-cluster
+      - LHS_INSTANCE_ID=1
     networks:
       - order-resilience
     healthcheck:

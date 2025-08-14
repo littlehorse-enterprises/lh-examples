@@ -57,13 +57,6 @@ if [ "$NO_SERVER" = false ]; then
         conflict=1
     fi
 
-    if ! check_port 9092 "Kafka Broker"; then
-        conflict=1
-    fi
-
-    if ! check_port 8080 "LittleHorse Dashboard"; then
-        conflict=1
-    fi
 
     if [ $conflict -eq 1 ]; then
         echo "======================================"
