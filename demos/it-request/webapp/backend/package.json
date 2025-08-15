@@ -1,0 +1,25 @@
+{
+  "name": "littlehorse-user-tasks-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Backend for LittleHorse User Tasks - IT Request example",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "adrian@littlehorse.io",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0",
+    "littlehorse-client": "^0.14.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  }
+}

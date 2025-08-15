@@ -1,0 +1,22 @@
+{
+  "name": "littlehorse-user-tasks-webapp",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Workspace for LittleHorse User Tasks example (frontend + backend)",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -ws",
+    "start": "npm run start -w backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
