@@ -145,10 +145,15 @@ export function ITRequestApp() {
   function goToStep(next: StepNumber): void {
     setCurrentStep(next);
     setResponseText('');
-    // Move focus to the main heading for screen readers when step changes
+    // Move focus to the main heading for screen readers when step changes (manual navigation)
     requestAnimationFrame(() => {
       const el = document.getElementById('step-heading');
-      if (el) el.focus();
+      if (el) {
+        el.setAttribute('tabindex', '-1');
+        el.focus();
+        // Remove tabindex after focus to avoid unwanted focus in the future
+        setTimeout(() => el.removeAttribute('tabindex'), 100);
+      }
     });
   }
 
@@ -364,15 +369,26 @@ export function ITRequestApp() {
   async function handleRestart(): Promise<void> {
     setIsLoading(true);
     setResponseText('');
+    let hasDeleteOperation = false;
+    
     try {
       // Perform deletions based on scope selection
       if (deleteScope === 'current' && wfRunId) {
-        await deleteWfRun(wfRunId);
+        const result = await deleteWfRun(wfRunId);
+        setResponseText(JSON.stringify(result, null, 2));
         setStatusText('Deleted current wfRun.');
+        hasDeleteOperation = true;
       } else if (deleteScope === 'all') {
         // This example's spec name is fixed
         const result = await deleteAllWfRunsForSpec('it-request');
+        setResponseText(JSON.stringify(result, null, 2));
         setStatusText(`Deleted ${result.deleted} wfRun(s) for spec "it-request".`);
+        hasDeleteOperation = true;
+      }
+
+      // If we performed a delete operation, wait 3 seconds so user can read the response
+      if (hasDeleteOperation) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
 
       // Reset all app state
@@ -436,7 +452,7 @@ export function ITRequestApp() {
     <>
       {/* Left column: controls for the current step */}
       <section className="flex flex-col" aria-labelledby="step-heading" aria-busy={isLoading}>
-        <h2 id="step-heading" tabIndex={-1} className="mt-0 mb-4 text-2xl font-semibold">{heading}</h2>
+        <h2 id="step-heading" className="mt-0 mb-4 text-2xl font-semibold">{heading}</h2>
         {/* Step-specific short instructions */}
         <p className="m-0 mb-6 opacity-95 text-gray-300">
           {((): string => {
@@ -667,7 +683,7 @@ export function ITRequestApp() {
         </div>
         <div className="h-3" />
         <h3 className="mt-0 mb-4 text-xl font-semibold" id="api-response-heading">API Response</h3>
-        <div className="bg-black/80 border border-white/20 rounded-md flex-1 mb-6 min-h-0 overflow-auto max-h-[calc(100vh-280px)]" role="region" aria-live="polite" aria-atomic="true" aria-labelledby="api-response-heading">
+        <div className="bg-black/80 border border-white/20 rounded-md flex-1 mb-6 min-h-0 overflow-auto max-h-[calc(100vh-400px)]" role="region" aria-live="polite" aria-atomic="true" aria-labelledby="api-response-heading">
           <SyntaxHighlighter
             className="code-block"
             language="json"
