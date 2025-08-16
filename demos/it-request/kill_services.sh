@@ -47,8 +47,7 @@ docker compose down
 
 # Kill any lingering processes on known ports
 echo "Checking for lingering processes..."
-kill_process_on_port 4000 "Backend API"
-kill_process_on_port 5173 "Frontend Dev Server"
+kill_process_on_port 5173 "Next.js Webapp"
 kill_process_on_port 2023 "LittleHorse Server"
 kill_process_on_port 9092 "Kafka Broker"
 kill_process_on_port 8080 "LittleHorse Dashboard"

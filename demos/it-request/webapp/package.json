@@ -1,22 +1,30 @@
 {
-  "name": "littlehorse-user-tasks-webapp",
-  "private": true,
+  "name": "littlehorse-it-request-nextjs",
   "version": "0.1.0",
-  "description": "Workspace for LittleHorse User Tasks example (frontend + backend)",
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
-  "engines": {
-    "node": ">=18"
-  },
+  "private": true,
   "scripts": {
-    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -ws",
-    "start": "npm run start -w backend"
+    "dev": "next dev -p 5173",
+    "build": "next build",
+    "start": "next start -p 5173",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "littlehorse-client": "^0.14.1",
+    "react-syntax-highlighter": "^15.6.1"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "typescript": "^5.0.0",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0"
   }
 }
-

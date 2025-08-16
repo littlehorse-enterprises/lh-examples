@@ -7,8 +7,7 @@ This demo showcases LittleHorse User Tasks in a corporate IT request workflow. I
 The application consists of the following components:
 
 - **Java Application**: Handles workflow definition, task workers, and business logic
-- **Frontend** (Port 5173): React + TypeScript web interface for creating and managing IT requests
-- **Backend API** (Port 4000): Express + TypeScript API proxy to LittleHorse
+- **Next.js Webapp** (Port 5173): Modern web interface built with Next.js, TypeScript, and Tailwind CSS
 - **LittleHorse Server** (Port 2023): Workflow orchestration engine
 - **Kafka Broker** (Port 9092): Message streaming platform (embedded in LittleHorse)
 - **LittleHorse Dashboard** (Port 8080): Web UI for monitoring workflows
@@ -98,8 +97,7 @@ If you prefer to run your own LittleHorse server (e.g., for development), you ca
 ```
 
 After starting the services, you can access:
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:4000
+- **Next.js Webapp**: http://localhost:5173
 - **LittleHorse Dashboard**: http://localhost:8080
 
 Once you're done with the demo, you can shut down all services with:
@@ -128,7 +126,7 @@ For development purposes, you may want to start services individually. Follow th
    ./gradlew run
    ```
 
-4. **Start the webapp (in a new terminal):**
+4. **Start the Next.js webapp (in a new terminal):**
    ```bash
    cd webapp
    npm run dev
@@ -223,10 +221,13 @@ There are two general ways to find User Task Runs:
 
 ## Webapp Structure
 
-The webapp is organized as an npm workspace containing:
+The webapp is a modern Next.js application with:
 
-- **Frontend**: React + TypeScript app (Vite) at http://localhost:5173
-- **Backend**: Express + TypeScript API proxy to LittleHorse at http://localhost:4000
+- **Next.js 14** with App Router for improved performance and developer experience
+- **TypeScript** for type safety with direct integration to LittleHorse client types
+- **Tailwind CSS** for modern, maintainable styling
+- **Server Actions** for secure API calls without a separate backend
+- **Responsive Design** with accessibility features
 
 ### Webapp Development
 
@@ -235,22 +236,22 @@ The webapp is organized as an npm workspace containing:
 cd webapp
 npm install
 
-# Start development servers (both frontend and backend)
+# Start development server
 npm run dev
 
-# Build both packages
+# Build for production
 npm run build
 
-# Start only backend (production)
-npm run start
+# Start production server
+npm start
 ```
 
 ### Webapp Configuration
 
-- The Vite dev server proxies requests from `/api/*` to `http://localhost:4000`
-- No CORS configuration needed in development
-- Frontend supports `VITE_API_URL` for custom API endpoints when deploying separately
-- Each package maintains its own `package.json` and TypeScript configs
+- Uses Server Actions for API calls, eliminating the need for a separate backend
+- Direct integration with `littlehorse-client` package for type safety
+- Environment variables for LittleHorse connection configuration
+- Built-in optimization and security features from Next.js
 
 ## Troubleshooting
 
@@ -279,4 +280,5 @@ In production environments:
 - Users would log into a customized web frontend to execute User Task Runs
 - LittleHorse tracks User Task state but doesn't provide a built-in web interface
 - Custom presentation layers can be built for mobile apps, internal tools, or customer-facing applications
+- The Next.js webapp provides a production-ready foundation with built-in security and optimization
 - For custom web frontends, contact LittleHorse Professional Services (`sales@littlehorse.io`)
