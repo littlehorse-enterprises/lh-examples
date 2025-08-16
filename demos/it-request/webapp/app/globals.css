@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --divider-color: rgba(255, 255, 255, 0.2);
+    --focus-ring: 2px solid #7aa2ff;
+    --focus-ring-offset: 2px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-black text-white font-sans text-base m-0;
+    font-family: ui-sans-serif, system-ui, -apple-system;
+  }
+}
+
+@layer components {  
+  /* Skip link for accessibility */
+  .skip-link {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden border-0;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .skip-link:focus {
+    @apply static w-auto h-auto m-2 p-3 bg-gray-800 text-white border-2 border-lh-primary rounded-md;
+    clip: auto;
+  }
+
+  /* Focus styles for better accessibility */
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible {
+    @apply outline-none ring-2 ring-lh-primary ring-offset-2;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      scroll-behavior: auto !important;
+    }
+    .animate-spin {
+      @apply animate-none;
+    }
+  }
+}
