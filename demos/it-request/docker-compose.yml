@@ -1,0 +1,31 @@
+services:
+  # LittleHorse standalone server with embedded Kafka
+  littlehorse:
+    image: ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
+    container_name: it-request-littlehorse
+    pull_policy: always
+    ports:
+      - "2023:2023"   # LittleHorse server
+      - "9092:9092"   # Kafka broker
+      - "8080:8080"   # LittleHorse dashboard
+    environment:
+      - LHS_KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      - LHS_SHOULD_CREATE_TOPICS=true
+      - LHS_CLUSTER_ID=it-request-cluster
+      - LHS_INSTANCE_ID=1
+    networks:
+      - it-request
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1822/liveness"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - lh_data:/var/lib/lh/data
+
+networks:
+  it-request:
+
+volumes:
+  lh_data:
