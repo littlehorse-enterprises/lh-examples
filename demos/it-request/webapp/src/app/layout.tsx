@@ -6,60 +6,19 @@ import "tailwindcss/tailwind.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
-// Uncomment and fill out all metadata fields
 export const metadata: Metadata = {
-	// title: {
-	// 	template: "%s — App",
-	// 	default: "App",
-	// },
-	// description:
-	// 	"Description",
-	// category: "software",
-	// metadataBase: new URL(""),
-	// openGraph: {
-	// 	type: "website",
-	// 	locale: "en",
-	// 	url: "",
-	// 	siteName: "",
-	// 	title: "",
-	// 	description: "",
-	// 	images: [
-	// 		{
-	// 			url: "/logo.svg",
-	// 			width: 400,
-	// 			height: 400,
-	// 			alt: "",
-	// 		},
-	// 	],
-	// },
-	// twitter: {
-	// 	creator: "@",
-	// 	site: "",
-	// 	card: "",
-	// 	description: "",
-	// 	images: [""],
-	// },
-	// creator: "",
-	// colorScheme: "light",
-	// themeColor: "#ffb400",
-	// publisher: "",
-	// keywords: [],
-	// referrer: "no-referrer-when-downgrade",
-	// applicationName: "",
-	// icons: {
-	// 	icon: "/icons/favicon.ico",
-	// 	apple: "/icons/apple-touch-icon.png",
-	// 	shortcut: "/icons/favicon.ico",
-	// },
-	// viewport: {
-	// 	width: "device-width",
-	// 	initialScale: 1,
-	// 	maximumScale: 1,
-	// 	userScalable: false,
-	// },
-	// other: {
-	// 	handheldFriendly: "true",
-	// },
+	title: {
+		template: "%s — LittleHorse: User Tasks / IT Request Example",
+		default: "LittleHorse: User Tasks / IT Request Example",
+	},
+	description: 'A demo showcasing LittleHorse User Tasks in an IT request workflow',
+	icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+  },
 };
 
 const inter = Inter({
@@ -82,7 +41,7 @@ export default function RootLayout({
 					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
-				/>
+				/>  {/* TODO: fix (boilerplate issue with dark mode) */}
 				<Toaster richColors position="top-center" />
 				{children}
 			</body>
