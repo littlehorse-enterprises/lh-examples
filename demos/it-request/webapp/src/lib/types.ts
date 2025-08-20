@@ -39,9 +39,11 @@ export type FinanceDecision = 'APPROVE' | 'DECLINE';
 export interface TaskIdRef {
   wfRunId: WfRunId;
   userTaskGuid: string;
-}
+};
 
 export interface UserTaskDetails {
   userTaskRun: UserTaskRun;
   userTaskDef: UserTaskDef;
-}
+};
+
+export type UserTaskFieldValue = string | boolean | number;
