@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import type { WfRunId } from '@/lib/types';
 
 export type StepNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type FinanceDecision = 'APPROVE' | 'DECLINE';
@@ -9,7 +10,7 @@ interface WorkflowState {
   currentStep: StepNumber;
   apiHealthy: boolean;
   
-  wfRunId: string;
+  wfRunId: WfRunId | null;
   requestingUserId: string;
   
   requestingUserTaskGuid: string;
@@ -38,7 +39,7 @@ interface WorkflowActions {
   
   setApiHealth: (healthy: boolean) => void;
   
-  setWfRunId: (id: string) => void;
+  setWfRunId: (id: WfRunId | null) => void;
   setRequestingUserId: (userId: string) => void;
   
   setRequestingUserTaskGuid: (guid: string) => void;
@@ -65,7 +66,7 @@ interface WorkflowActions {
 const initialState: WorkflowState = {
   currentStep: 1,
   apiHealthy: false,
-  wfRunId: '',
+  wfRunId: null,
   requestingUserId: '',
   requestingUserTaskGuid: '',
   financeUserTaskGuid: '',

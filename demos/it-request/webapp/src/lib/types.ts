@@ -15,15 +15,14 @@ import type {
   SearchWfRunRequest,
 } from 'littlehorse-client/dist/proto';
 
-// Re-export the types we need
 export type {
   UserTaskRun,
   UserTaskDef,
+  UserTaskRunStatus,
   WfRunId,
+  WfRun,
   UserTaskRunId,
   UserTaskRunIdList,
-  UserTaskRunStatus,
-  WfRun,
   VariableValue,
   AssignUserTaskRunRequest,
   CompleteUserTaskRunRequest,
