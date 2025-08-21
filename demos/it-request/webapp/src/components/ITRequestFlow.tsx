@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useWorkflowStore } from '@/store/workflow.store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,18 +8,32 @@ import { Loader2 } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { HealthCheckStep } from './steps/HealthCheckStep';
+import { StartWorkflowStep } from './steps/StartWorkflowStep';
+import { FindRequestingTaskStep } from './steps/FindRequestingTaskStep';
 
 const stepInfo = {
   1: {
     title: 'Step 1: Check API health',
     description: 'API health check: Ensuring the backend is reachable.',
-  }
+  },
+  2: {
+    title: 'Step 2: Run IT Request workflow',
+    description: 'Enter a valid User ID and start the IT Request workflow.',
+  },
+  3: {
+    title: 'Step 3: Find requesting user task',
+    description: 'First finds the task assigned to the requester. In this workflow, when the task is not claimed after 1 minute it gets released. In that case, it is found by definition and assigned back.',
+  },
 };
 
 const StepRenderer = ({ step }: { step: number }) => {
   switch (step) {
     case 1:
       return <HealthCheckStep />;
+    case 2:
+      return <StartWorkflowStep />;
+    case 3:
+      return <FindRequestingTaskStep />;
     default:
       return null;
   }
@@ -35,17 +49,42 @@ export const ITRequestFlow = () => {
     isLoading,
     statusText,
     responseText,
+    setStatus,
     nextStep,
   } = useWorkflowStore();
-  
+
   const canContinue = useMemo(() => {
     switch (currentStep) {
       case 1:
         return apiHealthy;
+      case 2:
+        return wfRunId !== null;
+      case 3:
+        return Boolean(requestingUserTaskGuid);
       default:
         return false;
     }
-  }, [currentStep, apiHealthy, wfRunId, requestingUserTaskGuid]);  
+  }, [currentStep, apiHealthy, wfRunId, requestingUserTaskGuid]);
+
+  // Update status text when step changes
+  useEffect(() => {
+    const defaultStatuses: Record<number, string> = {
+      2: 'Please enter a valid User ID.',
+    };
+    
+    if (defaultStatuses[currentStep]) {
+      setStatus(defaultStatuses[currentStep]);
+    }
+  }, [currentStep, setStatus]);
+
+  // Focus management for accessibility
+  useEffect(() => {
+    if (headingRef.current) {
+      headingRef.current.setAttribute('tabindex', '-1');
+      headingRef.current.focus();
+      setTimeout(() => headingRef.current?.removeAttribute('tabindex'), 100);
+    }
+  }, [currentStep]);
 
   const handleContinue = () => {
    // TODO: add continue logic
@@ -55,7 +94,7 @@ export const ITRequestFlow = () => {
   const { title, description } = stepInfo[currentStep as keyof typeof stepInfo];
 
   return (
-    <>      
+    <>
       <section className="flex flex-col" aria-labelledby='step-heading' aria-busy={isLoading}>
         <Card>
           <CardHeader>
@@ -66,13 +105,13 @@ export const ITRequestFlow = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <StepRenderer step={currentStep} />
-            <Button
-              onClick={handleContinue}
-              disabled={!canContinue}
-              className="w-full sm:w-auto"
-            >
-              Continue
-            </Button>
+              <Button
+                onClick={handleContinue}
+                disabled={!canContinue}
+                className="w-full sm:w-auto"
+              >
+                Continue
+              </Button>
           </CardContent>
         </Card>
       </section>

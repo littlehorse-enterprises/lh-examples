@@ -40,7 +40,7 @@ export default function RootLayout({
 					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
-				/>
+				/>  {/* TODO: fix (boilerplate issue with dark mode) */}
 				{children}
 			</body>
 		</html>
