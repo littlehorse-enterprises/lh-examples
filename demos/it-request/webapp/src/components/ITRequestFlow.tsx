@@ -11,6 +11,8 @@ import { HealthCheckStep } from './steps/HealthCheckStep';
 import { StartWorkflowStep } from './steps/StartWorkflowStep';
 import { FindRequestingTaskStep } from './steps/FindRequestingTaskStep';
 import { CompleteRequestStep } from './steps/CompleteRequestStep';
+import { FindFinanceTaskStep } from './steps/FindFinanceTaskStep';
+import { AssignFinanceTaskStep } from './steps/AssignFinanceTaskStep';
 
 const stepInfo = {
   1: {
@@ -29,6 +31,14 @@ const stepInfo = {
     title: 'Step 4: Complete requesting user task',
     description: 'Provide the Requested Item and Justification (both required), then submit to complete the requesting task.',
   },
+  5: {
+    title: 'Step 5: Find the Finance task',
+    description: 'Finding the Finance task (automatically created by the workflow).',
+  },
+  6: {
+    title: 'Step 6: Assign Finance task to a user',
+    description: 'Enter any Finance User ID to assign the task. Optionally enable override to take the task if needed.',
+  },
 };
 
 const StepRenderer = ({ step }: { step: number }) => {
@@ -41,6 +51,10 @@ const StepRenderer = ({ step }: { step: number }) => {
       return <FindRequestingTaskStep />;
     case 4:
       return <CompleteRequestStep />;
+    case 5:
+      return <FindFinanceTaskStep />;
+    case 6:
+      return <AssignFinanceTaskStep />;
     default:
       return null;
   }
@@ -56,6 +70,8 @@ export const ITRequestFlow = () => {
     requestedItem,
     justification,
     requestingTaskSubmitted,
+    financeUserTaskGuid,
+    financeAssigned,
     isLoading,
     statusText,
     responseText,
@@ -73,17 +89,22 @@ export const ITRequestFlow = () => {
         return Boolean(requestingUserTaskGuid);
       case 4:
         return requestingTaskSubmitted || (requestedItem.trim().length > 0 && justification.trim().length > 0);
+      case 5:
+        return Boolean(financeUserTaskGuid);
+      case 6:
+        return financeAssigned;
       default:
         return false;
     }
   }, [currentStep, apiHealthy, wfRunId, requestingUserTaskGuid, requestedItem, justification, 
-      requestingTaskSubmitted]);
+      requestingTaskSubmitted,financeUserTaskGuid, financeAssigned]);
 
   // Update status text when step changes
   useEffect(() => {
     const defaultStatuses: Record<number, string> = {
       2: 'Please enter a valid User ID.',
       4: 'Please fill in all required fields.',
+      6: 'Please enter a valid User ID.',
     };
     
     if (defaultStatuses[currentStep]) {
@@ -101,6 +122,7 @@ export const ITRequestFlow = () => {
   }, [currentStep]);
 
   const handleContinue = () => {
+   // TODO: add continue logic
    nextStep();
   };
 
@@ -132,7 +154,7 @@ export const ITRequestFlow = () => {
         </Card>
       </section>
 
-     <section className="flex flex-col min-h-0 max-h-full" aria-labelledby="status-heading">
+      <section className="flex flex-col min-h-0 max-h-full" aria-labelledby="status-heading">
         <Card className="mb-6">
           <CardHeader className="mb-3">
             <CardTitle>Status</CardTitle>

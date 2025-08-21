@@ -13,14 +13,22 @@ export const useWorkflowOperations = () => {
     requestingUserId,
     wfRunId,
     requestingUserTaskGuid,
+    financeUserTaskGuid,
     requestedItem,
     justification,
+    financeAssigneeUserId,
+    financeOverride,
+    financeDecision,
     setWfRunId,
     setRequestingUserTaskGuid,
+    setFinanceUserTaskGuid,
     setLoading,
     setStatus,
     setResponse,
     setRequestingTaskSubmitted,
+    setFinanceAssigned,
+    setWorkflowCompleted,
+    setShowResultModal,
   } = useWorkflowStore();
 
   const extractTaskIds = useCallback((value: unknown): TaskIdRef[] => {
@@ -97,6 +105,7 @@ export const useWorkflowOperations = () => {
       setStatus('No assigned task found. Searching by definition name...');
       const alt = await listUserTasks({ userTaskDefName: 'it-request' });
       setResponse(JSON.stringify(alt, null, 2));
+
       const candidates = extractTaskIds(alt);
       const match = candidates.find((t) => t.wfRunId.id === wfRunId?.id);
 
@@ -151,24 +160,141 @@ export const useWorkflowOperations = () => {
         throw new Error('wfRunId is required');
       }
       await completeUserTask(wfRunId, requestingUserTaskGuid, requestingUserId, results);
+
       setResponse(JSON.stringify({ ok: true }, null, 2));
       setStatus('OK');
       setRequestingTaskSubmitted(true);
+
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+
+      setResponse(JSON.stringify({ error: message }, null, 2));
+      setStatus('Error');
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [wfRunId, requestingUserTaskGuid, requestingUserId, requestedItem, justification,
+    setLoading, setResponse, setStatus, setRequestingTaskSubmitted]);
+
+  const findFinanceTask = useCallback(async () => {
+    setLoading(true);
+    setStatus('Finding Finance task... Looking for a pending Finance review task.');
+    setResponse('');
+
+    try {
+      const data = await listUserTasks({ userGroup: 'finance' });
+      setResponse(JSON.stringify(data, null, 2));
+
+      const candidates = extractTaskIds(data);
+      const match = candidates.find((t) => t.wfRunId.id === wfRunId?.id);
+      console.log('match', match);
+      
+      if (match) {
+        setFinanceUserTaskGuid(match.userTaskGuid);
+        console.log('setFinanceUserTaskGuid', match.userTaskGuid);
+        setStatus(`Found Finance task awaiting action.`);
+
+        return true;
+      } else {
+        setFinanceUserTaskGuid('');
+        setStatus('No Finance task found at this time.');
+
+        return false;
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      setResponse(JSON.stringify({ error: message }, null, 2));
+      setFinanceUserTaskGuid('');
+      setStatus(`Failed to find Finance task: ${message}`);
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [wfRunId, extractTaskIds, setLoading, setStatus, setResponse, setFinanceUserTaskGuid]);
+
+  const assignFinanceTask = useCallback(async () => {
+    setLoading(true);
+    setStatus('Assigning task...');
+    setResponse('');
+
+    try {
+      if (!wfRunId) {
+        throw new Error('wfRunId is required');
+      }
+      await assignUserTask(wfRunId, financeUserTaskGuid, { 
+        userId: financeAssigneeUserId, 
+        override: financeOverride 
+      });
+      
+      setResponse(JSON.stringify({ 
+        ok: true, 
+        wfRunId, 
+        userId: financeAssigneeUserId, 
+        userTaskGuid: financeUserTaskGuid 
+      }, null, 2));
+
+      setStatus(`OK — Task assigned to ${financeAssigneeUserId}`);
+      setFinanceAssigned(true);
+
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      setResponse(JSON.stringify({ error: message }, null, 2));
+      setStatus('Error');
+      setFinanceAssigned(false);
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [wfRunId, financeUserTaskGuid, financeAssigneeUserId, financeOverride,
+      setLoading, setStatus, setResponse, setFinanceAssigned]);
+
+  const completeFinanceTask = useCallback(async () => {
+    setLoading(true);
+    setResponse('');
+
+    try {
+      const results: Record<string, UserTaskFieldValue> = {
+        isApproved: financeDecision === 'APPROVE'
+      };
+
+      if (!wfRunId) {
+        throw new Error('wfRunId is required');
+      }
+
+      await completeUserTask(wfRunId, financeUserTaskGuid, financeAssigneeUserId, results);
+      setResponse(JSON.stringify({ ok: true }, null, 2));
+
+      setStatus('OK');
+      setWorkflowCompleted(true);
+      setShowResultModal(true);
+
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
       setResponse(JSON.stringify({ error: message }, null, 2));
       setStatus('Error');
       return false;
     } finally {
       setLoading(false);
     }
-  }, [wfRunId, requestingUserTaskGuid, requestingUserId, requestedItem, justification, 
-      setLoading, setResponse, setStatus, setRequestingTaskSubmitted]);
+  }, [wfRunId, financeUserTaskGuid, financeAssigneeUserId, financeDecision,
+      setLoading, setResponse, setStatus, setWorkflowCompleted, setShowResultModal]);
 
   return {
     runWorkflow,
     findRequestingTask,
     completeRequestingTask,
+    findFinanceTask,
+    assignFinanceTask,
+    completeFinanceTask,
   };
 };
