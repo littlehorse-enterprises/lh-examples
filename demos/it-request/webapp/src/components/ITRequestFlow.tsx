@@ -2,17 +2,23 @@
 
 import { useMemo, useRef, useEffect } from 'react';
 import { useWorkflowStore } from '@/store/workflow.store';
+import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 import { HealthCheckStep } from './steps/HealthCheckStep';
 import { StartWorkflowStep } from './steps/StartWorkflowStep';
 import { FindRequestingTaskStep } from './steps/FindRequestingTaskStep';
 import { CompleteRequestStep } from './steps/CompleteRequestStep';
 import { FindFinanceTaskStep } from './steps/FindFinanceTaskStep';
 import { AssignFinanceTaskStep } from './steps/AssignFinanceTaskStep';
+import { CompleteFinanceTaskStep } from './steps/CompleteFinanceTaskStep';
+
+import { RestartControls } from './RestartControls';
+import { ResultModal } from './ResultModal';
 
 const stepInfo = {
   1: {
@@ -39,6 +45,10 @@ const stepInfo = {
     title: 'Step 6: Assign Finance task to a user',
     description: 'Enter any Finance User ID to assign the task. Optionally enable override to take the task if needed.',
   },
+  7: {
+    title: 'Step 7: Complete Finance task',
+    description: 'Choose to approve or decline the IT request, then submit the decision to finish.',
+  },
 };
 
 const StepRenderer = ({ step }: { step: number }) => {
@@ -55,6 +65,8 @@ const StepRenderer = ({ step }: { step: number }) => {
       return <FindFinanceTaskStep />;
     case 6:
       return <AssignFinanceTaskStep />;
+    case 7:
+      return <CompleteFinanceTaskStep />;
     default:
       return null;
   }
@@ -72,12 +84,16 @@ export const ITRequestFlow = () => {
     requestingTaskSubmitted,
     financeUserTaskGuid,
     financeAssigned,
+    showResultModal,
+    workflowCompleted,
     isLoading,
     statusText,
     responseText,
     setStatus,
     nextStep,
   } = useWorkflowStore();
+  
+  const { completeFinanceTask } = useWorkflowOperations();
 
   const canContinue = useMemo(() => {
     switch (currentStep) {
@@ -93,11 +109,13 @@ export const ITRequestFlow = () => {
         return Boolean(financeUserTaskGuid);
       case 6:
         return financeAssigned;
+      case 7:
+        return !showResultModal && !workflowCompleted;
       default:
         return false;
     }
   }, [currentStep, apiHealthy, wfRunId, requestingUserTaskGuid, requestedItem, justification, 
-      requestingTaskSubmitted,financeUserTaskGuid, financeAssigned]);
+      requestingTaskSubmitted,financeUserTaskGuid, financeAssigned, showResultModal, workflowCompleted]);
 
   // Update status text when step changes
   useEffect(() => {
@@ -105,6 +123,7 @@ export const ITRequestFlow = () => {
       2: 'Please enter a valid User ID.',
       4: 'Please fill in all required fields.',
       6: 'Please enter a valid User ID.',
+      7: 'Please choose approve or decline.',
     };
     
     if (defaultStatuses[currentStep]) {
@@ -112,7 +131,7 @@ export const ITRequestFlow = () => {
     }
   }, [currentStep, setStatus]);
 
-  // Focus management for accessibility
+  // Focus management for accessibility (keybord control)
   useEffect(() => {
     if (headingRef.current) {
       headingRef.current.setAttribute('tabindex', '-1');
@@ -122,8 +141,11 @@ export const ITRequestFlow = () => {
   }, [currentStep]);
 
   const handleContinue = () => {
-   // TODO: add continue logic
-   nextStep();
+    if (currentStep === 7) {
+      completeFinanceTask();
+    } else {
+      nextStep();
+    }
   };
 
   const { title, description } = stepInfo[currentStep as keyof typeof stepInfo];
@@ -150,6 +172,9 @@ export const ITRequestFlow = () => {
                   Continue
                 </Button>
               )}
+            {currentStep === 7 && workflowCompleted && !showResultModal && (
+              <RestartControls />
+            )}
           </CardContent>
         </Card>
       </section>
@@ -211,6 +236,8 @@ export const ITRequestFlow = () => {
           <Loader2 className="h-10 w-10 animate-spin text-white" />
         </div>
       )}
+
+      <ResultModal />
     </>
   );
 };

@@ -5,6 +5,8 @@ import {
   listUserTasks,
   assignUserTask,
   completeUserTask,
+  deleteWfRun,
+  deleteAllWfRunsForSpec
 } from '@/lib/api'
 import type { TaskIdRef, UserTaskFieldValue } from '@/lib/types';
 
@@ -19,6 +21,7 @@ export const useWorkflowOperations = () => {
     financeAssigneeUserId,
     financeOverride,
     financeDecision,
+    deleteScope,
     setWfRunId,
     setRequestingUserTaskGuid,
     setFinanceUserTaskGuid,
@@ -29,6 +32,7 @@ export const useWorkflowOperations = () => {
     setFinanceAssigned,
     setWorkflowCompleted,
     setShowResultModal,
+    reset,
   } = useWorkflowStore();
 
   const extractTaskIds = useCallback((value: unknown): TaskIdRef[] => {
@@ -190,11 +194,9 @@ export const useWorkflowOperations = () => {
 
       const candidates = extractTaskIds(data);
       const match = candidates.find((t) => t.wfRunId.id === wfRunId?.id);
-      console.log('match', match);
       
       if (match) {
         setFinanceUserTaskGuid(match.userTaskGuid);
-        console.log('setFinanceUserTaskGuid', match.userTaskGuid);
         setStatus(`Found Finance task awaiting action.`);
 
         return true;
@@ -289,6 +291,42 @@ export const useWorkflowOperations = () => {
   }, [wfRunId, financeUserTaskGuid, financeAssigneeUserId, financeDecision,
       setLoading, setResponse, setStatus, setWorkflowCompleted, setShowResultModal]);
 
+  const restart = useCallback(async () => {
+    setLoading(true);
+    setResponse('');
+    let hasDeleteOperation = false;
+    
+    try {
+      if (deleteScope === 'current' && wfRunId) {
+        const result = await deleteWfRun(wfRunId);
+
+        setResponse(JSON.stringify(result, null, 2));
+        setStatus('Deleted current wfRun.');
+        hasDeleteOperation = true;
+      } else if (deleteScope === 'all') {
+        const result = await deleteAllWfRunsForSpec('it-request');
+
+        setResponse(JSON.stringify(result, null, 2));
+        setStatus(`Deleted ${result.deleted} wfRun(s) for spec "it-request".`);
+        hasDeleteOperation = true;
+      }
+
+      if (hasDeleteOperation) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+
+      reset();
+      setStatus('Restarted.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      setResponse(JSON.stringify({ error: message }, null, 2));
+      setStatus(`Failed to restart: ${message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [deleteScope, wfRunId, setLoading, setResponse, setStatus, reset]);
+
   return {
     runWorkflow,
     findRequestingTask,
@@ -296,5 +334,6 @@ export const useWorkflowOperations = () => {
     findFinanceTask,
     assignFinanceTask,
     completeFinanceTask,
+    restart
   };
 };
