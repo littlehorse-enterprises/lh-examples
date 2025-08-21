@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "tailwindcss/tailwind.css";
-import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
 	title: {
@@ -33,14 +32,8 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en" className={cn("h-screen w-screen", inter.className)}>
+		<html lang="en" className={cn("h-screen w-screen dark", inter.className)}>
 			<body className="h-full w-full min-h-screen bg-black text-white">
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="system"
-					enableSystem
-					disableTransitionOnChange
-				/>  {/* TODO: fix (boilerplate issue with dark mode) */}
 				{children}
 			</body>
 		</html>
