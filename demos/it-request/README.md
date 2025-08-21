@@ -7,7 +7,7 @@ This demo showcases LittleHorse User Tasks in a corporate IT request workflow. I
 The application consists of the following components:
 
 - **Java Application**: Handles workflow definition, task workers, and business logic
-- **Next.js Webapp** (Port 5173): Modern web interface built with Next.js, TypeScript, and Tailwind CSS
+- **Next.js Webapp** (Port 3000): Modern web interface built with Next.js, TypeScript, and Tailwind CSS
 - **LittleHorse Server** (Port 2023): Workflow orchestration engine
 - **Kafka Broker** (Port 9092): Message streaming platform (embedded in LittleHorse)
 - **LittleHorse Dashboard** (Port 8080): Web UI for monitoring workflows
@@ -97,7 +97,7 @@ If you prefer to run your own LittleHorse server (e.g., for development), you ca
 ```
 
 After starting the services, you can access:
-- **Next.js Webapp**: http://localhost:5173
+- **Next.js Webapp**: http://localhost:3000
 - **LittleHorse Dashboard**: http://localhost:8080
 
 Once you're done with the demo, you can shut down all services with:
@@ -136,7 +136,7 @@ For development purposes, you may want to start services individually. Follow th
 
 ### Web Interface Usage
 
-1. **Access the Application**: Open http://localhost:5173 in your browser
+1. **Access the Application**: Open http://localhost:3000 in your browser
 2. **Create IT Request**: Use the web interface to submit a new IT request with item description and justification
 3. **Monitor Progress**: View the request status and workflow progress in the LittleHorse Dashboard at http://localhost:8080
 4. **Approval Process**: The request will be assigned to the finance user group for approval

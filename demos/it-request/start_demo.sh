@@ -79,7 +79,7 @@ if [ "$NO_SERVER" = false ]; then
     check_port 8080 "LittleHorse Dashboard" || PORTS_OK=false
 fi
 
-check_port 5173 "Next.js Webapp" || PORTS_OK=false
+check_port 3000 "Next.js Webapp" || PORTS_OK=false
 
 if [ "$PORTS_OK" = false ]; then
     echo ""
@@ -160,13 +160,13 @@ echo "IT Request Demo is now running!"
 echo "================================"
 echo ""
 echo "Access Points:"
-echo " • Next.js Webapp:     http://localhost:5173"
+echo " • Next.js Webapp:     http://localhost:3000"
 if [ "$NO_SERVER" = false ]; then
     echo " • LittleHorse Dashboard: http://localhost:8080"
 fi
 echo ""
 echo "Demo Usage:"
-echo " 1. Open http://localhost:5173 in your browser"
+echo " 1. Open http://localhost:3000 in your browser"
 echo " 2. Create a new IT request workflow using the UI"
 echo " 3. Monitor workflow progress in the LittleHorse Dashboard"
 echo ""
