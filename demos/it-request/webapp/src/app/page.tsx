@@ -1,10 +1,11 @@
 import Image from "next/image";
+import { ITRequestFlow } from "@/components/ITRequestFlow";
 
 export default function Page() {
 	return (
-		<div className="min-h-screen bg-black text-white">
+		<>
       {/* Header */}
-      <div className="h-16 border-b border-white/20">
+      <header id="header" role="banner" className="h-16 border-b border-white/20">
         <div className="flex items-center justify-start mx-auto max-w-5xl py-4 px-6">
           <Image 
             src="/logo.png" 
@@ -15,10 +16,10 @@ export default function Page() {
           />
           <h1 className="text-2xl font-normal m-0 ml-auto">User Tasks / IT Request Example</h1>
         </div>
-      </div>
+      </header>
       
       {/* Main App */}
-      <div className="min-h-[calc(100vh-4rem)] flex flex-col mx-auto max-w-5xl py-6 px-6">
+      <main id="main" role="main" className="min-h-[calc(100vh-4rem)] flex flex-col mx-auto max-w-5xl py-6 px-6">
         <p className="border-b border-white/20 leading-relaxed mb-6 opacity-90 pb-6">
           This UI guides you through the LittleHorse User Tasks IT Request example. A requester starts an
           IT Request workflow, completes a requesting task by providing the Requested Item and a Justification,
@@ -26,10 +27,10 @@ export default function Page() {
           the API and always shows the latest response for the current step.
         </p>
 
-        <main id="main" className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 min-h-0" style={{alignItems: 'baseline'}} role="main">
-          adfasdfasdf
-        </main>
-      </div>
-    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 min-h-0 items-baseline">
+          <ITRequestFlow />
+        </div>
+      </main>
+		</>
 	);
 }

@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "tailwindcss/tailwind.css";
-import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
@@ -35,14 +34,12 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" className={cn("h-screen w-screen", inter.className)}>
-			<body className="h-full w-full">
+			<body className="h-full w-full min-h-screen bg-black text-white">
 				<ThemeProvider
 					attribute="class"
-					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
-				/>  {/* TODO: fix (boilerplate issue with dark mode) */}
-				<Toaster richColors position="top-center" />
+				/>
 				{children}
 			</body>
 		</html>
