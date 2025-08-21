@@ -6,6 +6,7 @@ import { createVariableValue } from './utils';
 import { 
   type WfRun,
   type UserTaskRunIdList,
+  type UserTaskDetails,
   type WfRunId,
 } from './types';
 
@@ -18,6 +19,22 @@ export async function startItRequest(userId: string): Promise<WfRun> {
     }
   });
   return run;
+}
+
+export async function getUserTask(wfRunId: WfRunId, userTaskGuid: string): Promise<UserTaskDetails> {
+  const client = getClient();
+  const userTaskRun = await client.getUserTaskRun({ 
+    wfRunId, 
+    userTaskGuid 
+  });
+  
+  const utdId = userTaskRun.userTaskDefId;
+  if (!utdId) {
+    throw new Error('userTaskDefId missing on UserTaskRun');
+  }
+  
+  const userTaskDef = await client.getUserTaskDef(utdId);
+  return { userTaskRun, userTaskDef };
 }
 
 export async function listUserTasks(params: {
@@ -57,4 +74,59 @@ export async function assignUserTask(
   } catch (err) {
     throw err;
   }
+}
+
+export async function completeUserTask(
+  wfRunId: WfRunId,
+  userTaskGuid: string,
+  userId: string,
+  results: Record<string, any>
+): Promise<void> {
+  const client = getClient();
+  
+  // Get the user task definition to validate fields
+  const utr = await client.getUserTaskRun({ wfRunId, userTaskGuid });
+  
+  const utdId = utr.userTaskDefId;
+  if (!utdId) {
+    throw new Error('userTaskDefId missing on UserTaskRun');
+  }
+  
+  const utd = await client.getUserTaskDef(utdId);
+  
+  // Convert results to proper VariableValue format
+  const finalResults: Record<string, any> = {};
+  for (const field of utd.fields) {
+    const raw = results[field.name];
+    if (raw === undefined || raw === null) {
+      if (field.required) {
+        throw new Error(`field ${field.name} is required`);
+      }
+      continue;
+    }
+    
+    // Create properly typed VariableValue
+    switch (field.type) {
+      case 'STR':
+        finalResults[field.name] = createVariableValue('str', raw);
+        break;
+      case 'BOOL':
+        finalResults[field.name] = createVariableValue('bool', raw);
+        break;
+      case 'INT':
+        finalResults[field.name] = createVariableValue('int', raw);
+        break;
+      case 'DOUBLE':
+        finalResults[field.name] = createVariableValue('double', raw);
+        break;
+      default:
+        finalResults[field.name] = createVariableValue('str', raw);
+    }
+  }
+
+  await client.completeUserTaskRun({
+    userTaskRunId: { wfRunId, userTaskGuid },
+    results: finalResults,
+    userId
+  });
 }

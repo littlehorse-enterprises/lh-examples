@@ -4,18 +4,23 @@ import {
   startItRequest,
   listUserTasks,
   assignUserTask,
+  completeUserTask,
 } from '@/lib/api'
-import type { TaskIdRef } from '@/lib/types';
+import type { TaskIdRef, UserTaskFieldValue } from '@/lib/types';
 
 export const useWorkflowOperations = () => {
   const {
     requestingUserId,
     wfRunId,
+    requestingUserTaskGuid,
+    requestedItem,
+    justification,
     setWfRunId,
     setRequestingUserTaskGuid,
     setLoading,
     setStatus,
     setResponse,
+    setRequestingTaskSubmitted,
   } = useWorkflowStore();
 
   const extractTaskIds = useCallback((value: unknown): TaskIdRef[] => {
@@ -125,15 +130,45 @@ export const useWorkflowOperations = () => {
       setResponse(JSON.stringify({ error: message }, null, 2));
       setRequestingUserTaskGuid('');
       setStatus(`Failed to find/assign requesting user task: ${message}`);
-
+      
       return false;
     } finally {
       setLoading(false);
     }
   }, [requestingUserId, wfRunId, extractTaskIds, setLoading, setStatus, setResponse, setRequestingUserTaskGuid]);
 
+  const completeRequestingTask = useCallback(async () => {
+    setLoading(true);
+    setResponse('');
+
+    try {
+      const results: Record<string, UserTaskFieldValue> = {
+        requestedItem,
+        justification
+      };
+
+      if (!wfRunId) {
+        throw new Error('wfRunId is required');
+      }
+      await completeUserTask(wfRunId, requestingUserTaskGuid, requestingUserId, results);
+      setResponse(JSON.stringify({ ok: true }, null, 2));
+      setStatus('OK');
+      setRequestingTaskSubmitted(true);
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setResponse(JSON.stringify({ error: message }, null, 2));
+      setStatus('Error');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [wfRunId, requestingUserTaskGuid, requestingUserId, requestedItem, justification, 
+      setLoading, setResponse, setStatus, setRequestingTaskSubmitted]);
+
   return {
     runWorkflow,
     findRequestingTask,
+    completeRequestingTask,
   };
 };

@@ -10,6 +10,7 @@ import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { HealthCheckStep } from './steps/HealthCheckStep';
 import { StartWorkflowStep } from './steps/StartWorkflowStep';
 import { FindRequestingTaskStep } from './steps/FindRequestingTaskStep';
+import { CompleteRequestStep } from './steps/CompleteRequestStep';
 
 const stepInfo = {
   1: {
@@ -24,6 +25,10 @@ const stepInfo = {
     title: 'Step 3: Find requesting user task',
     description: 'First finds the task assigned to the requester. In this workflow, when the task is not claimed after 1 minute it gets released. In that case, it is found by definition and assigned back.',
   },
+  4: {
+    title: 'Step 4: Complete requesting user task',
+    description: 'Provide the Requested Item and Justification (both required), then submit to complete the requesting task.',
+  },
 };
 
 const StepRenderer = ({ step }: { step: number }) => {
@@ -34,6 +39,8 @@ const StepRenderer = ({ step }: { step: number }) => {
       return <StartWorkflowStep />;
     case 3:
       return <FindRequestingTaskStep />;
+    case 4:
+      return <CompleteRequestStep />;
     default:
       return null;
   }
@@ -46,6 +53,9 @@ export const ITRequestFlow = () => {
     apiHealthy,
     wfRunId,
     requestingUserTaskGuid,
+    requestedItem,
+    justification,
+    requestingTaskSubmitted,
     isLoading,
     statusText,
     responseText,
@@ -61,15 +71,19 @@ export const ITRequestFlow = () => {
         return wfRunId !== null;
       case 3:
         return Boolean(requestingUserTaskGuid);
+      case 4:
+        return requestingTaskSubmitted || (requestedItem.trim().length > 0 && justification.trim().length > 0);
       default:
         return false;
     }
-  }, [currentStep, apiHealthy, wfRunId, requestingUserTaskGuid]);
+  }, [currentStep, apiHealthy, wfRunId, requestingUserTaskGuid, requestedItem, justification, 
+      requestingTaskSubmitted]);
 
   // Update status text when step changes
   useEffect(() => {
     const defaultStatuses: Record<number, string> = {
       2: 'Please enter a valid User ID.',
+      4: 'Please fill in all required fields.',
     };
     
     if (defaultStatuses[currentStep]) {
@@ -87,7 +101,6 @@ export const ITRequestFlow = () => {
   }, [currentStep]);
 
   const handleContinue = () => {
-   // TODO: add continue logic
    nextStep();
   };
 
@@ -105,18 +118,21 @@ export const ITRequestFlow = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <StepRenderer step={currentStep} />
-              <Button
-                onClick={handleContinue}
-                disabled={!canContinue}
-                className="w-full sm:w-auto"
-              >
-                Continue
-              </Button>
+              {/* Continue button (not shown for step 4 which has its own) */}
+              {currentStep !== 4 && (
+                <Button
+                  onClick={handleContinue}
+                  disabled={!canContinue}
+                  className="w-full sm:w-auto"
+                >
+                  Continue
+                </Button>
+              )}
           </CardContent>
         </Card>
       </section>
 
-      <section className="flex flex-col min-h-0 max-h-full" aria-labelledby="status-heading">
+     <section className="flex flex-col min-h-0 max-h-full" aria-labelledby="status-heading">
         <Card className="mb-6">
           <CardHeader className="mb-3">
             <CardTitle>Status</CardTitle>
