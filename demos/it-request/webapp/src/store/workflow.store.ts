@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+//import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { WfRunId } from '@/lib/types';
 
@@ -86,7 +86,7 @@ const initialState: WorkflowState = {
 };
 
 export const useWorkflowStore = create<WorkflowState & WorkflowActions>()(
-  devtools( // TODO: devtools is optional, but useful for debugging
+  // devtools( // Zustand offers this middleware to use Redux DevTools extension
     immer((set) => ({
       ...initialState,
       
@@ -173,5 +173,5 @@ export const useWorkflowStore = create<WorkflowState & WorkflowActions>()(
       
       reset: () => set(() => initialState)
     }))
-  )
+  //)
 );

@@ -6,8 +6,11 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-// TODO: properly document this function
-// Helper function to create typed variable values
+/**
+ * VariableValue is a structure containing a value in LittleHorse. It can be
+ * used to pass input variables into a WfRun/ThreadRun/TaskRun/etc, as output
+ * from a TaskRun, as the value of a WfRun's Variable, etc.
+ */
 export const createVariableValue = (
   type: 'str' | 'bool' | 'int' | 'double' | 'jsonObj' | 'jsonArr',
   value: string | boolean | number
