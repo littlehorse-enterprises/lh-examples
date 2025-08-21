@@ -37,6 +37,7 @@ export default function RootLayout({
 			<body className="h-full w-full min-h-screen bg-black text-white">
 				<ThemeProvider
 					attribute="class"
+					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
 				/>
