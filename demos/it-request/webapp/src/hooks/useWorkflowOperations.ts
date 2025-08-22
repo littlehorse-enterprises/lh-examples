@@ -8,7 +8,9 @@ import {
   deleteWfRun,
   deleteAllWfRunsForSpec
 } from '@/lib/api'
-import type { TaskIdRef, UserTaskFieldValue } from '@/lib/types';
+import type { TaskIdRef } from '@/lib/types';
+import { UserTaskRunId, UserTaskRunStatus, VariableValue } from 'littlehorse-client/proto';
+import { createVariableValue } from '@/lib/utils';
 
 export const useWorkflowOperations = () => {
   const {
@@ -42,10 +44,10 @@ export const useWorkflowOperations = () => {
       'results' in (value as Record<string, unknown>) &&
       Array.isArray((value as Record<string, any>).results)
     ) {
-      const arr: unknown[] = (value as Record<string, any>).results;
-      return arr.map((item: any) => ({
-        wfRunId: item.wfRunId,
-        userTaskGuid: item.userTaskGuid,
+      const results = (value as { results: UserTaskRunId[] }).results;
+      return results.map((item: UserTaskRunId) => ({
+        wfRunId: item.wfRunId!,
+        userTaskGuid: item.userTaskGuid
       }));
     }
     return [];
@@ -90,7 +92,7 @@ export const useWorkflowOperations = () => {
     setResponse('');
 
     try {
-      const queryParams = { userId: requestingUserId, status: 'ASSIGNED' };
+      const queryParams = { userId: requestingUserId, status: UserTaskRunStatus.ASSIGNED };
       const data = await listUserTasks(queryParams);
 
       setResponse(JSON.stringify(data, null, 2));
@@ -125,7 +127,7 @@ export const useWorkflowOperations = () => {
       try {
         const result = await assignUserTask(match.wfRunId, match.userTaskGuid, { 
           userId: requestingUserId, 
-          override: true 
+          overrideClaim: true 
         });
         
         setResponse(JSON.stringify(result, null, 2));
@@ -155,9 +157,9 @@ export const useWorkflowOperations = () => {
     setResponse('');
 
     try {
-      const results: Record<string, UserTaskFieldValue> = {
-        requestedItem,
-        justification
+      const results: Record<string, VariableValue> = {
+        requestedItem: createVariableValue('STR', requestedItem),
+        justification: createVariableValue('STR', justification)
       };
 
       if (!wfRunId) {
@@ -230,7 +232,7 @@ export const useWorkflowOperations = () => {
       }
       await assignUserTask(wfRunId, financeUserTaskGuid, { 
         userId: financeAssigneeUserId, 
-        override: financeOverride 
+        overrideClaim: financeOverride 
       });
       
       setResponse(JSON.stringify({ 
@@ -263,8 +265,8 @@ export const useWorkflowOperations = () => {
     setResponse('');
 
     try {
-      const results: Record<string, UserTaskFieldValue> = {
-        isApproved: financeDecision === 'APPROVE'
+      const results: Record<string, VariableValue> = {
+        isApproved: createVariableValue('BOOL', financeDecision === 'APPROVE')
       };
 
       if (!wfRunId) {

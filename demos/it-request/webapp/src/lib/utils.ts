@@ -1,6 +1,6 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { VariableValue } from "littlehorse-client/dist/proto";
+import { VariableType, VariableValue } from "littlehorse-client/proto";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -12,21 +12,21 @@ export function cn(...inputs: ClassValue[]) {
  * from a TaskRun, as the value of a WfRun's Variable, etc.
  */
 export const createVariableValue = (
-  type: 'str' | 'bool' | 'int' | 'double' | 'jsonObj' | 'jsonArr',
+  type: keyof typeof VariableType,
   value: string | boolean | number
 ): VariableValue => {
   switch (type) {
-    case 'str':
+    case 'STR':
       return { str: String(value) };
-    case 'bool':
+    case 'BOOL':
       return { bool: Boolean(value) };
-    case 'int':
+    case 'INT':
       return { int: Number(value) };
-    case 'double':
+    case 'DOUBLE':
       return { double: Number(value) };
-    case 'jsonObj':
+    case 'JSON_OBJ':
       return { jsonObj: JSON.stringify(value) };
-    case 'jsonArr':
+    case 'JSON_ARR':
       return { jsonArr: JSON.stringify(value) };
     default:
       throw new Error(`Unknown variable type: ${type}`);
