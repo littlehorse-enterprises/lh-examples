@@ -13,7 +13,7 @@ import type {
   SearchUserTaskRunRequest,
   DeleteWfRunRequest,
   SearchWfRunRequest,
-} from 'littlehorse-client/dist/proto';
+} from 'littlehorse-client/proto';
 
 export type {
   UserTaskRun,

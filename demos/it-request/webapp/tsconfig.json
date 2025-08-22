@@ -10,9 +10,9 @@
       "doM.iterable",
       "esnext"
     ],
-    "module": "esnext",
+    "module": "nodenext",
     "target": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
