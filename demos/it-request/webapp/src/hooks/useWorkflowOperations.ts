@@ -9,7 +9,7 @@ import {
   deleteAllWfRunsForSpec
 } from '@/lib/api'
 import type { TaskIdRef } from '@/lib/types';
-import { UserTaskRunId, UserTaskRunStatus, VariableValue } from 'littlehorse-client/proto';
+import { UserTaskRunId, UserTaskRunIdList, UserTaskRunStatus, VariableValue } from 'littlehorse-client/proto';
 import { createVariableValue } from '@/lib/utils';
 
 export const useWorkflowOperations = () => {
@@ -37,20 +37,11 @@ export const useWorkflowOperations = () => {
     reset,
   } = useWorkflowStore();
 
-  const extractTaskIds = useCallback((value: unknown): TaskIdRef[] => {
-    if (
-      typeof value === 'object' && 
-      value !== null &&
-      'results' in (value as Record<string, unknown>) &&
-      Array.isArray((value as Record<string, any>).results)
-    ) {
-      const results = (value as { results: UserTaskRunId[] }).results;
-      return results.map((item: UserTaskRunId) => ({
-        wfRunId: item.wfRunId!,
-        userTaskGuid: item.userTaskGuid
-      }));
-    }
-    return [];
+  const extractTaskIds = useCallback((value: UserTaskRunIdList): TaskIdRef[] => {
+    return value.results.map((item: UserTaskRunId) => ({
+      wfRunId: item.wfRunId!,
+      userTaskGuid: item.userTaskGuid
+    }));
   }, []);
 
   const runWorkflow = useCallback(async () => {
