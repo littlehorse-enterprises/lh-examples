@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
-export const FindRequestingTaskStep = () => {
+export const FindRequestingTask = () => {
   const { wfRunId, requestingUserTaskGuid } = useWorkflowStore();
-  const { findRequestingTask } = useWorkflowOperations();
+  const { findRequestingTask } = useWorkflowActions();
 
   useEffect(() => {
     findRequestingTask();

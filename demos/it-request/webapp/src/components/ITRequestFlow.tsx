@@ -2,20 +2,20 @@
 
 import { useMemo, useRef, useEffect } from 'react';
 import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-import { HealthCheckStep } from './steps/HealthCheckStep';
-import { StartWorkflowStep } from './steps/StartWorkflowStep';
-import { FindRequestingTaskStep } from './steps/FindRequestingTaskStep';
-import { CompleteRequestStep } from './steps/CompleteRequestStep';
-import { FindFinanceTaskStep } from './steps/FindFinanceTaskStep';
-import { AssignFinanceTaskStep } from './steps/AssignFinanceTaskStep';
-import { CompleteFinanceTaskStep } from './steps/CompleteFinanceTaskStep';
+import { HealthCheck } from './steps/HealthCheck';
+import { StartWorkflow } from './steps/StartWorkflow';
+import { FindRequestingTask } from './steps/FindRequestingTask';
+import { CompleteRequest } from './steps/CompleteRequest';
+import { FindFinanceTask } from './steps/FindFinanceTask';
+import { AssignFinanceTask } from './steps/AssignFinanceTask';
+import { CompleteFinanceTask } from './steps/CompleteFinanceTask';
 
 import { RestartControls } from './RestartControls';
 import { ResultModal } from './ResultModal';
@@ -54,19 +54,19 @@ const stepInfo = {
 const StepRenderer = ({ step }: { step: number }) => {
   switch (step) {
     case 1:
-      return <HealthCheckStep />;
+      return <HealthCheck />;
     case 2:
-      return <StartWorkflowStep />;
+      return <StartWorkflow />;
     case 3:
-      return <FindRequestingTaskStep />;
+      return <FindRequestingTask />;
     case 4:
-      return <CompleteRequestStep />;
+      return <CompleteRequest />;
     case 5:
-      return <FindFinanceTaskStep />;
+      return <FindFinanceTask />;
     case 6:
-      return <AssignFinanceTaskStep />;
+      return <AssignFinanceTask />;
     case 7:
-      return <CompleteFinanceTaskStep />;
+      return <CompleteFinanceTask />;
     default:
       return null;
   }
@@ -93,7 +93,7 @@ export const ITRequestFlow = () => {
     nextStep,
   } = useWorkflowStore();
   
-  const { completeFinanceTask } = useWorkflowOperations();
+  const { completeFinanceTask } = useWorkflowActions();
 
   const canContinue = useMemo(() => {
     switch (currentStep) {

@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
-export const FindFinanceTaskStep = () => {
+export const FindFinanceTask = () => {
   const { financeUserTaskGuid } = useWorkflowStore();
-  const { findFinanceTask } = useWorkflowOperations();
+  const { findFinanceTask } = useWorkflowActions();
 
   useEffect(() => {
     findFinanceTask();

@@ -2,7 +2,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useWorkflowStore } from '@/store/workflow.store';
 
-export const CompleteFinanceTaskStep = () => {
+export const CompleteFinanceTask = () => {
   const { 
     financeDecision, 
     showResultModal, 

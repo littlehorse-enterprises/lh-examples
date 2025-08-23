@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
-export const StartWorkflowStep = () => {
+export const StartWorkflow = () => {
   const { requestingUserId, wfRunId, setRequestingUserId } = useWorkflowStore();
-  const { runWorkflow } = useWorkflowOperations();
+  const { runWorkflow } = useWorkflowActions();
 
   const isValidUserId = (userId: string): boolean => userId.trim().length >= 3;
 

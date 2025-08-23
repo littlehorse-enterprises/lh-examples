@@ -3,9 +3,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
-export const AssignFinanceTaskStep = () => {
+export const AssignFinanceTask = () => {
   const { 
     financeAssigneeUserId, 
     financeOverride, 
@@ -13,7 +13,7 @@ export const AssignFinanceTaskStep = () => {
     setFinanceAssignee,
     setFinanceOverride
   } = useWorkflowStore();
-  const { assignFinanceTask } = useWorkflowOperations();
+  const { assignFinanceTask } = useWorkflowActions();
 
   const isValidUserId = (userId: string): boolean => userId.trim().length >= 3;
 

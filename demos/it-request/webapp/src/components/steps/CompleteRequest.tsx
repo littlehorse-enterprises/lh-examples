@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowOperations } from '@/hooks/useWorkflowOperations';
+import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
-export const CompleteRequestStep = () => {
+export const CompleteRequest = () => {
   const { 
     requestedItem, 
     justification, 
@@ -14,7 +14,7 @@ export const CompleteRequestStep = () => {
     setRequestData,
     nextStep 
   } = useWorkflowStore();
-  const { completeRequestingTask } = useWorkflowOperations();
+  const { completeRequestingTask } = useWorkflowActions();
 
   const canSubmit = requestedItem.trim().length > 0 && justification.trim().length > 0;
 

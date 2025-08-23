@@ -5,7 +5,7 @@ import { useWorkflowStore } from '@/store/workflow.store';
 
 type HealthResponse = { ok: boolean };
 
-export const HealthCheckStep = () => {
+export const HealthCheck = () => {
   const { setApiHealth, setLoading, setStatus, setResponse } = useWorkflowStore();
 
   useEffect(() => {
