@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 import { useWorkflowStore } from '@/store/workflow.store';
-import {
-  startItRequest,
-  listUserTasks,
-  assignUserTask,
-  completeUserTask,
-  deleteWfRun,
-  deleteAllWfRunsForSpec
-} from '@/lib/api'
+
+import { startItRequest } from '@/app/actions/startItRequest';
+import { listUserTasks } from '@/app/actions/listUserTasks';
+import { assignUserTask } from '@/app/actions/assignUserTask';
+import { completeUserTask } from '@/app/actions/completeUserTask';
+import { deleteWfRun } from '@/app/actions/deleteWfRun';
+import { deleteAllWfRunsForSpec } from '@/app/actions/deleteAllWfRunsForSpec';
+
 import type { TaskIdRef } from '@/lib/types';
 import { UserTaskRunId, UserTaskRunIdList, UserTaskRunStatus, VariableValue } from 'littlehorse-client/proto';
 import { createVariableValue } from '@/lib/utils';
