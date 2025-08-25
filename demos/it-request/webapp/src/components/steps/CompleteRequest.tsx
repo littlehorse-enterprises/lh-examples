@@ -10,16 +10,16 @@ import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 export const CompleteRequest = () => {
-  const { wfRunId, isLoading, userId } = useWorkflowContext();
+  const { wfRunId, isLoading, userId, taskGuid, currentStep } = useWorkflowContext();
   const { completeRequestingTask } = useWorkflowActions();
   const router = useRouter();
   const [item, setItem] = useState('');
   const [justification, setJustification] = useState('');
 
   const handleSubmit = async () => { // TODO: add error handling
-    const success = await completeRequestingTask(userId!, item, justification); // TODO: userId should not be null at this point, handle this better
+    const success = await completeRequestingTask(userId!, taskGuid!, item, justification); // TODO: userId and taskGuid should not be null at this point, handle this better
     if (success) {
-      router.push(`/workflow/${wfRunId}/step/5`);
+      router.push(`/workflow/${wfRunId}/step/${currentStep + 1}`);
     }
   };
 

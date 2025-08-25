@@ -9,7 +9,6 @@ interface WorkflowContextType {
   isLoading: boolean;
   statusText: string;
   responseText: string;
-  showResultModal: boolean;
   
   taskGuid?: string;
   userId?: string;
@@ -17,15 +16,12 @@ interface WorkflowContextType {
     item: string;
     justification: string;
   };
-  financeDecision?: 'APPROVE' | 'DECLINE';
   
   setLoading: (loading: boolean) => void;
   setStatus: (text: string) => void;
   setResponse: (text: string) => void;
-  setShowResultModal: (show: boolean) => void;
   setTaskGuid: (guid: string) => void;
   setRequestData: (data: { item: string; justification: string }) => void;
-  setFinanceDecision: (decision: 'APPROVE' | 'DECLINE') => void;
 }
 
 const WorkflowContext = createContext<WorkflowContextType | null>(null);
@@ -56,13 +52,11 @@ export function WorkflowProvider({
   taskGuid: initialTaskGuid 
 }: WorkflowProviderProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [statusText, setStatusText] = useState('');
+  const [statusText, setStatusText] = useState('Idle');
   const [responseText, setResponseText] = useState('');
-  const [showResultModal, setShowResultModal] = useState(false);
   
   const [taskGuid, setTaskGuid] = useState(initialTaskGuid || '');
   const [requestData, setRequestData] = useState({ item: '', justification: '' });
-  const [financeDecision, setFinanceDecision] = useState<'APPROVE' | 'DECLINE'>('APPROVE');
   
   const setLoading = useCallback((loading: boolean) => {
     setIsLoading(loading);
@@ -82,18 +76,14 @@ export function WorkflowProvider({
     isLoading,
     statusText,
     responseText,
-    showResultModal,
     userId,
     taskGuid,
     requestData,
-    financeDecision,
     setLoading,
     setStatus,
     setResponse,
-    setShowResultModal,
     setTaskGuid,
     setRequestData,
-    setFinanceDecision,
   };
 
   return (

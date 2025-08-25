@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 export const HealthCheck = () => {
-  const { setLoading, setStatus, setResponse, wfRunId, isLoading } = useWorkflowContext();
+  const { setLoading, setStatus, setResponse, wfRunId, isLoading, currentStep } = useWorkflowContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -37,12 +37,11 @@ export const HealthCheck = () => {
   }, []);
 
   const handleContinue = () => {
-    router.push(`/workflow/${wfRunId || 'new'}/step/2`);
+    router.push(`/workflow/${wfRunId || 'new'}/step/${currentStep + 1}`);
   };
 
   return (
     <div className="space-y-4">
-      <div className="text-sm">Checking API connection...</div>
       {!isLoading && (
         <Button onClick={handleContinue} className="w-full sm:w-auto">
           Continue

@@ -20,7 +20,7 @@ export const AssignFinanceTask = () => {
   const handleAssign = async () => {
     const success = await assignFinanceTask(userId, override, taskGuid!); // TODO: taskGuid should not be undefined at this point, handle this better. Also, add error handling
     if (success) {
-      router.push(`/workflow/${wfRunId}/step/${currentStep + 1}?taskGuid=${taskGuid}&userId=${userId}`); // TODO: normalize how params are passed
+      router.push(`/workflow/${wfRunId}/step/${currentStep + 1}?taskGuid=${taskGuid}&userId=${userId}`);
     }
   };
 

@@ -1,6 +1,5 @@
 'use client';
 
-import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import {
   Dialog,
   DialogContent,
@@ -11,15 +10,19 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-export function ResultModal() {
-  const { showResultModal, setShowResultModal, financeDecision } = useWorkflowContext();
+interface ResultModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  financeDecision: 'APPROVE' | 'DECLINE';
+}
 
+export function ResultModal({ isOpen, onClose, financeDecision }: ResultModalProps) {
   const message = financeDecision === 'APPROVE'
     ? 'The IT request has been approved. An email has been sent to the user.'
     : 'The IT request has been declined. An email has been sent to the user.';
 
   return (
-    <Dialog open={showResultModal} onOpenChange={setShowResultModal}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Result</DialogTitle>
@@ -28,11 +31,11 @@ export function ResultModal() {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button onClick={() => setShowResultModal(false)}>
+          <Button onClick={onClose}>
             Close
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}

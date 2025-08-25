@@ -1,8 +1,6 @@
 'use client';
 
-//import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-//import { Button } from '@/components/ui/button';
 import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 
 import { HealthCheck } from './HealthCheck';
@@ -12,8 +10,6 @@ import { CompleteRequest } from './CompleteRequest';
 import { FindFinanceTask } from './FindFinanceTask';
 import { AssignFinanceTask } from './AssignFinanceTask';
 import { CompleteFinanceTask } from './CompleteFinanceTask';
-
-import { RestartControls } from '../RestartControls';
 
 const stepInfo = {
   1: {
@@ -54,42 +50,10 @@ const stepInfo = {
 } as const;
 
 export function StepContainer() {
-  //const router = useRouter();
-  const { /*wfRunId, isLoading, taskGuid,*/ currentStep, showResultModal } = useWorkflowContext(); // TODO: remove taskGuid
+  const { currentStep } = useWorkflowContext();
 
   const stepData = stepInfo[currentStep as keyof typeof stepInfo];
-  const StepComponent = stepData.component;
-
-  /*const handleContinue = () => {
-    if (currentStep === 7) {
-      return;
-    }
-    
-    const nextStep = currentStep + 1;
-    const baseUrl = `/workflow/${wfRunId || 'new'}/step/${nextStep}`;
-    const params = new URLSearchParams();
-    
-    //if (taskGuid) params.append('taskGuid', taskGuid);
-    if (params.get('userId')) params.append('userId', params.get('userId')!);
-    if (params.get('taskGuid')) params.append('taskGuid', params.get('taskGuid')!);
-    
-    const url = params.toString() ? `${baseUrl}?${params}` : baseUrl;
-    router.push(url);
-  };
-
-  // TODO: move this to each step component
-  const canContinue = () => {
-    switch (currentStep) {
-      case 1: return false;
-      case 2: return wfRunId !== null;
-      case 3: return Boolean(taskGuid); // TODO: see after removing taskGuid 
-      case 4: return false;
-      case 5: return Boolean(taskGuid); // TODO: see after removing taskGuid
-      case 6: return false;
-      case 7: return false;
-      default: return false;
-    }
-  };*/
+  const StepComponent = stepData.component;  
 
   return (
     <Card>
@@ -99,21 +63,6 @@ export function StepContainer() {
       </CardHeader>
       <CardContent className="space-y-6">
         <StepComponent />
-        
-        {/* TODO: move this to each step component */}
-        {/*currentStep !== 4 && currentStep !== 6 && currentStep !== 7 && (
-          <Button
-            onClick={handleContinue}
-            disabled={!canContinue() || isLoading}
-            className="w-full sm:w-auto"
-          >
-            Continue
-          </Button>
-        )*/}
-        
-        {currentStep === 7 && showResultModal && (
-          <RestartControls />
-        )}
       </CardContent>
     </Card>
   );

@@ -5,7 +5,6 @@ import { WorkflowProvider } from '@/components/providers/WorkflowProvider';
 import { StepContainer } from '@/components/steps/StepContainer';
 import { StatusPanel } from '@/components/StatusPanel';
 import { ResponsePanel } from '@/components/ResponsePanel';
-import { ResultModal } from '@/components/ResultModal';
 
 interface PageProps {
   params: Promise<{
@@ -74,7 +73,6 @@ export default async function StepPage({ params, searchParams }: PageProps) {
             </section>
           </div>
         </main>
-        <ResultModal />
       </>
     </WorkflowProvider>
   );

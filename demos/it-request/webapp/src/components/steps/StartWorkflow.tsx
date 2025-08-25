@@ -10,7 +10,7 @@ import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 export const StartWorkflow = () => {
   const [userId, setUserId] = useState('');
-  const { isLoading } = useWorkflowContext();
+  const { isLoading, currentStep } = useWorkflowContext();
   const { runWorkflow } = useWorkflowActions(); 
   const router = useRouter();
 
@@ -19,7 +19,7 @@ export const StartWorkflow = () => {
   const handleSubmit = async () => {
     const wfRunId = await runWorkflow(userId);
     if (wfRunId) {
-      router.push(`/workflow/${wfRunId}/step/3?userId=${userId}`);
+      router.push(`/workflow/${wfRunId}/step/${currentStep + 1}?userId=${userId}`);
     }
   };
 

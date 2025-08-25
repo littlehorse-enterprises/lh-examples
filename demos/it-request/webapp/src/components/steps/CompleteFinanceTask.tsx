@@ -7,15 +7,19 @@ import { Button } from '@/components/ui/button';
 import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
+import { RestartControls } from '../RestartControls';
+import { ResultModal } from '../ResultModal';
+
 export const CompleteFinanceTask = () => {
-  const { isLoading, showResultModal, setShowResultModal, taskGuid, userId } = useWorkflowContext();
+  const { isLoading, taskGuid, userId } = useWorkflowContext();
   const { completeFinanceTask } = useWorkflowActions();
   
   const [decision, setDecision] = useState<'APPROVE' | 'DECLINE'>('APPROVE');
   const [workflowComplete, setWorkflowComplete] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
 
   const handleComplete = async () => {
-    const success = await completeFinanceTask(decision, taskGuid!, userId!); // TODO: taskGuid should not be undefined at this point, handle this better. Also, add error handling
+    const success = await completeFinanceTask(decision, taskGuid!, userId!);
     if (success) {
       setWorkflowComplete(true);
       setShowResultModal(true);
@@ -37,10 +41,18 @@ export const CompleteFinanceTask = () => {
       </div>
       <Button
         onClick={handleComplete}
-        disabled={isLoading}
+        disabled={isLoading || showResultModal || workflowComplete}
       >
         Submit Decision
       </Button>
+      {!showResultModal && workflowComplete && (
+        <RestartControls />
+      )}
+      <ResultModal 
+        isOpen={showResultModal}
+        onClose={() => setShowResultModal(false)}
+        financeDecision={decision}
+      />
     </div>
   );
 };

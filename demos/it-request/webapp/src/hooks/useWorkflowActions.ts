@@ -14,11 +14,9 @@ import { completeUserTask } from '@/app/actions/completeUserTask';
 export const useWorkflowActions = () => {
   const {
     wfRunId, 
-    taskGuid, // TODO: remove
     setLoading, 
     setStatus, 
     setResponse,
-    setTaskGuid // TODO: remove
   } = useWorkflowContext();
 
   const extractTaskIds = useCallback((value: UserTaskRunIdList): TaskIdRef[] => {
@@ -39,7 +37,7 @@ export const useWorkflowActions = () => {
       setResponse(JSON.stringify(response, null, 2));
       setStatus('Workflow started successfully');
 
-      return response.id?.id ?? null; // TODO: hace falta retornar el id o alcanza solo con true?
+      return response.id?.id ?? null;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       setResponse(JSON.stringify({ error: message }, null, 2));
@@ -69,7 +67,6 @@ export const useWorkflowActions = () => {
 
       if (assignedMatch) {
         setStatus(`Found requesting user task assigned to "${userId}".`);
-        setTaskGuid(assignedMatch.userTaskGuid); // TODO: pass by URL
         return assignedMatch.userTaskGuid;
       }
 
@@ -102,7 +99,6 @@ export const useWorkflowActions = () => {
       
       setStatus(`Assigned requesting task to "${userId} (found by def)".`);
 
-      setTaskGuid(match.userTaskGuid); // TODO: pass by URL
       return match.userTaskGuid;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -114,10 +110,11 @@ export const useWorkflowActions = () => {
     } finally {
       setLoading(false);
     }
-  }, [wfRunId, extractTaskIds, setLoading, setStatus, setResponse, setTaskGuid]);
+  }, [wfRunId, extractTaskIds, setLoading, setStatus, setResponse]);
 
   const completeRequestingTask = useCallback(async (
     userId: string,
+    taskGuid: string,
     requestedItem: string,
     justification: string
   ): Promise<boolean> => {
@@ -135,7 +132,7 @@ export const useWorkflowActions = () => {
         throw new Error('wfRunId is required');
       }
 
-      const response = await completeUserTask({ id: wfRunId }, taskGuid!, userId, results);
+      const response = await completeUserTask({ id: wfRunId }, taskGuid, userId, results);
 
       setResponse(JSON.stringify(response, null, 2));
       setStatus('Request submitted successfully');
@@ -151,7 +148,7 @@ export const useWorkflowActions = () => {
     } finally {
       setLoading(false);
     }
-  }, [taskGuid, wfRunId, setLoading, setStatus, setResponse]); // TODO: remove taskGuid
+  }, [wfRunId, setLoading, setStatus, setResponse]);
 
   const findFinanceTask = useCallback(async () => {
     if (!wfRunId) return null;
@@ -168,28 +165,23 @@ export const useWorkflowActions = () => {
       const match = candidates.find((t) => t.wfRunId.id === wfRunId);
       
       if (match) {
-        setTaskGuid(match.userTaskGuid); // TODO: pass by URL
         setStatus(`Found Finance task awaiting action.`);
-
         return match.userTaskGuid;
       } else {
-        setTaskGuid(''); // TODO: not needed
         setStatus('No Finance task found at this time.');
-
         return null;
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
 
       setResponse(JSON.stringify({ error: message }, null, 2));
-      setTaskGuid(''); // TODO: not needed
       setStatus(`Failed to find Finance task: ${message}`);
 
       return null;
     } finally {
       setLoading(false);
     }
-  }, [wfRunId, extractTaskIds, setLoading, setStatus, setResponse, setTaskGuid]); // TODO: remove taskGuid
+  }, [wfRunId, extractTaskIds, setLoading, setStatus, setResponse]); 
 
   const assignFinanceTask = useCallback(async (
     userId: string,
@@ -228,7 +220,7 @@ export const useWorkflowActions = () => {
     } finally {
       setLoading(false);
     }
-  }, [taskGuid, wfRunId, setLoading, setStatus, setResponse]); // TODO: remove taskGuid
+  }, [ wfRunId, setLoading, setStatus, setResponse]);
 
   const completeFinanceTask = useCallback(async (
     decision: 'APPROVE' | 'DECLINE',
@@ -262,7 +254,7 @@ export const useWorkflowActions = () => {
     } finally {
       setLoading(false);
     }
-  }, [taskGuid, wfRunId, setLoading, setStatus, setResponse]); // TODO: remove taskGuid
+  }, [wfRunId, setLoading, setStatus, setResponse]);
 
   return {
     runWorkflow,
