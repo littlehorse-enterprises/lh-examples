@@ -7,19 +7,25 @@ import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 import { Button } from '../ui/button';
 
 export function FindFinanceTask() {
-  const { wfRunId, currentStep, isLoading } = useWorkflowContext();
+  const { wfRunId, currentStep, isLoading, setStatus, setResponse } = useWorkflowContext();
   const { findFinanceTask } = useWorkflowActions();
   const router = useRouter();
   const [financeTaskGuid, setFinanceTaskGuid] = useState<string | null>(null);
 
   useEffect(() => {
     const find = async () => {
-      const guid = await findFinanceTask(); // TODO: add error handling
-      if (guid) setFinanceTaskGuid(guid);
+      try {
+        const guid = await findFinanceTask();
+        if (guid) setFinanceTaskGuid(guid);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        setStatus(`Failed to find finance task: ${message}`);
+        setResponse(JSON.stringify({ error: message }, null, 2));
+      }
     };
     
     find();
-  }, [wfRunId, setFinanceTaskGuid, findFinanceTask ]);
+  }, [wfRunId]);
 
   const handleContinue = () => {
     router.push(`/workflow/${wfRunId}/step/${currentStep + 1}?taskGuid=${financeTaskGuid}`);

@@ -15,6 +15,7 @@ export const RestartControls = () => {
   const [deleteScope, setDeleteScope] = useState<'none' | 'current' | 'all'>('none');
   const { wfRunId, setLoading, setStatus, setResponse } = useWorkflowContext();
   const router = useRouter();
+  const [disabledButton, setDisabledButton] = useState(false);
 
   const handleRestart = async () => {
     setLoading(true);
@@ -30,7 +31,11 @@ export const RestartControls = () => {
 
         setStatus(`Deleted ${result.deleted} wfRun(s) for spec "it-request".`);
         setResponse(JSON.stringify(result, null, 2));
+      } else {
+        setStatus('Keeping all workflow runs. Restarting...');
       }
+
+      setDisabledButton(true);
 
       setTimeout(() => {
         router.push('/workflow/new/step/1');
@@ -69,7 +74,7 @@ export const RestartControls = () => {
           </div>
         </RadioGroup>
         
-        <Button onClick={handleRestart} className="w-full">
+        <Button onClick={handleRestart} className="w-full" disabled={disabledButton}>
           Restart Workflow
         </Button>
       </CardContent>

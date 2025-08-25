@@ -10,7 +10,7 @@ import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 export const AssignFinanceTask = () => {
-  const { wfRunId, isLoading, taskGuid, currentStep } = useWorkflowContext();
+  const { wfRunId, isLoading, taskGuid, currentStep, setStatus, setResponse } = useWorkflowContext();
   const { assignFinanceTask } = useWorkflowActions();
   const router = useRouter();
   
@@ -18,9 +18,21 @@ export const AssignFinanceTask = () => {
   const [override, setOverride] = useState(false);
 
   const handleAssign = async () => {
-    const success = await assignFinanceTask(userId, override, taskGuid!); // TODO: taskGuid should not be undefined at this point, handle this better. Also, add error handling
-    if (success) {
-      router.push(`/workflow/${wfRunId}/step/${currentStep + 1}?taskGuid=${taskGuid}&userId=${userId}`);
+    if (!taskGuid) {
+      setStatus('Error: Missing task GUID');
+      setResponse(JSON.stringify({ error: 'taskGuid is required' }, null, 2));
+      return;
+    }
+  
+    try {
+      const success = await assignFinanceTask(userId, override, taskGuid);
+      if (success) {
+        router.push(`/workflow/${wfRunId}/step/${currentStep + 1}?taskGuid=${taskGuid}&userId=${userId}`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`Failed to assign task: ${message}`);
+      setResponse(JSON.stringify({ error: message }, null, 2));
     }
   };
 

@@ -23,7 +23,7 @@ export const FindRequestingTask = () => {
       
       executeTask();
     }
-  }, [wfRunId, userId, retrievedTaskGuid, findRequestingTask]);
+  }, [wfRunId, userId]);
 
   const handleContinue = () => {
     if (!retrievedTaskGuid || !wfRunId || !userId) return;

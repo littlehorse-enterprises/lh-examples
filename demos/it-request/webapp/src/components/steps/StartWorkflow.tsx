@@ -14,7 +14,7 @@ export const StartWorkflow = () => {
   const { runWorkflow } = useWorkflowActions(); 
   const router = useRouter();
 
-  const isValidUserId = (userId: string): boolean => userId.trim().length >= 3; // TODO: review and apply real validation
+  const isValidUserId = (userId: string): boolean => userId.trim().length >= 3; // TODO: review userId validation
 
   const handleSubmit = async () => {
     const wfRunId = await runWorkflow(userId);

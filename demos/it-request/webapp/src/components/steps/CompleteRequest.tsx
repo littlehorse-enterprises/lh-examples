@@ -10,16 +10,28 @@ import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 export const CompleteRequest = () => {
-  const { wfRunId, isLoading, userId, taskGuid, currentStep } = useWorkflowContext();
+  const { wfRunId, isLoading, userId, taskGuid, currentStep, setStatus, setResponse } = useWorkflowContext();
   const { completeRequestingTask } = useWorkflowActions();
   const router = useRouter();
   const [item, setItem] = useState('');
   const [justification, setJustification] = useState('');
 
-  const handleSubmit = async () => { // TODO: add error handling
-    const success = await completeRequestingTask(userId!, taskGuid!, item, justification); // TODO: userId and taskGuid should not be null at this point, handle this better
-    if (success) {
-      router.push(`/workflow/${wfRunId}/step/${currentStep + 1}`);
+  const handleSubmit = async () => {
+    if (!userId || !taskGuid) {
+      setStatus('Error: Missing user ID or task GUID');
+      setResponse(JSON.stringify({ error: 'userId and taskGuid are required' }, null, 2));
+      return;
+    }
+    
+    try {
+      const success = await completeRequestingTask(userId, taskGuid, item, justification);
+      if (success) {
+        router.push(`/workflow/${wfRunId}/step/${currentStep + 1}`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`Failed to complete request: ${message}`);
+      setResponse(JSON.stringify({ error: message }, null, 2));
     }
   };
 
