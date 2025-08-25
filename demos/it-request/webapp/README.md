@@ -1,51 +1,102 @@
-# ☂️ NextJS Boilerplate
+# IT Request Workflow Demo
 
-This is a NextJS boilerplate that comes with TailwindCSS, Typescript, Prettier,
-and, making it easy for you to kickstart your Next.js projects with
-modern web development tools and best practices and uses the Shadcn/ui design system.
+A Next.js application demonstrating LittleHorse User Tasks through an IT request approval workflow. The application guides users through a complete workflow where a requester submits an IT request and a finance team member reviews and approves or declines it.
 
-## Features 🔥
+## Architecture
 
-- 🚀 Next.js: A popular React framework for building server-rendered React
-    applications.
-- 🎨 Comprehensive Design System: Built with
-    [Shadcn/ui](https://ui.shadcn.com/), a high quality design system for
-    building modern web applications.
-- 📦 SWR: A React Hooks library for remote data fetching.
-- 📂 Lucide: A comprehensive & beautiful icon set with over 1,400 icons.
-    [lucide](https://lucide.dev)
-- 💅 TailwindCSS: A highly customizable CSS framework for building modern user
-    interfaces.
-- 🔍 Typescript: A statically typed superset of JavaScript that provides
-    better code quality and error checking.
-- 🔧 Prettier: An opinionated code formatter that enforces consistent code
-    style for better code readability.
+The application uses Next.js 15 App Router with the following architecture:
 
-## Quick Start 🚀
+- **URL-based state management**: Each workflow step is a separate route (`/workflow/[wfRunId]/step/[stepNumber]`)
+- **Server Actions**: Direct server-side mutations without API routes
+- **Context per page**: Ephemeral UI state using React Context API (no global state)
+- **Type-safe gRPC client**: LittleHorse client for workflow operations
 
-💾 Clone the repository
+### Workflow Steps
 
-`git clone https://github.com/littlehorse-enterprises/frontend-boilerplate.git`
+1. **Health Check**: Verify API connectivity
+2. **Start Workflow**: Initialize IT request with user ID
+3. **Find Requesting Task**: Locate the user's task
+4. **Complete Request**: Submit item and justification
+5. **Find Finance Task**: Locate the finance review task
+6. **Assign Finance Task**: Assign to a finance user
+7. **Complete Finance Task**: Approve or decline the request
 
-📂 Change directory to the cloned repository
+## Technologies
 
-`cd frontend-boilerplate`
+- **Next.js 15.1**: React framework with App Router
+- **React 19**: UI library
+- **TypeScript**: Type safety
+- **TailwindCSS**: Utility-first CSS framework
+- **LittleHorse Client**: gRPC client for workflow orchestration
+- **Radix UI**: Accessible component primitives (checkbox, dialog, label, radio-group)
+- **Lucide React**: Icon library
+- **React Syntax Highlighter**: Code formatting for API responses
 
-📦 Install dependencies
+## Prerequisites
 
-`npm install`
+- Node.js 18+
+- LittleHorse Server running locally or accessible
+- Environment variables configured (see Configuration)
 
-🏗️ Start the development server:
+## Installation
 
-`npm run dev`
+```bash
+npm install
+```
 
-🌐 Open your browser and go to `http://localhost:3000` to see the Next.js app
-running locally.
+## Configuration
 
-## Resources 🎨
+Create a `.env.local` file with:
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Shadcn/ui Documentation](https://ui.shadcn.com/)
-- [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Prettier Documentation](https://prettier.io/docs/en/)
+```env
+LHC_API_HOST=localhost
+LHC_API_PORT=2023
+LHC_API_PROTOCOL=PLAINTEXT
+```
+
+## Development
+
+```bash
+npm run dev
+```
+
+Opens the application at `http://localhost:3000`
+
+## Production
+
+```bash
+npm run build
+npm start
+```
+
+## Scripts
+
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Check code formatting
+- `npm run lint:fix` - Fix code formatting
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── actions/         # Server actions for LittleHorse operations
+│   ├── api/             # Health check endpoint
+│   └── workflow/        # App Router pages
+│       └── [wfRunId]/
+│           └── step/
+│               └── [stepNumber]/
+│                   └── page.tsx
+├── components/
+│   ├── providers/       # React Context providers
+│   ├── steps/           # Step-specific components
+│   └── ui/              # Reusable UI components
+├── hooks/               # Custom React hooks
+└── lib/                 # Utilities and client configuration
+```
+
+## License
+
+See LICENSE file in the repository root.
