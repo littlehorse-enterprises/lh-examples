@@ -1,13 +1,49 @@
-import { useWorkflowStore } from '@/store/workflow.store';
-import { useWorkflowActions } from '@/hooks/useWorkflowActions';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
+
+import { deleteWfRun } from '@/app/actions/deleteWfRun';
+import { deleteAllWfRunsForSpec } from '@/app/actions/deleteAllWfRunsForSpec';
 
 export const RestartControls = () => {
-  const { deleteScope, setDeleteScope } = useWorkflowStore();
-  const { restart } = useWorkflowActions();
+  const [deleteScope, setDeleteScope] = useState<'none' | 'current' | 'all'>('none');
+  const { wfRunId, setLoading, setStatus, setResponse } = useWorkflowContext();
+  const router = useRouter();
+
+  const handleRestart = async () => {
+    setLoading(true);
+    
+    try {
+      if (deleteScope === 'current' && wfRunId) {
+        await deleteWfRun({ id: wfRunId });
+
+        setStatus('Deleted current wfRun.');
+        setResponse(JSON.stringify({ deleted: 'current' }, null, 2));
+      } else if (deleteScope === 'all') {
+        const result = await deleteAllWfRunsForSpec('it-request');
+
+        setStatus(`Deleted ${result.deleted} wfRun(s) for spec "it-request".`);
+        setResponse(JSON.stringify(result, null, 2));
+      }
+
+      setTimeout(() => {
+        router.push('/workflow/new/step/1');
+      }, 1500);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      setStatus(`Failed to restart: ${message}`);
+      setResponse(JSON.stringify({ error: message }, null, 2));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card className="mt-6">
@@ -33,7 +69,7 @@ export const RestartControls = () => {
           </div>
         </RadioGroup>
         
-        <Button onClick={restart} className="w-full">
+        <Button onClick={handleRestart} className="w-full">
           Restart Workflow
         </Button>
       </CardContent>

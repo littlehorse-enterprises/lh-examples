@@ -1,14 +1,27 @@
-import { Button } from '@/components/ui/button';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useWorkflowStore } from '@/store/workflow.store';
+import { Button } from '@/components/ui/button';
+import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 export const StartWorkflow = () => {
-  const { requestingUserId, wfRunId, setRequestingUserId } = useWorkflowStore();
-  const { runWorkflow } = useWorkflowActions();
+  const [userId, setUserId] = useState('');
+  const { isLoading } = useWorkflowContext();
+  const { runWorkflow } = useWorkflowActions(); 
+  const router = useRouter();
 
-  const isValidUserId = (userId: string): boolean => userId.trim().length >= 3;
+  const isValidUserId = (userId: string): boolean => userId.trim().length >= 3; // TODO: review and apply real validation
+
+  const handleSubmit = async () => {
+    const wfRunId = await runWorkflow(userId);
+    if (wfRunId) {
+      router.push(`/workflow/${wfRunId}/step/3?userId=${userId}`);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -19,16 +32,16 @@ export const StartWorkflow = () => {
           type="text"
           required
           aria-required={true}
-          aria-invalid={!isValidUserId(requestingUserId) && requestingUserId.trim().length > 0}
-          value={requestingUserId}
-          onChange={(e) => setRequestingUserId(e.target.value)}
+          aria-invalid={!isValidUserId(userId) && userId.trim().length > 0}
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
           placeholder="Enter User ID"
-          disabled={Boolean(wfRunId)}
+          disabled={isLoading}
         />
       </div>
       <Button
-        onClick={runWorkflow}
-        disabled={!isValidUserId(requestingUserId) || Boolean(wfRunId)}
+        onClick={handleSubmit}
+        disabled={!isValidUserId(userId) || isLoading}
       >
         Run IT workflow
       </Button>

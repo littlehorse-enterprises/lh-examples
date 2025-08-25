@@ -1,26 +1,25 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useWorkflowStore } from '@/store/workflow.store';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import { useWorkflowActions } from '@/hooks/useWorkflowActions';
 
 export const CompleteRequest = () => {
-  const { 
-    requestedItem, 
-    justification, 
-    requestingTaskSubmitted,
-    setRequestData,
-    nextStep 
-  } = useWorkflowStore();
+  const { wfRunId, isLoading, userId } = useWorkflowContext();
   const { completeRequestingTask } = useWorkflowActions();
+  const router = useRouter();
+  const [item, setItem] = useState('');
+  const [justification, setJustification] = useState('');
 
-  const canSubmit = requestedItem.trim().length > 0 && justification.trim().length > 0;
-
-  const handleSubmit = async () => {
-    if (canSubmit) {
-      await completeRequestingTask();
+  const handleSubmit = async () => { // TODO: add error handling
+    const success = await completeRequestingTask(userId!, item, justification); // TODO: userId should not be null at this point, handle this better
+    if (success) {
+      router.push(`/workflow/${wfRunId}/step/5`);
     }
   };
 
@@ -33,30 +32,30 @@ export const CompleteRequest = () => {
           type="text"
           required
           aria-required={true}
-          value={requestedItem}
-          onChange={(e) => setRequestData(e.target.value, justification)}
+          value={item}
+          onChange={(e) => setItem(e.target.value)}
           placeholder="What do you need?"
-          disabled={requestingTaskSubmitted}
+          disabled={isLoading}
         />
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="justification">Justification</Label>
-        <Input
+        <Textarea
           id="justification"
-          type="text"
+          rows={4}
           required
           aria-required={true}
           value={justification}
-          onChange={(e) => setRequestData(requestedItem, e.target.value)}
+          onChange={(e) => setJustification(e.target.value)}
           placeholder="Why is it needed?"
-          disabled={requestingTaskSubmitted}
+          disabled={isLoading}
         />
       </div>
       
       <Button
-        onClick={requestingTaskSubmitted ? nextStep : handleSubmit}
-        disabled={!requestingTaskSubmitted && !canSubmit}
+        onClick={handleSubmit}
+        disabled={!item.trim() || !justification.trim() || isLoading}
       >
         Continue
       </Button>

@@ -1,10 +1,16 @@
-import Image from "next/image";
+import { redirect } from 'next/navigation';
+
+export default function HomePage() {
+  redirect('/workflow/new/step/1');
+}
+
+// TODO: erase this
+/*import Image from "next/image";
 import { ITRequestFlow } from "@/components/ITRequestFlow";
 
 export default function Page() {
 	return (
 		<>
-      {/* Header */}
       <header id="header" role="banner" className="h-16 border-b border-white/20">
         <div className="flex items-center justify-start mx-auto max-w-5xl py-4 px-6">
           <Image 
@@ -18,7 +24,6 @@ export default function Page() {
         </div>
       </header>
       
-      {/* Main App */}
       <main id="main" role="main" className="min-h-[calc(100vh-4rem)] flex flex-col mx-auto max-w-5xl py-6 px-6">
         <p className="border-b border-white/20 leading-relaxed mb-6 opacity-90 pb-6">
           This UI guides you through the LittleHorse User Tasks IT Request example. A requester starts an
@@ -33,4 +38,4 @@ export default function Page() {
       </main>
 		</>
 	);
-}
+}*/

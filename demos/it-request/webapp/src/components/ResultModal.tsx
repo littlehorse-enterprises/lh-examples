@@ -1,4 +1,6 @@
-import { useWorkflowStore } from '@/store/workflow.store';
+'use client';
+
+import { useWorkflowContext } from '@/components/providers/WorkflowProvider';
 import {
   Dialog,
   DialogContent,
@@ -9,8 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-export const ResultModal = () => {
-  const { showResultModal, financeDecision, setShowResultModal } = useWorkflowStore();
+export function ResultModal() {
+  const { showResultModal, setShowResultModal, financeDecision } = useWorkflowContext();
 
   const message = financeDecision === 'APPROVE'
     ? 'The IT request has been approved. An email has been sent to the user.'
