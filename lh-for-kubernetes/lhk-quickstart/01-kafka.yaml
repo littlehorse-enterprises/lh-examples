@@ -1,0 +1,19 @@
+---
+apiVersion: littlehorse.io/v1
+kind: LHKafka
+metadata:
+  namespace: littlehorse
+  name: lh-kafka
+spec:
+  controllers:
+    storage:
+      storageClassName: standard
+      volumeSize: "10G"
+    replicas: 3
+  # # uncomment to enable separate brokers and controllers. The LH Operator
+  # # automatically handles the rebalancing for you!
+  # brokers:
+  #   storage:
+  #     storageClassName: standard
+  #     volumeSize: "10G"
+  #   replicas: 3
