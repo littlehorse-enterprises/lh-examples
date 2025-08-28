@@ -1,0 +1,44 @@
+---
+apiVersion: littlehorse.io/v1
+kind: LHCluster
+metadata:
+  name: quickstart
+  namespace: littlehorse
+spec:
+  dashboard: {}
+  server:
+    version: 0.14.1
+    listeners:
+    - name: internal
+      port: 2024
+    # The below listener is a hack intended only for quickstart purposes
+    # to allow access from task workers via local port-forwarding.
+    - name: external
+      port: 2023
+      advertisedListeners:
+        servers:
+        - host: localhost
+          port: 2023
+    imagePullPolicy: IfNotPresent
+
+    # You can scale the LH Kernel out by adding more replicas here. However,
+    # the "port-forward for task workers" hack above only works with a
+    # single replica.
+    replicas: 1
+
+    # Recommended to set this to `1` in production. However, it must
+    # be less than the number of replicas, so in this example it is at
+    # zero.
+    hotStandbyReplicas: 0
+
+    storage:
+      storageClassName: standard
+      volumeSize: "10G"
+  kafka:
+    replicationFactor: 3
+    clusterPartitions: 12
+    lhKafkaRef:
+      clusterName: 'lh-kafka'
+      clusterWideQuotas:
+        producerThroughputPerSecond: 5M
+        consumerThroughputPerSecond: 10M

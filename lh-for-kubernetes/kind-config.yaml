@@ -1,0 +1,42 @@
+# This file is passed in to the `kind create cluster` command
+# and defines mappings from host port to node port, which allows
+# us to conveniently place Ingress controllers and Gateway Controllers.
+#
+# The configuration utilizes KIND Port Mappings to enable the following:
+# - 80:30080
+# - 443:30443
+# - 2023:32023
+# - 2024:32024
+# - 9092:30092
+#
+# In real life, you would probably do this with load balancers (for example
+# an NLB in front of an EKS cluster on AWS).
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 30443
+        hostPort: 443
+        protocol: TCP
+      - containerPort: 32023
+        hostPort: 2023
+        protocol: TCP
+      - containerPort: 32024
+        hostPort: 2024
+        protocol: TCP
+      - containerPort: 30092
+        hostPort: 9092
+        protocol: TCP
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."kind-registry:5000"]
+    endpoint = ["http://kind-registry:5000"]

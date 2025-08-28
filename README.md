@@ -18,7 +18,6 @@ Welcome to LittleHorse! LittleHorse is a platform for integration, microservice 
   - [Repository Inventory](#repository-inventory)
     - [Quickstarts](#quickstarts)
     - [Demo's](#demos)
-    - [Archives](#archives)
 
 ## Getting Started
 
@@ -50,9 +49,11 @@ The development dashboard should be available at `http://localhost:8080`.
 
 ## Repository Inventory
 
-* Quickstarts
-* Demos
-* Archives
+* **[Quickstarts](./quickstart/)**: get up and running quickly.
+* **[Demos](./demos/)**: polished, larger applications showcasing LittleHorse capabilities.
+* **[LittleHorse for Kubernetes](./lh-for-kubernetes/)**: examples for using the LittleHorse for Kubernetes product suite.
+* **[Docker](./docker/)**: examples of how to package and run Task Workers and other LittleHorse client applications in docker.
+* **[Archives](./archive/)**: older demo's that are no longer maintained but were interesting enough to keep for posterity.
 
 ### Quickstarts
 
@@ -86,6 +87,3 @@ The [demos](./demos/) directory contains a few prettified LittleHorse demo appli
   * _HTTP POST Task Workers,_ which are used to make requests to existing HTTP endpoints within a task.
 * [**Agentic Customer Support**](./demos/ai-customer-support-call-actions/): models a customer support workflow in which an LLM agentically takes action by running a choice of multiple other workflows in LittleHorse.
 
-### Archives
-
-The [archive](./archive/) folder contains older demo's that are no longer maintained but were interesting enough to keep for posterity.
