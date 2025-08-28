@@ -38,12 +38,14 @@ LittleHorse for Kubernetes is a management suite (delivered via Kubernetes Opera
 You can find the following examples in this directory:
 
 * [**Quickstart**](./quickstart/): get the LittleHorse Kernel running on Kubernetes and connect to it from a `Pod` inside the cluster.
-* [**Gateway API**](./gateway-api/): connect to the LittleHorse Kernel using the Gateway API (`TLSRoute`) in a KIND cluster.
-* [**Ingress**](./gateway-api/): connect to the LittleHorse Kernel using the `Ingress` in a KIND cluster.
+
+<!-- The below coming soon: -->
+<!-- * [**Gateway API**](./gateway-api/): connect to the LittleHorse Kernel using the Gateway API (`TLSRoute`) in a KIND cluster.
+* [**Ingress**](./gateway-api/): connect to the LittleHorse Kernel using the `Ingress` in a KIND cluster. -->
 
 ## Common Setup
 
-All of the examples in this directory will utilize the same system setup: a KIND cluster.
+All of the examples in this directory will utilize the same system setup: a KIND cluster. Please complete all of the following steps before moving to one of the guided tours. 
 
 ### Configure `/etc/hosts`
 

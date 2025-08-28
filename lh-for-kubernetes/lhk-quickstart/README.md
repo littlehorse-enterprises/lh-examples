@@ -5,7 +5,11 @@ In this quickstart, we will:
 * Use the LittleHorse Operator to deploy an Apache Kafka® cluster using the `LHKafka` CRD.
 * Use the `LHCluster` CRD to create a minimal LittleHorse cluster.
 
-**As a prerequisite, make sure you did the KIND cluster setup in the [previous README](../README.md).** No additional setup is needed specific to this example.
+**As a prerequisite, make sure you did the "Common Setup" in the [previous README](../README.md#common-setup).** This will:
+
+* Configure `/etc/hosts` properly.
+* Create a KIND cluster.
+* Install the LittleHorse Kubernetes Operator.
 
 ## Start Apache Kafka®
 
