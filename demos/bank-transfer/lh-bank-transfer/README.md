@@ -15,7 +15,14 @@ The steps of the workflow are as follows:
 ## Setup
 
 1. We need to have a running LittleHorse instance. We will be using our [User Tasks Standalone](https://github.com/littlehorse-enterprises/lh-user-tasks-api/blob/main/standalone/README.md) image for this to also run the User Tasks UI.
-```docker run --name lh-user-tasks-standalone --rm -d -p 2023:2023 -p 8080:8080 -p 8888:8888 -p 8089:8089 -p 3000:3000 ghcr.io/littlehorse-enterprises/lh-user-tasks-api/lh-user-tasks-standalone:main```
+```docker run --pull always --name lh-user-tasks-bridge-standalone --rm -d \
+  -p 8080:8080 \
+  -p 8888:8888 \
+  -p 8089:8089 \
+  -p 3000:3000 \
+  -p 2023:2023 \
+  -p 9092:9092 \
+  ghcr.io/littlehorse-enterprises/lh-user-tasks-bridge-backend/lh-user-tasks-bridge-standalone:latest```
 
 2. run `gradle build` to build the jars
 3. run `./gradlew run --args register` to register the `TaskDefs` and `WfSpec` in LittleHorse
