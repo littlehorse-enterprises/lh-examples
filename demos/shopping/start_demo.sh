@@ -145,7 +145,7 @@ if [ ! -d "node_modules" ]; then
 fi
 # Start Angular app
 echo "  🚀 Running ng serve..."
-ng serve > "$BASE_DIR/frontend.log" 2>&1 &
+n serve > "$BASE_DIR/frontend.log" 2>&1 &
 echo "  📝 Logs available at $BASE_DIR/frontend.log"
 
 # Return to base directory
